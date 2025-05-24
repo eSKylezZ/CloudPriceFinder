@@ -917,76 +917,66 @@ def scrape_hetzner_cloud_page():
     return result
 
 def fetch_hetzner_cloud():
-    """Enhanced cloud data fetching with comprehensive API integration."""
-    logger.info("Starting enhanced Hetzner Cloud data fetch...")
+    """Enhanced cloud data fetching via API only."""
+    logger.info("Starting Hetzner Cloud data fetch via API...")
     cloud_data = []
     
-    if HETZNER_API_TOKEN:
-        logger.info("API token provided - attempting comprehensive API data fetch...")
-        
-        try:
-            # Fetch all cloud service data
-            server_types = fetch_server_types()
-            pricing_data = fetch_pricing_data()
-            lb_types = fetch_load_balancer_types()
-            volume_pricing = fetch_volume_types()
-            floating_ip_pricing = fetch_floating_ip_pricing()
-            network_pricing = fetch_network_pricing()
-            
-            # Process server types with pricing
-            if server_types:
-                servers = process_server_types_with_pricing(server_types, pricing_data)
-                cloud_data.extend(servers)
-                logger.info(f"Added {len(servers)} server types to cloud data")
-            
-            # Process load balancers
-            if lb_types:
-                load_balancers = process_load_balancer_types_with_pricing(lb_types, pricing_data)
-                cloud_data.extend(load_balancers)
-                logger.info(f"Added {len(load_balancers)} load balancer types to cloud data")
-            
-            # Process volume pricing
-            if volume_pricing:
-                volumes = process_volume_pricing(volume_pricing)
-                cloud_data.extend(volumes)
-                logger.info(f"Added {len(volumes)} volume pricing entries to cloud data")
-            
-            # Process floating IP pricing
-            if floating_ip_pricing:
-                floating_ips = process_floating_ip_pricing(floating_ip_pricing)
-                cloud_data.extend(floating_ips)
-                logger.info(f"Added {len(floating_ips)} floating IP pricing entries to cloud data")
-            
-            # Process network pricing
-            if network_pricing:
-                networks = process_network_pricing(network_pricing)
-                cloud_data.extend(networks)
-                logger.info(f"Added {len(networks)} network pricing entries to cloud data")
-            
-            if cloud_data:
-                logger.info(f"Successfully fetched {len(cloud_data)} total cloud service entries via enhanced API")
-                return cloud_data
-            else:
-                logger.warning("API fetch completed but no data was collected")
-                
-        except Exception as e:
-            logger.error(f"Enhanced API fetch failed: {e}")
-    else:
-        logger.info("No API token provided - skipping API fetch")
+    if not HETZNER_API_TOKEN:
+        logger.error("Hetzner Cloud API token required for cloud data")
+        logger.error("Please set HETZNER_API_TOKEN environment variable")
+        return []
     
-    # Fallback to scraping if no token, or if API failed to populate cloud_data
-    logger.info("Attempting to scrape cloud page as fallback...")
+    logger.info("API token provided - fetching comprehensive cloud data...")
+    
     try:
-        scraped_cloud_data = scrape_hetzner_cloud_page()
-        if scraped_cloud_data:
-            cloud_data.extend(scraped_cloud_data)
-            logger.info(f"Successfully scraped {len(scraped_cloud_data)} cloud types from webpage.")
+        # Fetch all cloud service data
+        server_types = fetch_server_types()
+        pricing_data = fetch_pricing_data()
+        lb_types = fetch_load_balancer_types()
+        volume_pricing = fetch_volume_types()
+        floating_ip_pricing = fetch_floating_ip_pricing()
+        network_pricing = fetch_network_pricing()
+        
+        # Process server types with pricing
+        if server_types:
+            servers = process_server_types_with_pricing(server_types, pricing_data)
+            cloud_data.extend(servers)
+            logger.info(f"Added {len(servers)} server types to cloud data")
+        
+        # Process load balancers
+        if lb_types:
+            load_balancers = process_load_balancer_types_with_pricing(lb_types, pricing_data)
+            cloud_data.extend(load_balancers)
+            logger.info(f"Added {len(load_balancers)} load balancer types to cloud data")
+        
+        # Process volume pricing
+        if volume_pricing:
+            volumes = process_volume_pricing(volume_pricing)
+            cloud_data.extend(volumes)
+            logger.info(f"Added {len(volumes)} volume pricing entries to cloud data")
+        
+        # Process floating IP pricing
+        if floating_ip_pricing:
+            floating_ips = process_floating_ip_pricing(floating_ip_pricing)
+            cloud_data.extend(floating_ips)
+            logger.info(f"Added {len(floating_ips)} floating IP pricing entries to cloud data")
+        
+        # Process network pricing
+        if network_pricing:
+            networks = process_network_pricing(network_pricing)
+            cloud_data.extend(networks)
+            logger.info(f"Added {len(networks)} network pricing entries to cloud data")
+        
+        if cloud_data:
+            logger.info(f"Successfully fetched {len(cloud_data)} total cloud service entries via API")
+            return cloud_data
         else:
-            logger.warning("Cloud page scraping yielded no data.")
+            logger.warning("API fetch completed but no data was collected")
+            return []
+            
     except Exception as e:
-        logger.error(f"Error during cloud page scraping: {e}")
-    
-    return cloud_data
+        logger.error(f"API fetch failed: {e}")
+        return []
 
 def parse_price(price_text, default=None):
     if not price_text or price_text == "N/A": return default
@@ -1572,75 +1562,61 @@ def merge_ipv4_ipv6_data(ipv4_servers, ipv6_servers):
 
 def fetch_hetzner_dedicated():
     """
-    Fetch Hetzner dedicated servers with Robot API as primary method and Selenium scraping as fallback.
+    Fetch Hetzner dedicated servers via Robot API only.
     
-    Strategy:
-    1. Try Robot API if credentials are provided (HETZNER_ROBOT_USER/HETZNER_ROBOT_PASSWORD)
-    2. Fall back to Selenium scraping if Robot API is not available or fails
+    Strategy: Use Robot API exclusively for reliable, fast data collection
     """
-    logger.info("Starting enhanced Hetzner dedicated server data fetch...")
+    logger.info("Starting Hetzner dedicated server data fetch via Robot API...")
     all_results = []
     
-    # --- PHASE 1: Try Robot API first ---
-    if HETZNER_ROBOT_USER and HETZNER_ROBOT_PASSWORD:
-        logger.info("Robot API credentials provided - attempting Robot API fetch...")
+    # Robot API is required for this implementation
+    if not HETZNER_ROBOT_USER or not HETZNER_ROBOT_PASSWORD:
+        logger.error("Robot API credentials required for dedicated server data")
+        logger.error("Please set HETZNER_ROBOT_USER and HETZNER_ROBOT_PASSWORD environment variables")
+        return []
+    
+    logger.info("Robot API credentials provided - fetching data...")
+    
+    try:
+        # Fetch server products
+        products = fetch_dedicated_server_products()
+        if not products:
+            logger.warning("Robot API returned no server products")
+            return []
+            
+        processed_servers = process_dedicated_server_products(products)
+        all_results.extend(processed_servers)
+        logger.info(f"Successfully fetched {len(processed_servers)} dedicated servers via Robot API")
         
-        try:
-            # Fetch server products
-            products = fetch_dedicated_server_products()
-            if products:
-                processed_servers = process_dedicated_server_products(products)
-                all_results.extend(processed_servers)
-                logger.info(f"Successfully fetched {len(processed_servers)} dedicated servers via Robot API")
-                
-                # Fetch addon information for IPv4 pricing context
-                addons = fetch_dedicated_server_addons()
-                if addons:
-                    # Find Primary IPv4 addon pricing for reference
-                    ipv4_addon_price = None
-                    for addon in addons:
-                        if "ipv4" in addon.get("name", "").lower() or "primary" in addon.get("name", "").lower():
-                            prices = addon.get("price", [])
-                            for price_entry in prices:
-                                if price_entry.get("currency") == "EUR":
-                                    ipv4_addon_price = float(price_entry.get("price_monthly", {}).get("net", 0))
-                                    break
-                            if ipv4_addon_price:
-                                break
-                    
-                    # Add IPv4 addon pricing context to all servers
+        # Fetch addon information for IPv4 pricing context
+        addons = fetch_dedicated_server_addons()
+        if addons:
+            # Find Primary IPv4 addon pricing for reference
+            ipv4_addon_price = None
+            for addon in addons:
+                if "ipv4" in addon.get("name", "").lower() or "primary" in addon.get("name", "").lower():
+                    prices = addon.get("price", [])
+                    for price_entry in prices:
+                        if price_entry.get("currency") == "EUR":
+                            ipv4_addon_price = float(price_entry.get("price_monthly", {}).get("net", 0))
+                            break
                     if ipv4_addon_price:
-                        for server in all_results:
-                            if server.get("source") == "robot_api_enhanced":
-                                server["ipv4_addon_price_eur_monthly"] = ipv4_addon_price
-                        
-                        logger.info(f"Added Primary IPv4 addon pricing context: €{ipv4_addon_price}/month")
+                        break
+            
+            # Add IPv4 addon pricing context to all servers
+            if ipv4_addon_price:
+                for server in all_results:
+                    if server.get("source") == "robot_api_enhanced":
+                        server["ipv4_addon_price_eur_monthly"] = ipv4_addon_price
                 
-                if all_results:
-                    logger.info(f"Robot API fetch successful: {len(all_results)} servers with comprehensive pricing data")
-                    return all_results
-            else:
-                logger.warning("Robot API returned no server products")
-                
-        except Exception as e:
-            logger.error(f"Robot API fetch failed: {e}")
-            logger.info("Falling back to Selenium scraping...")
-    else:
-        logger.info("Robot API credentials not provided - skipping Robot API fetch")
-        logger.info("Set HETZNER_ROBOT_USER and HETZNER_ROBOT_PASSWORD environment variables to enable Robot API")
-    
-    # --- PHASE 2: Fallback to Selenium scraping ---
-    logger.info("Attempting Selenium scraping as fallback for dedicated servers...")
-    start_url = "https://www.hetzner.com/dedicated-rootserver"
-    # Working with 50 items per page for better performance
-    # For 386 servers, this means ~8 pages instead of ~39 pages with 10 per page
-    max_pages = 10  # Limit to handle ~8 pages for 386 servers with 50 per page
-    
-    print("Creating WebDriver for dedicated server scraping...")
-    print("PERFORMANCE MONITORING: Using 50 items per page, optimized pagination for ~8 pages")
-    if os.environ.get('CI'):
-        print("CI environment detected - using optimized settings for efficient pagination")
-        print("CI OPTIMIZATION: Fast page navigation and reduced wait times")
+                logger.info(f"Added Primary IPv4 addon pricing context: €{ipv4_addon_price}/month")
+        
+        logger.info(f"Robot API fetch successful: {len(all_results)} servers with comprehensive pricing data")
+        return all_results
+        
+    except Exception as e:
+        logger.error(f"Robot API fetch failed: {e}")
+        return []
     
     driver = None
     try:
@@ -1833,16 +1809,19 @@ if __name__ == "__main__":
         print(f"\nSuccessfully wrote {len(all_hetzner_data)} total Hetzner entries to {output_path}")
     else: print(f"\nNo data fetched for Hetzner. {output_path} not updated.")
 
-    print("\n--- Debugging Tips ---")
-    print("1. Cloud Data: If API fails (401), ensure HETZNER_API_TOKEN is correct or try without it to trigger scraping.")
-    print("   If scraping cloud data fails, update selectors in `scrape_hetzner_cloud_page`.")
-    print("2. Dedicated Server Data:")
-    print("   - Robot API (Recommended): Set HETZNER_ROBOT_USER and HETZNER_ROBOT_PASSWORD for reliable dedicated server data")
-    print("   - Fallback Scraping: If `Found 0 potential dedicated server elements...` with 'li.border-card':")
-    print("     * The class name or tag for server items has changed. Inspect the page source for the correct repeating element.")
-    print("     * Update the `server_elements = soup.select('li.border-card')` line in `fetch_hetzner_dedicated_page`.")
-    print("     * If elements are found but data is wrong/missing, refine sub-selectors within `fetch_hetzner_dedicated_page` based on the HTML of a single server item.")
-    print("3. Robot API Integration:")
-    print("   - Provides accurate dedicated server pricing via GET /order/server/product")
-    print("   - Includes IPv4 addon pricing context (servers are IPv6-only by default as of March 28, 2022)")
-    print("   - More reliable than web scraping for dedicated server data")
+    print("\n--- API-Only Configuration ---")
+    print("This script now uses APIs exclusively for reliable, fast data collection.")
+    print("")
+    print("Required Environment Variables:")
+    print("1. HETZNER_API_TOKEN - Hetzner Cloud API token (from console.hetzner.cloud)")
+    print("   - Get from: Security → API Tokens")
+    print("   - Permissions: 'Read' is sufficient")
+    print("2. HETZNER_ROBOT_USER - Robot API username (from robot.your-server.de)")
+    print("3. HETZNER_ROBOT_PASSWORD - Robot API password")
+    print("")
+    print("Benefits of API-Only Approach:")
+    print("- ✅ No Chrome/Selenium dependencies (faster CI)")
+    print("- ✅ More reliable data (direct from Hetzner systems)")
+    print("- ✅ Comprehensive coverage (all cloud services + dedicated servers)")
+    print("- ✅ IPv4 addon pricing context (shows true total costs)")
+    print("- ✅ Faster execution and better error handling")

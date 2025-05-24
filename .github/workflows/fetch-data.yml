@@ -2,8 +2,8 @@ name: Fetch and Normalize Cloud Instance Data
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 0 * * 0' # Weekly
+  # schedule:
+  #   - cron: '0 0 * * 0' # Weekly (disabled for manual testing)
 
 jobs:
   fetch-and-merge:
@@ -19,53 +19,10 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install Chrome dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            fonts-liberation \
-            libappindicator3-1 \
-            libasound2 \
-            libatk-bridge2.0-0 \
-            libatk1.0-0 \
-            libcups2 \
-            libdbus-1-3 \
-            libdrm2 \
-            libgtk-3-0 \
-            libnspr4 \
-            libnss3 \
-            libxcomposite1 \
-            libxdamage1 \
-            libxrandr2 \
-            xdg-utils \
-            libxss1 \
-            libgconf-2-4
-
-      - name: Install Google Chrome
-        run: |
-          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-          sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
-          
-      - name: Verify Chrome installation
-        run: |
-          google-chrome --version
-          which google-chrome
-
       - name: Install Python dependencies
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
-
-      - name: Set Chrome environment variables
-        run: |
-          echo "CHROME_BIN=/usr/bin/google-chrome" >> $GITHUB_ENV
-          echo "CHROMEDRIVER_PATH=/usr/bin/chromedriver" >> $GITHUB_ENV
-
-      - name: Test Selenium setup
-        run: python test_selenium_setup.py
-        continue-on-error: true  # Continue even if test fails, for debugging
 
       - name: Fetch AWS data
         run: python scripts/fetch_aws.py
@@ -82,16 +39,12 @@ jobs:
       - name: Fetch Hetzner data
         run: python scripts/fetch_hetzner.py
         env:
-          # Ensure headless operation in CI environment
-          DISPLAY: ":99"
-          # Set timeouts for CI environment
-          SELENIUM_TIMEOUT: "45"
           # Hetzner Cloud API credentials
           HETZNER_API_TOKEN: ${{ secrets.HETZNER_API_TOKEN }}
           # Hetzner Robot API credentials (for dedicated servers)
           HETZNER_ROBOT_USER: ${{ secrets.HETZNER_ROBOT_USER }}
           HETZNER_ROBOT_PASSWORD: ${{ secrets.HETZNER_ROBOT_PASSWORD }}
-        timeout-minutes: 15
+        timeout-minutes: 5
 
       - name: Fetch OVH data
         run: python scripts/fetch_ovh.py
