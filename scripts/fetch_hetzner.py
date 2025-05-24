@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Enhanced Hetzner data fetcher using only APIs (Cloud API + Robot API).
-No Selenium dependencies - fast, reliable, comprehensive data collection.
+Hetzner Cloud API data fetcher - Cloud services only.
+Fast, reliable, comprehensive cloud data collection via API.
 """
 
 import os
@@ -10,21 +10,18 @@ import json
 import time
 import logging
 import requests
-from datetime import datetime, timedelta
+from datetime import datetime
 
-# Enhanced API Configuration
+# Hetzner Cloud API Configuration
 API_BASE_URL = "https://api.hetzner.cloud/v1"
-ROBOT_API_BASE_URL = "https://robot-ws.your-server.de"
 API_RATE_LIMIT_DELAY = 0.1  # 100ms between API calls
 API_RETRY_COUNT = 3
 API_RETRY_DELAY = 1.0  # Initial retry delay
 API_TIMEOUT = 15
 CACHE_DURATION = 300  # 5 minutes cache for development
 
-# Robot API Configuration
+# Cloud API Configuration
 HETZNER_API_TOKEN = os.environ.get("HETZNER_API_TOKEN")
-HETZNER_ROBOT_USER = os.environ.get("HETZNER_ROBOT_USER")
-HETZNER_ROBOT_PASSWORD = os.environ.get("HETZNER_ROBOT_PASSWORD")
 
 # Simple in-memory cache
 _api_cache = {}
@@ -73,12 +70,6 @@ def get_api_headers():
     if HETZNER_API_TOKEN:
         headers['Authorization'] = f'Bearer {HETZNER_API_TOKEN}'
     return headers
-
-def get_robot_api_auth():
-    """Get Robot API authentication tuple."""
-    if HETZNER_ROBOT_USER and HETZNER_ROBOT_PASSWORD:
-        return (HETZNER_ROBOT_USER, HETZNER_ROBOT_PASSWORD)
-    return None
 
 def make_api_request(endpoint, params=None, retry_count=API_RETRY_COUNT):
     """
@@ -160,90 +151,6 @@ def make_api_request(endpoint, params=None, retry_count=API_RETRY_COUNT):
     logger.error(f"Cloud API request failed after {retry_count + 1} attempts: {url}")
     return None
 
-def make_robot_api_request(endpoint, params=None, retry_count=API_RETRY_COUNT):
-    """
-    Make Robot API request with enhanced error handling, retries, and caching.
-    """
-    url = f"{ROBOT_API_BASE_URL}/{endpoint.lstrip('/')}"
-    cache_key = f"robot_{url}_{str(params or {})}"
-    
-    # Check cache first
-    cached_data = get_from_cache(cache_key)
-    if cached_data is not None:
-        return cached_data
-    
-    auth = get_robot_api_auth()
-    if not auth:
-        logger.warning("Robot API credentials not provided (HETZNER_ROBOT_USER/HETZNER_ROBOT_PASSWORD)")
-        return None
-    
-    headers = BASE_HEADERS.copy()
-    
-    for attempt in range(retry_count + 1):
-        try:
-            # Apply rate limiting
-            if attempt > 0:
-                rate_limit_delay()
-            
-            logger.debug(f"Robot API request attempt {attempt + 1}/{retry_count + 1}: {url}")
-            
-            response = requests.get(
-                url,
-                auth=auth,
-                headers=headers,
-                params=params,
-                timeout=API_TIMEOUT
-            )
-            
-            # Handle different HTTP status codes
-            if response.status_code == 200:
-                data = response.json()
-                set_cache(cache_key, data)
-                return data
-            elif response.status_code == 401:
-                logger.error("Robot API authentication failed (401). Check HETZNER_ROBOT_USER/HETZNER_ROBOT_PASSWORD.")
-                return None
-            elif response.status_code == 403:
-                logger.error("Robot API access forbidden (403). Check your credentials permissions.")
-                return None
-            elif response.status_code == 404:
-                logger.warning(f"Robot API endpoint not found (404): {url}")
-                return None
-            elif response.status_code == 429:
-                # Rate limited - wait longer
-                wait_time = API_RETRY_DELAY * (2 ** attempt)
-                logger.warning(f"Robot API rate limited (429). Waiting {wait_time}s before retry...")
-                time.sleep(wait_time)
-                continue
-            elif 500 <= response.status_code < 600:
-                # Server error - retry
-                logger.warning(f"Robot API server error ({response.status_code}). Retrying...")
-                if attempt < retry_count:
-                    time.sleep(API_RETRY_DELAY * (2 ** attempt))
-                    continue
-            else:
-                logger.error(f"Unexpected Robot API response status: {response.status_code}")
-                return None
-                
-        except requests.exceptions.Timeout:
-            logger.warning(f"Robot API request timeout on attempt {attempt + 1}")
-            if attempt < retry_count:
-                time.sleep(API_RETRY_DELAY * (2 ** attempt))
-                continue
-        except requests.exceptions.ConnectionError:
-            logger.warning(f"Robot API connection error on attempt {attempt + 1}")
-            if attempt < retry_count:
-                time.sleep(API_RETRY_DELAY * (2 ** attempt))
-                continue
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Robot API request failed: {e}")
-            break
-        except Exception as e:
-            logger.error(f"Unexpected error during Robot API request: {e}")
-            break
-    
-    logger.error(f"Robot API request failed after {retry_count + 1} attempts: {url}")
-    return None
 
 # --- Cloud API Functions ---
 
@@ -536,121 +443,6 @@ def process_network_pricing(network_pricing):
     logger.info(f"Processed {len(processed_networks)} network pricing entries")
     return processed_networks
 
-# --- Robot API Functions ---
-
-def fetch_dedicated_server_products():
-    """Fetch dedicated server products from Hetzner Robot API."""
-    logger.info("Fetching dedicated server products from Robot API...")
-    
-    data = make_robot_api_request("order/server/product")
-    if data and isinstance(data, list):
-        logger.info(f"Successfully fetched {len(data)} dedicated server products")
-        return data
-    elif data and isinstance(data, dict) and "product" in data:
-        products = data["product"]
-        logger.info(f"Successfully fetched {len(products)} dedicated server products")
-        return products
-    
-    logger.warning("Failed to fetch dedicated server products from Robot API")
-    return []
-
-def process_dedicated_server_products(products):
-    """Process dedicated server products from Robot API."""
-    logger.info("Processing dedicated server products from Robot API...")
-    
-    processed_servers = []
-    
-    for product in products:
-        try:
-            # Extract server specifications
-            name = product.get("name", "Unknown Server")
-            description = product.get("description", "")
-            
-            # Extract pricing information
-            prices = product.get("price", [])
-            monthly_price = None
-            setup_fee = None
-            
-            # Find EUR pricing
-            for price_entry in prices:
-                if price_entry.get("currency") == "EUR":
-                    monthly_price = float(price_entry.get("price_monthly", {}).get("net", 0))
-                    setup_fee = float(price_entry.get("price_setup", {}).get("net", 0))
-                    break
-            
-            # Extract specifications from description or other fields
-            import re
-            cpu_info = "N/A"
-            ram_info = "N/A"
-            storage_info = "N/A"
-            
-            # Try to extract specs from description
-            if description:
-                # CPU extraction
-                cpu_match = re.search(r'(\d+)\s*x\s*([\w\s\-\.]+(?:GHz)?)', description, re.IGNORECASE)
-                if cpu_match:
-                    cpu_info = f"{cpu_match.group(1)}x {cpu_match.group(2).strip()}"
-                
-                # RAM extraction  
-                ram_match = re.search(r'(\d+)\s*GB\s*(?:DDR\d*\s*)?RAM', description, re.IGNORECASE)
-                if ram_match:
-                    ram_info = f"{ram_match.group(1)} GB RAM"
-                
-                # Storage extraction
-                storage_match = re.search(r'(\d+(?:\.\d+)?)\s*(TB|GB)\s*(SSD|HDD|NVMe)', description, re.IGNORECASE)
-                if storage_match:
-                    storage_info = f"{storage_match.group(1)} {storage_match.group(2)} {storage_match.group(3)}"
-            
-            # Location information
-            locations = []
-            if "location" in product:
-                locations = [product["location"]]
-            elif "datacenter" in product:
-                locations = [product["datacenter"]]
-            
-            server_data = {
-                "type": "dedicated-robot-api",
-                "instanceType": name,
-                "description": description,
-                "cpu": cpu_info,
-                "ram": ram_info,
-                "storage": storage_info,
-                "priceEUR_monthly_net": monthly_price,
-                "setup_feeEUR": setup_fee,
-                "locations": locations,
-                "source": "robot_api_enhanced",
-                "robot_product_id": product.get("id"),
-                "availability": product.get("available", "unknown"),
-                # Note about IPv4 pricing changes
-                "pricing_note": "Prices exclude Primary IPv4 addon (as of March 28, 2022). IPv6-only by default.",
-                "ipv4_addon_required": True,
-                "raw_product_data": product
-            }
-            
-            processed_servers.append(server_data)
-            
-        except Exception as e:
-            logger.error(f"Error processing dedicated server product {product.get('name', 'unknown')}: {e}")
-            continue
-    
-    logger.info(f"Processed {len(processed_servers)} dedicated server products")
-    return processed_servers
-
-def fetch_dedicated_server_addons():
-    """Fetch addon pricing including Primary IPv4 from Robot API."""
-    logger.info("Fetching dedicated server addons from Robot API...")
-    
-    data = make_robot_api_request("order/server/addon")
-    if data and isinstance(data, list):
-        logger.info(f"Successfully fetched {len(data)} server addons")
-        return data
-    elif data and isinstance(data, dict) and "addon" in data:
-        addons = data["addon"]
-        logger.info(f"Successfully fetched {len(addons)} server addons")
-        return addons
-    
-    logger.warning("Failed to fetch dedicated server addons from Robot API")
-    return []
 
 # --- Main Fetch Functions ---
 
@@ -717,58 +509,10 @@ def fetch_hetzner_cloud():
         return []
 
 def fetch_hetzner_dedicated():
-    """Fetch Hetzner dedicated servers via Robot API only."""
-    logger.info("Starting Hetzner dedicated server data fetch via Robot API...")
-    all_results = []
-    
-    # Robot API is required for this implementation
-    if not HETZNER_ROBOT_USER or not HETZNER_ROBOT_PASSWORD:
-        logger.error("Robot API credentials required for dedicated server data")
-        logger.error("Please set HETZNER_ROBOT_USER and HETZNER_ROBOT_PASSWORD environment variables")
-        return []
-    
-    logger.info("Robot API credentials provided - fetching data...")
-    
-    try:
-        # Fetch server products
-        products = fetch_dedicated_server_products()
-        if not products:
-            logger.warning("Robot API returned no server products")
-            return []
-            
-        processed_servers = process_dedicated_server_products(products)
-        all_results.extend(processed_servers)
-        logger.info(f"Successfully fetched {len(processed_servers)} dedicated servers via Robot API")
-        
-        # Fetch addon information for IPv4 pricing context
-        addons = fetch_dedicated_server_addons()
-        if addons:
-            # Find Primary IPv4 addon pricing for reference
-            ipv4_addon_price = None
-            for addon in addons:
-                if "ipv4" in addon.get("name", "").lower() or "primary" in addon.get("name", "").lower():
-                    prices = addon.get("price", [])
-                    for price_entry in prices:
-                        if price_entry.get("currency") == "EUR":
-                            ipv4_addon_price = float(price_entry.get("price_monthly", {}).get("net", 0))
-                            break
-                    if ipv4_addon_price:
-                        break
-            
-            # Add IPv4 addon pricing context to all servers
-            if ipv4_addon_price:
-                for server in all_results:
-                    if server.get("source") == "robot_api_enhanced":
-                        server["ipv4_addon_price_eur_monthly"] = ipv4_addon_price
-                
-                logger.info(f"Added Primary IPv4 addon pricing context: €{ipv4_addon_price}/month")
-        
-        logger.info(f"Robot API fetch successful: {len(all_results)} servers with comprehensive pricing data")
-        return all_results
-        
-    except Exception as e:
-        logger.error(f"Robot API fetch failed: {e}")
-        return []
+    """Fetch Hetzner dedicated servers - DISABLED for now (Cloud API only)."""
+    logger.info("Dedicated server data collection is currently disabled")
+    logger.info("Only collecting Hetzner Cloud data for now")
+    return []
 
 def main():
     """Main function to fetch all Hetzner data."""
@@ -822,22 +566,28 @@ def main():
         print(f"\n❌ Fatal error: {e}")
         return False
     
-    print("\n--- API-Only Configuration ---")
-    print("This script now uses APIs exclusively for reliable, fast data collection.")
+    print("\n--- Hetzner Cloud API Configuration ---")
+    print("This script uses Hetzner Cloud API exclusively for reliable, fast data collection.")
+    print("Dedicated server data collection is currently DISABLED.")
     print("")
-    print("Required Environment Variables:")
+    print("Required Environment Variable:")
     print("1. HETZNER_API_TOKEN - Hetzner Cloud API token (from console.hetzner.cloud)")
     print("   - Get from: Security → API Tokens")
     print("   - Permissions: 'Read' is sufficient")
-    print("2. HETZNER_ROBOT_USER - Robot API username (from robot.your-server.de)")
-    print("3. HETZNER_ROBOT_PASSWORD - Robot API password")
     print("")
-    print("Benefits of API-Only Approach:")
+    print("Currently Collecting:")
+    print("- ✅ Cloud Servers (all instance types)")
+    print("- ✅ Load Balancers (all types)")
+    print("- ✅ Block Storage (volume pricing)")
+    print("- ✅ Floating IPs (all locations)")
+    print("- ✅ Private Networks (all locations)")
+    print("")
+    print("Benefits:")
     print("- ✅ No Chrome/Selenium dependencies (faster CI)")
-    print("- ✅ More reliable data (direct from Hetzner systems)")
-    print("- ✅ Comprehensive coverage (all cloud services + dedicated servers)")
-    print("- ✅ IPv4 addon pricing context (shows true total costs)")
-    print("- ✅ Faster execution and better error handling")
+    print("- ✅ More reliable data (direct from Hetzner Cloud API)")
+    print("- ✅ Comprehensive cloud service coverage")
+    print("- ✅ Fast execution (~1-2 minutes)")
+    print("- ✅ Location-specific pricing")
     
     return len(all_data) > 0
 

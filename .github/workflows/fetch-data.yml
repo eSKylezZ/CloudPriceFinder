@@ -39,12 +39,9 @@ jobs:
       - name: Fetch Hetzner data
         run: python scripts/fetch_hetzner.py
         env:
-          # Hetzner Cloud API credentials
+          # Hetzner Cloud API credentials (Robot API disabled for now)
           HETZNER_API_TOKEN: ${{ secrets.HETZNER_API_TOKEN }}
-          # Hetzner Robot API credentials (for dedicated servers)
-          HETZNER_ROBOT_USER: ${{ secrets.HETZNER_ROBOT_USER }}
-          HETZNER_ROBOT_PASSWORD: ${{ secrets.HETZNER_ROBOT_PASSWORD }}
-        timeout-minutes: 5
+        timeout-minutes: 3
 
       # - name: Fetch OVH data
       #   run: python scripts/fetch_ovh.py
@@ -52,5 +49,8 @@ jobs:
       - name: Commit and push data
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: update cloud instance data"
+          commit_message: "chore: update cloud instance data [skip ci]"
           file_pattern: data/*.json
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
+          push_options: '--force-with-lease'
