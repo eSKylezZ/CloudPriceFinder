@@ -1,0 +1,23 @@
+# Node
+node_modules/
+dist/
+.build/
+.cache/
+*.log
+
+# Python
+__pycache__/
+*.pyc
+
+# Data
+data/*.json
+
+# Astro
+.astro/
+
+# OS
+.DS_Store
+Thumbs.db
+
+.venv/
+TempData/
