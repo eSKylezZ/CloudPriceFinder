@@ -24,17 +24,17 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Fetch AWS data
-        run: python scripts/fetch_aws.py
+      # - name: Fetch AWS data
+      #   run: python scripts/fetch_aws.py
 
-      - name: Fetch Azure data
-        run: python scripts/fetch_azure.py
+      # - name: Fetch Azure data
+      #   run: python scripts/fetch_azure.py
 
-      - name: Fetch OCI data
-        run: python scripts/fetch_oci.py
+      # - name: Fetch OCI data
+      #   run: python scripts/fetch_oci.py
 
-      - name: Fetch Google data
-        run: python scripts/fetch_google.py
+      # - name: Fetch Google data
+      #   run: python scripts/fetch_google.py
 
       - name: Fetch Hetzner data
         run: python scripts/fetch_hetzner.py
@@ -46,12 +46,9 @@ jobs:
           HETZNER_ROBOT_PASSWORD: ${{ secrets.HETZNER_ROBOT_PASSWORD }}
         timeout-minutes: 5
 
-      - name: Fetch OVH data
-        run: python scripts/fetch_ovh.py
-
-      - name: Normalize and merge data
-        run: python scripts/normalize_merge.py
-
+      # - name: Fetch OVH data
+      #   run: python scripts/fetch_ovh.py
+      
       - name: Commit and push data
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
