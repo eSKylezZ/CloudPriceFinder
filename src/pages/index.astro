@@ -11,7 +11,7 @@ const summary = await loadSummaryData();
 ---
 
 <BaseLayout title="CloudCosts - Multi-Cloud Instance Comparison">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-8 flex-1">
     <!-- Hero Section -->
     <div class="text-center mb-8">
       <h1 class="text-4xl font-bold text-gray-900 mb-4">
@@ -27,14 +27,14 @@ const summary = await loadSummaryData();
     <DataSummary summary={summary} />
 
     <!-- Main Content -->
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+    <div class="grid grid-cols-1 xl:grid-cols-5 2xl:grid-cols-6 gap-6 lg:gap-8">
       <!-- Filters Sidebar -->
-      <div class="lg:col-span-1">
+      <div class="xl:col-span-1 2xl:col-span-1">
         <FilterPanel instances={instances} />
       </div>
 
       <!-- Comparison Table -->
-      <div class="lg:col-span-3">
+      <div class="xl:col-span-4 2xl:col-span-5">
         <ComparisonTable instances={instances} />
       </div>
     </div>

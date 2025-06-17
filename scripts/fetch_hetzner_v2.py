@@ -209,7 +209,8 @@ class HetznerCloudCollector:
                         if monthly_price is None and 'price_monthly' in price_entry:
                             monthly_price = float(price_entry['price_monthly'].get('net', 0))
                 
-                server_data = {
+                # Create base server data
+                base_server_data = {
                     'platform': 'cloud',
                     'type': 'cloud-server',
                     'instanceType': name,
@@ -234,7 +235,30 @@ class HetznerCloudCollector:
                     'raw': server_type
                 }
                 
+                # Standard server with IPv4 + IPv6 (default configuration)
+                server_data = base_server_data.copy()
+                server_data['networkOptions'] = 'ipv4_ipv6'
+                server_data['ipType'] = 'ipv4_ipv6'
+                server_data['description'] = f"{server_data['description']} (IPv4 + IPv6)"
                 processed_servers.append(server_data)
+                
+                # IPv6-only server option (discounted pricing according to Hetzner website)
+                # Based on website: "save 0.50 0.60" for IPv6 only servers
+                if monthly_price and monthly_price > 0:
+                    ipv6_server_data = base_server_data.copy()
+                    ipv6_server_data['networkOptions'] = 'ipv6_only'
+                    ipv6_server_data['ipType'] = 'ipv6'
+                    
+                    # Apply IPv6-only discount (€0.50 monthly savings)
+                    ipv6_discount = 0.50
+                    ipv6_server_data['priceEUR_monthly_net'] = max(0, monthly_price - ipv6_discount)
+                    ipv6_server_data['priceEUR_hourly_net'] = ipv6_server_data['priceEUR_monthly_net'] / (24 * 30) if ipv6_server_data['priceEUR_monthly_net'] > 0 else 0
+                    
+                    ipv6_server_data['description'] = f"{base_server_data['description']} (IPv6 only, €{ipv6_discount} discount)"
+                    ipv6_server_data['hetzner_metadata']['networkType'] = 'ipv6_only'
+                    ipv6_server_data['hetzner_metadata']['discountApplied'] = ipv6_discount
+                    
+                    processed_servers.append(ipv6_server_data)
                 
             except Exception as e:
                 logger.error(f"Error processing server type {server_type.get('name')}: {e}")
@@ -308,7 +332,7 @@ class HetznerCloudCollector:
         return processed_lbs
     
     def _process_pricing_services(self, data: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Process other pricing services (volumes, floating IPs, etc.)."""
+        """Process other pricing services (volumes, floating IPs, networks, primary IPs, etc.)."""
         pricing_data = data.get('pricing', {})
         processed_services = []
         
@@ -349,19 +373,53 @@ class HetznerCloudCollector:
             for price_entry in pricing_data['floating_ip']:
                 try:
                     location = price_entry.get('location')
+                    ip_type = price_entry.get('type', 'unknown')  # Should be 'ipv4' or 'ipv6'
                     hourly_price = float(price_entry.get('price_hourly', {}).get('net', 0))
                     monthly_price = float(price_entry.get('price_monthly', {}).get('net', 0))
                     
                     ip_data = {
                         'platform': 'cloud',
                         'type': 'cloud-floating-ip',
-                        'instanceType': 'Floating IP',
+                        'instanceType': f'Floating IP ({ip_type.upper() if ip_type != "unknown" else "IPv4/IPv6"})',
+                        'ipType': ip_type if ip_type != 'unknown' else 'ipv4_ipv6',  # Add IP type as filterable field
                         'location': location,
                         'priceEUR_hourly_net': hourly_price,
                         'priceEUR_monthly_net': monthly_price,
                         'regions': [location] if location else [],
                         'source': 'hetzner_cloud_api',
-                        'description': 'Floating IP pricing',
+                        'description': f'Floating {ip_type.upper() if ip_type != "unknown" else "IP"} address pricing',
+                        'lastUpdated': datetime.now().isoformat(),
+                        'hetzner_metadata': {
+                            'platform': 'cloud',
+                            'apiSource': 'cloud_api',
+                            'serviceCategory': 'networking',
+                            'ipVersion': ip_type if ip_type != 'unknown' else 'mixed'
+                        }
+                    }
+                    
+                    processed_services.append(ip_data)
+                    
+                except Exception as e:
+                    logger.error(f"Error processing floating IP pricing: {e}")
+        
+        # Process private network pricing
+        if 'network' in pricing_data and isinstance(pricing_data['network'], list):
+            for price_entry in pricing_data['network']:
+                try:
+                    location = price_entry.get('location')
+                    hourly_price = float(price_entry.get('price_hourly', {}).get('net', 0))
+                    monthly_price = float(price_entry.get('price_monthly', {}).get('net', 0))
+                    
+                    network_data = {
+                        'platform': 'cloud',
+                        'type': 'cloud-private-network',
+                        'instanceType': 'Private Network',
+                        'location': location,
+                        'priceEUR_hourly_net': hourly_price,
+                        'priceEUR_monthly_net': monthly_price,
+                        'regions': [location] if location else [],
+                        'source': 'hetzner_cloud_api',
+                        'description': 'Private network pricing',
                         'lastUpdated': datetime.now().isoformat(),
                         'hetzner_metadata': {
                             'platform': 'cloud',
@@ -370,10 +428,44 @@ class HetznerCloudCollector:
                         }
                     }
                     
+                    processed_services.append(network_data)
+                    
+                except Exception as e:
+                    logger.error(f"Error processing network pricing: {e}")
+        
+        # Process primary IP pricing
+        if 'primary_ip' in pricing_data and isinstance(pricing_data['primary_ip'], list):
+            for price_entry in pricing_data['primary_ip']:
+                try:
+                    location = price_entry.get('location')
+                    ip_type = price_entry.get('type', 'unknown')  # Should be 'ipv4' or 'ipv6'
+                    hourly_price = float(price_entry.get('price_hourly', {}).get('net', 0))
+                    monthly_price = float(price_entry.get('price_monthly', {}).get('net', 0))
+                    
+                    ip_data = {
+                        'platform': 'cloud',
+                        'type': 'cloud-primary-ip',
+                        'instanceType': f'Primary IP ({ip_type.upper()})',
+                        'ipType': ip_type,  # Add IP type as filterable field
+                        'location': location,
+                        'priceEUR_hourly_net': hourly_price,
+                        'priceEUR_monthly_net': monthly_price,
+                        'regions': [location] if location else [],
+                        'source': 'hetzner_cloud_api',
+                        'description': f'Primary {ip_type.upper()} address pricing',
+                        'lastUpdated': datetime.now().isoformat(),
+                        'hetzner_metadata': {
+                            'platform': 'cloud',
+                            'apiSource': 'cloud_api',
+                            'serviceCategory': 'networking',
+                            'ipVersion': ip_type
+                        }
+                    }
+                    
                     processed_services.append(ip_data)
                     
                 except Exception as e:
-                    logger.error(f"Error processing floating IP pricing: {e}")
+                    logger.error(f"Error processing primary IP pricing: {e}")
         
         return processed_services
 
