@@ -1,0 +1,42 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ComparisonTable from '../components/ComparisonTable.astro';
+import FilterPanel from '../components/FilterPanel.astro';
+import DataSummary from '../components/DataSummary.astro';
+import { loadInstanceData, loadSummaryData } from '../lib/data-loader';
+
+// Load data at build time
+const instances = await loadInstanceData();
+const summary = await loadSummaryData();
+---
+
+<BaseLayout title="CloudCosts - Multi-Cloud Instance Comparison">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Hero Section -->
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-gray-900 mb-4">
+        Multi-Cloud Instance Comparison
+      </h1>
+      <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+        Compare cloud instance costs and specifications across AWS, Azure, Google Cloud, 
+        Hetzner, Oracle Cloud, and OVH. Find the best value for your workload.
+      </p>
+    </div>
+
+    <!-- Data Summary -->
+    <DataSummary summary={summary} />
+
+    <!-- Main Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <!-- Filters Sidebar -->
+      <div class="lg:col-span-1">
+        <FilterPanel instances={instances} />
+      </div>
+
+      <!-- Comparison Table -->
+      <div class="lg:col-span-3">
+        <ComparisonTable instances={instances} />
+      </div>
+    </div>
+  </div>
+</BaseLayout>

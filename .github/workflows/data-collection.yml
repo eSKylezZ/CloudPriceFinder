@@ -1,0 +1,204 @@
+name: Cloud Data Collection & Deployment
+
+on:
+  # Run weekly on Sunday at midnight UTC
+  schedule:
+    - cron: '0 0 * * 0'
+  
+  # Allow manual triggering
+  workflow_dispatch:
+    inputs:
+      enable_dedicated:
+        description: 'Enable Hetzner dedicated server collection'
+        required: false
+        default: 'false'
+        type: boolean
+      enable_auction:
+        description: 'Enable Hetzner auction server collection'
+        required: false
+        default: 'false'
+        type: boolean
+
+  # Run on pushes to main (for testing)
+  push:
+    branches: [ main ]
+    paths: 
+      - 'scripts/**'
+      - '.github/workflows/**'
+
+env:
+  # Hetzner configuration
+  HETZNER_ENABLE_CLOUD: true
+  HETZNER_ENABLE_DEDICATED: ${{ github.event.inputs.enable_dedicated || 'false' }}
+  HETZNER_ENABLE_AUCTION: ${{ github.event.inputs.enable_auction || 'false' }}
+
+jobs:
+  collect-data:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+        
+    - name: 📦 Install Python dependencies
+      run: |
+        pip install -r requirements.txt
+        
+    - name: 🌩️ Collect cloud pricing data
+      env:
+        HETZNER_API_TOKEN: ${{ secrets.HETZNER_API_TOKEN }}
+        HETZNER_ROBOT_USER: ${{ secrets.HETZNER_ROBOT_USER }}
+        HETZNER_ROBOT_PASSWORD: ${{ secrets.HETZNER_ROBOT_PASSWORD }}
+      run: |
+        echo "🚀 Starting data collection..."
+        echo "Configuration:"
+        echo "  Cloud: $HETZNER_ENABLE_CLOUD"
+        echo "  Dedicated: $HETZNER_ENABLE_DEDICATED"
+        echo "  Auction: $HETZNER_ENABLE_AUCTION"
+        
+        python3 scripts/orchestrator.py
+        
+    - name: 📊 Validate collected data
+      run: |
+        echo "📊 Data validation results:"
+        
+        # Check if data files exist
+        if [ -f "data/all_instances.json" ]; then
+          instances=$(jq length data/all_instances.json)
+          echo "✅ Total instances: $instances"
+        else
+          echo "❌ No instances data file found"
+          exit 1
+        fi
+        
+        if [ -f "data/summary.json" ]; then
+          providers=$(jq '.providersCount' data/summary.json)
+          echo "✅ Providers: $providers"
+        else
+          echo "❌ No summary data file found"
+          exit 1
+        fi
+        
+        # Validate data structure
+        if jq -e 'type == "array" and length > 0' data/all_instances.json > /dev/null; then
+          echo "✅ Data structure is valid"
+        else
+          echo "❌ Invalid data structure"
+          exit 1
+        fi
+        
+        # Check for required fields
+        required_fields='["provider", "type", "instanceType", "priceUSD_hourly", "lastUpdated"]'
+        if jq -e --argjson fields "$required_fields" '
+          all(
+            . as $item | 
+            $fields | 
+            all(. as $field | $item | has($field))
+          )' data/all_instances.json > /dev/null; then
+          echo "✅ All required fields present"
+        else
+          echo "❌ Missing required fields in some instances"
+          exit 1
+        fi
+        
+    - name: 🏗️ Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: 📦 Install Node.js dependencies
+      run: npm ci
+      
+    - name: 🔧 Build static site
+      run: |
+        echo "🏗️ Building CloudCosts static site..."
+        npm run build
+        
+    - name: 📈 Generate build report
+      run: |
+        echo "📈 Build Report" >> $GITHUB_STEP_SUMMARY
+        echo "=============" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Data summary
+        instances=$(jq length data/all_instances.json)
+        providers=$(jq '.providersCount' data/summary.json)
+        last_updated=$(jq -r '.lastUpdated' data/summary.json)
+        
+        echo "## 📊 Data Collection Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- **Total Instances:** $instances" >> $GITHUB_STEP_SUMMARY
+        echo "- **Providers:** $providers" >> $GITHUB_STEP_SUMMARY  
+        echo "- **Last Updated:** $last_updated" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Provider breakdown
+        echo "## 🏢 By Provider" >> $GITHUB_STEP_SUMMARY
+        jq -r '.byProvider | to_entries[] | "- **\(.key):** \(.value) instances"' data/summary.json >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Service type breakdown  
+        echo "## 🔧 By Service Type" >> $GITHUB_STEP_SUMMARY
+        jq -r '.byType | to_entries[] | "- **\(.key):** \(.value) services"' data/summary.json >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Build info
+        echo "## 🏗️ Build Information" >> $GITHUB_STEP_SUMMARY
+        echo "- **Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "- **Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "- **Workflow:** \`${{ github.workflow }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "- **Triggered by:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+        
+        # Check for errors
+        if [ -f "data/summary.json" ] && jq -e '.errors | length > 0' data/summary.json > /dev/null; then
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## ⚠️ Collection Errors" >> $GITHUB_STEP_SUMMARY
+          jq -r '.errors | to_entries[] | "- **\(.key):** \(.value)"' data/summary.json >> $GITHUB_STEP_SUMMARY
+        fi
+        
+    - name: 📤 Upload data artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: cloud-pricing-data-${{ github.run_number }}
+        path: |
+          data/
+          dist/
+        retention-days: 30
+        
+    - name: 💾 Commit updated data and build
+      if: github.ref == 'refs/heads/main'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        # Add data and built site
+        git add data/ dist/
+        
+        if git diff --cached --quiet; then
+          echo "📊 No changes to commit"
+        else
+          git commit -m "🤖 Update pricing data and build - $(date -u '+%Y-%m-%d %H:%M UTC')"
+          git push
+          echo "✅ Data and build updated - Cloudflare Pages will auto-deploy"
+        fi
+        
+  notify:
+    runs-on: ubuntu-latest
+    needs: collect-data
+    if: always()
+    
+    steps:
+    - name: 📬 Report status
+      run: |
+        if [ "${{ needs.collect-data.result }}" = "success" ]; then
+          echo "✅ Data collection and deployment completed successfully"
+        else
+          echo "❌ Data collection failed - check logs for details"
+          exit 1
+        fi

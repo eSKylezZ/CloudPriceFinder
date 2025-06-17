@@ -1,0 +1,271 @@
+---
+import type { CloudInstance } from '../types';
+
+export interface Props {
+  instances: CloudInstance[];
+}
+
+const { instances } = Astro.props;
+
+const formatPrice = (price: number) => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 4,
+  }).format(price);
+};
+
+const getProviderBadgeColor = (provider: string) => {
+  const colors: Record<string, string> = {
+    aws: 'bg-orange-100 text-orange-800',
+    azure: 'bg-blue-100 text-blue-800',
+    gcp: 'bg-green-100 text-green-800',
+    hetzner: 'bg-red-100 text-red-800',
+    oci: 'bg-purple-100 text-purple-800',
+    ovh: 'bg-indigo-100 text-indigo-800',
+  };
+  return colors[provider] || 'bg-gray-100 text-gray-800';
+};
+
+const getTypeBadgeColor = (type: string) => {
+  const colors: Record<string, string> = {
+    'cloud-server': 'bg-blue-100 text-blue-800',
+    'cloud-loadbalancer': 'bg-green-100 text-green-800',
+    'cloud-volume': 'bg-yellow-100 text-yellow-800',
+    'cloud-network': 'bg-purple-100 text-purple-800',
+    'cloud-floating-ip': 'bg-pink-100 text-pink-800',
+    'cloud-snapshot': 'bg-cyan-100 text-cyan-800',
+    'cloud-certificate': 'bg-teal-100 text-teal-800',
+    'dedicated-server': 'bg-gray-100 text-gray-800',
+    'dedicated-auction': 'bg-orange-100 text-orange-800',
+    'dedicated-storage': 'bg-stone-100 text-stone-800',
+    'dedicated-colocation': 'bg-slate-100 text-slate-800',
+  };
+  return colors[type] || 'bg-gray-100 text-gray-800';
+};
+
+const formatTypeDisplay = (type: string) => {
+  return type.replace('cloud-', '').replace('dedicated-', '').replace('-', ' ');
+};
+---
+
+<div class="bg-white rounded-lg shadow-sm border">
+  <div class="px-6 py-4 border-b border-gray-200">
+    <div class="flex items-center justify-between">
+      <h2 class="text-lg font-semibold text-gray-900">
+        Instance Comparison
+      </h2>
+      <div class="flex items-center space-x-4">
+        <select
+          id="sort-select"
+          class="rounded border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500"
+        >
+          <option value="priceUSD_hourly">Price (Low to High)</option>
+          <option value="priceUSD_hourly-desc">Price (High to Low)</option>
+          <option value="vCPU">vCPU (Low to High)</option>
+          <option value="vCPU-desc">vCPU (High to Low)</option>
+          <option value="memoryGiB">Memory (Low to High)</option>
+          <option value="memoryGiB-desc">Memory (High to Low)</option>
+          <option value="provider">Provider (A-Z)</option>
+        </select>
+        <div class="text-sm text-gray-500" id="result-count">
+          {instances.length} instances
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200" id="instances-table">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Provider
+          </th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Instance Type
+          </th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Type
+          </th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            vCPU
+          </th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Memory
+          </th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Price/Hour
+          </th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Price/Month
+          </th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Regions
+          </th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200" id="table-body">
+        {instances.map((instance) => (
+          <tr class="hover:bg-gray-50 instance-row" data-instance={JSON.stringify(instance)}>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getProviderBadgeColor(instance.provider)}`}>
+                {instance.provider.toUpperCase()}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+              {instance.instanceType}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex flex-col space-y-1">
+                <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeBadgeColor(instance.type)}`}>
+                  {formatTypeDisplay(instance.type)}
+                </span>
+                {instance.platform && (
+                  <span class="text-xs text-gray-500 capitalize">
+                    {instance.platform}
+                  </span>
+                )}
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              {instance.vCPU || '-'}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              {instance.memoryGiB ? `${instance.memoryGiB} GiB` : '-'}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+              {formatPrice(instance.priceUSD_hourly)}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              {formatPrice(instance.priceUSD_monthly)}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <div class="max-w-32 truncate">
+                {instance.regions?.slice(0, 3).join(', ')}
+                {instance.regions && instance.regions.length > 3 && '...'}
+              </div>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  {instances.length === 0 && (
+    <div class="text-center py-12">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      <h3 class="mt-2 text-sm font-medium text-gray-900">No instances found</h3>
+      <p class="mt-1 text-sm text-gray-500">
+        No cloud instances match your current filters. Try adjusting your search criteria.
+      </p>
+    </div>
+  )}
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const sortSelect = document.getElementById('sort-select') as HTMLSelectElement;
+    const tableBody = document.getElementById('table-body');
+    const resultCount = document.getElementById('result-count');
+    
+    let allInstances = Array.from(document.querySelectorAll('.instance-row'))
+      .map(row => JSON.parse((row as HTMLElement).dataset.instance || '{}'));
+    
+    // Handle sorting
+    if (sortSelect) {
+      sortSelect.addEventListener('change', () => {
+        const [field, direction] = sortSelect.value.split('-');
+        sortInstances(field, direction === 'desc' ? 'desc' : 'asc');
+      });
+    }
+    
+    // Handle filtering
+    document.addEventListener('filtersChanged', (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const filters = customEvent.detail;
+      filterAndRenderInstances(filters);
+    });
+    
+    function sortInstances(field: string, direction: 'asc' | 'desc') {
+      const visibleRows = Array.from(document.querySelectorAll('.instance-row:not(.hidden)'));
+      const instances = visibleRows.map(row => JSON.parse((row as HTMLElement).dataset.instance || '{}'));
+      
+      instances.sort((a, b) => {
+        const aVal = a[field];
+        const bVal = b[field];
+        
+        if (aVal === bVal) return 0;
+        const comparison = aVal < bVal ? -1 : 1;
+        return direction === 'asc' ? comparison : -comparison;
+      });
+      
+      // Re-render sorted instances
+      renderInstances(instances);
+    }
+    
+    function filterAndRenderInstances(filters: any) {
+      const filtered = allInstances.filter(instance => {
+        // Provider filter
+        if (filters.providers?.length && !filters.providers.includes(instance.provider)) {
+          return false;
+        }
+        
+        // Instance type filter
+        if (filters.instanceTypes?.length && !filters.instanceTypes.includes(instance.type)) {
+          return false;
+        }
+        
+        // vCPU filter
+        if (instance.vCPU < filters.minVCPU || instance.vCPU > filters.maxVCPU) {
+          return false;
+        }
+        
+        // Memory filter
+        if (instance.memoryGiB < filters.minMemory || instance.memoryGiB > filters.maxMemory) {
+          return false;
+        }
+        
+        // Price filter
+        if (instance.priceUSD_hourly > filters.maxPrice) {
+          return false;
+        }
+        
+        return true;
+      });
+      
+      renderInstances(filtered);
+      
+      if (resultCount) {
+        resultCount.textContent = `${filtered.length} instances`;
+      }
+    }
+    
+    function renderInstances(instances: any[]) {
+      if (!tableBody) return;
+      
+      // Hide all rows first
+      document.querySelectorAll('.instance-row').forEach(row => {
+        (row as HTMLElement).style.display = 'none';
+      });
+      
+      // Show matching rows in order
+      instances.forEach((instance) => {
+        const matchingRow = Array.from(document.querySelectorAll('.instance-row'))
+          .find(row => {
+            const rowData = JSON.parse((row as HTMLElement).dataset.instance || '{}');
+            return rowData.instanceType === instance.instanceType && 
+                   rowData.provider === instance.provider;
+          });
+        
+        if (matchingRow) {
+          (matchingRow as HTMLElement).style.display = '';
+          // Move to correct position
+          tableBody.appendChild(matchingRow);
+        }
+      });
+    }
+  });
+</script>

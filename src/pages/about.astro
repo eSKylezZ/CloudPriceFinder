@@ -1,0 +1,73 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="About CloudCosts" description="Learn more about CloudCosts - the open-source multi-cloud cost comparison tool">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold text-gray-900 mb-4">
+        About CloudCosts
+      </h1>
+      <p class="text-xl text-gray-600">
+        Open-source multi-cloud instance cost comparison
+      </p>
+    </div>
+
+    <div class="prose prose-lg mx-auto">
+      <h2>What is CloudCosts?</h2>
+      <p>
+        CloudCosts is an open-source tool that helps developers and businesses compare 
+        cloud instance costs across multiple providers. Instead of manually checking 
+        each cloud provider's pricing pages, CloudCosts aggregates and normalizes 
+        pricing data to help you make informed decisions.
+      </p>
+
+      <h2>Supported Providers</h2>
+      <ul>
+        <li><strong>Hetzner Cloud</strong> - Fully integrated with real-time API data</li>
+        <li><strong>Amazon Web Services (AWS)</strong> - Coming soon</li>
+        <li><strong>Microsoft Azure</strong> - Coming soon</li>
+        <li><strong>Google Cloud Platform (GCP)</strong> - Coming soon</li>
+        <li><strong>Oracle Cloud Infrastructure (OCI)</strong> - Coming soon</li>
+        <li><strong>OVH</strong> - Coming soon</li>
+      </ul>
+
+      <h2>Features</h2>
+      <ul>
+        <li>Real-time pricing data from provider APIs</li>
+        <li>Standardized comparison across providers</li>
+        <li>Filter by CPU, memory, price, and region</li>
+        <li>Sort by any specification</li>
+        <li>Mobile-responsive design</li>
+        <li>No tracking or analytics</li>
+      </ul>
+
+      <h2>Data Sources</h2>
+      <p>
+        CloudCosts fetches data directly from cloud provider APIs when available, 
+        ensuring the most accurate and up-to-date pricing information. All prices 
+        are converted to USD for easy comparison while preserving original pricing 
+        in the provider's currency.
+      </p>
+
+      <h2>Open Source</h2>
+      <p>
+        CloudCosts is completely open source and available on GitHub. We welcome 
+        contributions, bug reports, and feature requests from the community.
+      </p>
+      
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mt-8">
+        <h3 class="text-lg font-semibold text-blue-900 mb-2">Contributing</h3>
+        <p class="text-blue-800 mb-4">
+          Help us add more cloud providers or improve the existing functionality.
+        </p>
+        <a 
+          href="https://github.com/cloudcosts/cloudcosts" 
+          class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+        >
+          View on GitHub
+        </a>
+      </div>
+    </div>
+  </div>
+</BaseLayout>

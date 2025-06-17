@@ -1,0 +1,68 @@
+name: Data Collection Only
+
+on:
+  # Run weekly on Wednesday at midnight UTC for data collection
+  schedule:
+    - cron: '0 0 * * 3'
+  
+  # Allow manual triggering
+  workflow_dispatch:
+    inputs:
+      providers:
+        description: 'Providers to collect (comma-separated: hetzner,aws,azure,gcp,oci,ovh)'
+        required: false
+        default: 'hetzner'
+
+env:
+  # Default configuration
+  HETZNER_ENABLE_CLOUD: true
+  HETZNER_ENABLE_DEDICATED: true
+  HETZNER_ENABLE_AUCTION: true
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout
+      uses: actions/checkout@v4
+      
+    - name: 🐍 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+        
+    - name: 📦 Install dependencies
+      run: pip install -r requirements.txt
+        
+    - name: 🔍 Collect pricing data
+      env:
+        HETZNER_API_TOKEN: ${{ secrets.HETZNER_API_TOKEN }}
+        HETZNER_ROBOT_USER: ${{ secrets.HETZNER_ROBOT_USER }}
+        HETZNER_ROBOT_PASSWORD: ${{ secrets.HETZNER_ROBOT_PASSWORD }}
+      run: |
+        echo "🚀 Collecting cloud pricing data..."
+        python3 scripts/orchestrator.py
+        
+        if [ -f "data/all_instances.json" ]; then
+          instances=$(jq length data/all_instances.json 2>/dev/null || echo "0")
+          echo "✅ Collected $instances instances"
+        else
+          echo "❌ No data collected"
+          exit 1
+        fi
+        
+    - name: 💾 Commit updated data
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        if git diff --quiet data/; then
+          echo "📊 No data changes detected"
+        else
+          git add data/
+          git commit -m "🤖 Update pricing data - $(date -u '+%Y-%m-%d %H:%M UTC')"
+          git push
+          echo "✅ Data updated and committed"
+        fi

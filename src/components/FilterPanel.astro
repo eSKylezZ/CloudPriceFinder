@@ -1,0 +1,242 @@
+---
+import type { CloudInstance } from '../types';
+import { getUniqueValues } from '../lib/data-loader';
+
+export interface Props {
+  instances: CloudInstance[];
+}
+
+const { instances } = Astro.props;
+
+const providers = getUniqueValues(instances, 'provider');
+const instanceTypes = getUniqueValues(instances, 'type');
+
+// Calculate ranges for sliders
+const vCPURange = instances.length > 0 ? {
+  min: Math.min(...instances.map(i => i.vCPU || 1).filter(Boolean)),
+  max: Math.max(...instances.map(i => i.vCPU || 1).filter(Boolean))
+} : { min: 1, max: 32 };
+
+const memoryRange = instances.length > 0 ? {
+  min: Math.min(...instances.map(i => i.memoryGiB || 1).filter(Boolean)),
+  max: Math.max(...instances.map(i => i.memoryGiB || 1).filter(Boolean))
+} : { min: 1, max: 256 };
+
+const priceRange = instances.length > 0 ? {
+  min: Math.min(...instances.map(i => i.priceUSD_hourly)),
+  max: Math.max(...instances.map(i => i.priceUSD_hourly))
+} : { min: 0, max: 10 };
+---
+
+<div class="bg-white rounded-lg shadow-sm border p-6">
+  <h2 class="text-lg font-semibold text-gray-900 mb-4">Filters</h2>
+  
+  <div class="space-y-6" id="filter-panel">
+    <!-- Provider Filter -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">
+        Cloud Providers
+      </label>
+      <div class="space-y-2">
+        {providers.map((provider) => (
+          <label class="flex items-center">
+            <input
+              type="checkbox"
+              name="provider"
+              value={provider}
+              checked
+              class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            />
+            <span class="ml-2 text-sm text-gray-600 capitalize">{provider}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+
+    <!-- vCPU Range -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">
+        vCPU Count
+      </label>
+      <div class="space-y-2">
+        <div class="flex items-center space-x-2">
+          <input
+            type="number"
+            name="minVCPU"
+            placeholder="Min"
+            min={vCPURange.min}
+            max={vCPURange.max}
+            value={vCPURange.min}
+            class="w-20 rounded border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500"
+          />
+          <span class="text-gray-500">to</span>
+          <input
+            type="number"
+            name="maxVCPU"
+            placeholder="Max"
+            min={vCPURange.min}
+            max={vCPURange.max}
+            value={vCPURange.max}
+            class="w-20 rounded border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Memory Range -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">
+        Memory (GiB)
+      </label>
+      <div class="space-y-2">
+        <div class="flex items-center space-x-2">
+          <input
+            type="number"
+            name="minMemory"
+            placeholder="Min"
+            min={memoryRange.min}
+            max={memoryRange.max}
+            value={memoryRange.min}
+            class="w-20 rounded border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500"
+          />
+          <span class="text-gray-500">to</span>
+          <input
+            type="number"
+            name="maxMemory"
+            placeholder="Max"
+            min={memoryRange.min}
+            max={memoryRange.max}
+            value={memoryRange.max}
+            class="w-20 rounded border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Price Range -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">
+        Max Price (USD/hour)
+      </label>
+      <input
+        type="number"
+        name="maxPrice"
+        placeholder="Max price"
+        min={priceRange.min}
+        max={priceRange.max}
+        step="0.01"
+        value={priceRange.max}
+        class="w-full rounded border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500"
+      />
+    </div>
+
+    <!-- Instance Type Filter -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">
+        Instance Types
+      </label>
+      <div class="space-y-2">
+        {instanceTypes.map((type) => (
+          <label class="flex items-center">
+            <input
+              type="checkbox"
+              name="instanceType"
+              value={type}
+              checked
+              class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            />
+            <span class="ml-2 text-sm text-gray-600">{type.replace('cloud-', '').replace('-', ' ')}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="space-y-2 pt-4 border-t border-gray-200">
+      <button
+        type="button"
+        id="apply-filters"
+        class="w-full bg-primary-600 text-white py-2 px-4 rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 text-sm"
+      >
+        Apply Filters
+      </button>
+      <button
+        type="button"
+        id="clear-filters"
+        class="w-full bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 text-sm"
+      >
+        Clear All
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Client-side filtering logic
+  document.addEventListener('DOMContentLoaded', () => {
+    const applyButton = document.getElementById('apply-filters');
+    const clearButton = document.getElementById('clear-filters');
+    // const filterPanel = document.getElementById('filter-panel');
+    
+    if (applyButton) {
+      applyButton.addEventListener('click', applyFilters);
+    }
+    
+    if (clearButton) {
+      clearButton.addEventListener('click', clearFilters);
+    }
+  });
+
+  function applyFilters() {
+    // Get filter values
+    const providers = Array.from(document.querySelectorAll('input[name="provider"]:checked'))
+      .map(input => (input as HTMLInputElement).value);
+    
+    const instanceTypes = Array.from(document.querySelectorAll('input[name="instanceType"]:checked'))
+      .map(input => (input as HTMLInputElement).value);
+    
+    const minVCPU = parseInt((document.querySelector('input[name="minVCPU"]') as HTMLInputElement)?.value || '0');
+    const maxVCPU = parseInt((document.querySelector('input[name="maxVCPU"]') as HTMLInputElement)?.value || '999');
+    const minMemory = parseInt((document.querySelector('input[name="minMemory"]') as HTMLInputElement)?.value || '0');
+    const maxMemory = parseInt((document.querySelector('input[name="maxMemory"]') as HTMLInputElement)?.value || '9999');
+    const maxPrice = parseFloat((document.querySelector('input[name="maxPrice"]') as HTMLInputElement)?.value || '999');
+
+    // Trigger custom event with filter data
+    const filterEvent = new CustomEvent('filtersChanged', {
+      detail: {
+        providers,
+        instanceTypes,
+        minVCPU,
+        maxVCPU,
+        minMemory,
+        maxMemory,
+        maxPrice
+      }
+    });
+    
+    document.dispatchEvent(filterEvent);
+  }
+
+  function clearFilters() {
+    // Reset all checkboxes to checked
+    document.querySelectorAll('input[type="checkbox"]').forEach(input => {
+      (input as HTMLInputElement).checked = true;
+    });
+    
+    // Reset range inputs to their original values
+    const vcpuMin = document.querySelector('input[name="minVCPU"]') as HTMLInputElement;
+    const vcpuMax = document.querySelector('input[name="maxVCPU"]') as HTMLInputElement;
+    const memMin = document.querySelector('input[name="minMemory"]') as HTMLInputElement;
+    const memMax = document.querySelector('input[name="maxMemory"]') as HTMLInputElement;
+    const priceMax = document.querySelector('input[name="maxPrice"]') as HTMLInputElement;
+    
+    if (vcpuMin) vcpuMin.value = vcpuMin.min;
+    if (vcpuMax) vcpuMax.value = vcpuMax.max;
+    if (memMin) memMin.value = memMin.min;
+    if (memMax) memMax.value = memMax.max;
+    if (priceMax) priceMax.value = priceMax.max;
+    
+    // Apply the cleared filters
+    applyFilters();
+  }
+</script>
