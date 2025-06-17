@@ -7,8 +7,7 @@ __pycache__/
 *.pyo
 *.pyd
 
-# Build outputs
-dist/
+# Build outputs (local development only)
 .build/
 .cache/
 .astro/
@@ -35,7 +34,6 @@ yarn-error.log*
 Thumbs.db
 
 # Local development data
-data/
 TempData/
 temp/
 *.tmp
@@ -48,6 +46,7 @@ coverage/
 # Local configuration
 .claude/settings.local.json
 config.local.json
+.gitignore.local
 
 # Backup files
 *.bak

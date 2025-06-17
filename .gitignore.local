@@ -1,0 +1,7 @@
+# Local development overrides
+# Copy this file to .git/info/exclude to ignore data/ and dist/ locally
+# while allowing them in the repository for Cloudflare Pages
+
+# Local build outputs (ignored locally but committed for Cloudflare Pages)
+dist/
+data/
