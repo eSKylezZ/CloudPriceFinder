@@ -10,12 +10,12 @@ on:
     inputs:
       enable_dedicated:
         description: 'Enable Hetzner dedicated server collection'
-        required: false
+        required: true
         default: 'false'
         type: boolean
       enable_auction:
         description: 'Enable Hetzner auction server collection'
-        required: false
+        required: true
         default: 'false'
         type: boolean
 
