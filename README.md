@@ -64,6 +64,8 @@ npm run dev
 
 Visit `http://localhost:4321` to see the application.
 
+> **Note**: For local development, you may want to ignore `data/` and `dist/` directories locally while keeping them in the repository for Cloudflare Pages. Copy `.gitignore.local` to `.git/info/exclude` to do this.
+
 ## 📋 Development Commands
 
 | Command | Description |
