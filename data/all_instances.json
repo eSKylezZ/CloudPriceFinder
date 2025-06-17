@@ -22,7 +22,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CPX 11 (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-17T21:49:59.197280",
+    "lastUpdated": "2025-06-17T21:52:01.927216",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -175,7 +175,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CPX 11 (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-17T21:49:59.197280",
+    "lastUpdated": "2025-06-17T21:52:01.927216",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -328,7 +328,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CPX 21 (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-17T21:49:59.197308",
+    "lastUpdated": "2025-06-17T21:52:01.927240",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -481,7 +481,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CPX 21 (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-17T21:49:59.197308",
+    "lastUpdated": "2025-06-17T21:52:01.927240",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -634,7 +634,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CPX 31 (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-17T21:49:59.197315",
+    "lastUpdated": "2025-06-17T21:52:01.927249",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -787,7 +787,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CPX 31 (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-17T21:49:59.197315",
+    "lastUpdated": "2025-06-17T21:52:01.927249",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -940,7 +940,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CPX 41 (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-17T21:49:59.197321",
+    "lastUpdated": "2025-06-17T21:52:01.927255",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -1093,7 +1093,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CPX 41 (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-17T21:49:59.197321",
+    "lastUpdated": "2025-06-17T21:52:01.927255",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -1246,7 +1246,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CPX 51 (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-17T21:49:59.197325",
+    "lastUpdated": "2025-06-17T21:52:01.927260",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -1399,7 +1399,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CPX 51 (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-17T21:49:59.197325",
+    "lastUpdated": "2025-06-17T21:52:01.927260",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -1549,7 +1549,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CAX11 (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-17T21:49:59.197330",
+    "lastUpdated": "2025-06-17T21:52:01.927265",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -1651,7 +1651,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CAX11 (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-17T21:49:59.197330",
+    "lastUpdated": "2025-06-17T21:52:01.927265",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -1753,7 +1753,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CAX21 (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-17T21:49:59.197362",
+    "lastUpdated": "2025-06-17T21:52:01.927272",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -1855,7 +1855,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CAX21 (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-17T21:49:59.197362",
+    "lastUpdated": "2025-06-17T21:52:01.927272",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -1957,7 +1957,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CAX31 (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-17T21:49:59.197367",
+    "lastUpdated": "2025-06-17T21:52:01.927276",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -2059,7 +2059,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CAX31 (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-17T21:49:59.197367",
+    "lastUpdated": "2025-06-17T21:52:01.927276",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -2161,7 +2161,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CAX41 (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-17T21:49:59.197371",
+    "lastUpdated": "2025-06-17T21:52:01.927281",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -2263,7 +2263,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CAX41 (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-17T21:49:59.197371",
+    "lastUpdated": "2025-06-17T21:52:01.927281",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -2368,7 +2368,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX13 Dedicated CPU (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-17T21:49:59.197376",
+    "lastUpdated": "2025-06-17T21:52:01.927285",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -2521,7 +2521,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX13 Dedicated CPU (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-17T21:49:59.197376",
+    "lastUpdated": "2025-06-17T21:52:01.927285",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -2674,7 +2674,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX23 Dedicated CPU (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-17T21:49:59.197380",
+    "lastUpdated": "2025-06-17T21:52:01.927290",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -2827,7 +2827,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX23 Dedicated CPU (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-17T21:49:59.197380",
+    "lastUpdated": "2025-06-17T21:52:01.927290",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -2980,7 +2980,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX33 Dedicated CPU (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-17T21:49:59.197387",
+    "lastUpdated": "2025-06-17T21:52:01.927296",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -3133,7 +3133,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX33 Dedicated CPU (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-17T21:49:59.197387",
+    "lastUpdated": "2025-06-17T21:52:01.927296",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -3286,7 +3286,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX43 Dedicated CPU (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-17T21:49:59.197393",
+    "lastUpdated": "2025-06-17T21:52:01.927301",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -3439,7 +3439,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX43 Dedicated CPU (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-17T21:49:59.197393",
+    "lastUpdated": "2025-06-17T21:52:01.927301",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -3592,7 +3592,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX53 Dedicated CPU (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-17T21:49:59.197397",
+    "lastUpdated": "2025-06-17T21:52:01.927306",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -3745,7 +3745,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX53 Dedicated CPU (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-17T21:49:59.197397",
+    "lastUpdated": "2025-06-17T21:52:01.927306",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -3898,7 +3898,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX63 Dedicated CPU (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-17T21:49:59.197401",
+    "lastUpdated": "2025-06-17T21:52:01.927311",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -4051,7 +4051,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX63 Dedicated CPU (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-17T21:49:59.197401",
+    "lastUpdated": "2025-06-17T21:52:01.927311",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -4201,7 +4201,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CX22 (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-17T21:49:59.197406",
+    "lastUpdated": "2025-06-17T21:52:01.927318",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -4303,7 +4303,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CX22 (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-17T21:49:59.197406",
+    "lastUpdated": "2025-06-17T21:52:01.927318",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -4405,7 +4405,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CX32 (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-17T21:49:59.197415",
+    "lastUpdated": "2025-06-17T21:52:01.927326",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -4507,7 +4507,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CX32 (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-17T21:49:59.197415",
+    "lastUpdated": "2025-06-17T21:52:01.927326",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -4609,7 +4609,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CX42 (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-17T21:49:59.197419",
+    "lastUpdated": "2025-06-17T21:52:01.927330",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -4711,7 +4711,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CX42 (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-17T21:49:59.197419",
+    "lastUpdated": "2025-06-17T21:52:01.927330",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -4813,7 +4813,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CX52 (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-17T21:49:59.197423",
+    "lastUpdated": "2025-06-17T21:52:01.927335",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -4915,7 +4915,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CX52 (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-17T21:49:59.197423",
+    "lastUpdated": "2025-06-17T21:52:01.927335",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -5018,7 +5018,7 @@
     "deprecated": null,
     "source": "hetzner_cloud_api",
     "description": "LB11",
-    "lastUpdated": "2025-06-17T21:49:59.651422",
+    "lastUpdated": "2025-06-17T21:52:02.305060",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -5162,7 +5162,7 @@
     "deprecated": null,
     "source": "hetzner_cloud_api",
     "description": "LB21",
-    "lastUpdated": "2025-06-17T21:49:59.651439",
+    "lastUpdated": "2025-06-17T21:52:02.305072",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -5306,7 +5306,7 @@
     "deprecated": null,
     "source": "hetzner_cloud_api",
     "description": "LB31",
-    "lastUpdated": "2025-06-17T21:49:59.651446",
+    "lastUpdated": "2025-06-17T21:52:02.305076",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
