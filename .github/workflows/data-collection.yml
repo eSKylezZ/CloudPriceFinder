@@ -177,8 +177,8 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         
-        # Add data and built site
-        git add data/ dist/
+        # Add data and built site (force add in case of gitignore cache)
+        git add -f data/ dist/ || git add data/ dist/
         
         if git diff --cached --quiet; then
           echo "📊 No changes to commit"

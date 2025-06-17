@@ -313,7 +313,7 @@ class HetznerCloudCollector:
         processed_services = []
         
         # Process volume pricing
-        if 'volume' in pricing_data:
+        if 'volume' in pricing_data and isinstance(pricing_data['volume'], list):
             for price_entry in pricing_data['volume']:
                 try:
                     location = price_entry.get('location')
@@ -345,7 +345,7 @@ class HetznerCloudCollector:
                     logger.error(f"Error processing volume pricing: {e}")
         
         # Process floating IP pricing
-        if 'floating_ip' in pricing_data:
+        if 'floating_ip' in pricing_data and isinstance(pricing_data['floating_ip'], list):
             for price_entry in pricing_data['floating_ip']:
                 try:
                     location = price_entry.get('location')
