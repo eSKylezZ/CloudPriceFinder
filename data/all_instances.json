@@ -1,0 +1,2857 @@
+[
+  {
+    "platform": "cloud",
+    "type": "cloud-server",
+    "instanceType": "cpx11",
+    "vCPU": 2,
+    "memoryGiB": 2.0,
+    "diskType": "local",
+    "diskSizeGB": 40,
+    "priceEUR_hourly_net": 0.0063,
+    "priceEUR_monthly_net": 3.85,
+    "cpuType": "shared",
+    "architecture": "x86",
+    "regions": [
+      "fsn1",
+      "nbg1",
+      "hel1",
+      "sin",
+      "ash",
+      "hil"
+    ],
+    "deprecated": false,
+    "source": "hetzner_cloud_api",
+    "description": "CPX 11",
+    "lastUpdated": "2025-06-17T21:36:10.469256",
+    "hetzner_metadata": {
+      "platform": "cloud",
+      "apiSource": "cloud_api",
+      "serviceCategory": "compute"
+    },
+    "raw": {
+      "id": 22,
+      "name": "cpx11",
+      "description": "CPX 11",
+      "cores": 2,
+      "memory": 2.0,
+      "disk": 40,
+      "deprecated": false,
+      "prices": [
+        {
+          "location": "fsn1",
+          "price_hourly": {
+            "net": "0.0063000000",
+            "gross": "0.0075600000000000"
+          },
+          "price_monthly": {
+            "net": "3.8500000000",
+            "gross": "4.6200000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "nbg1",
+          "price_hourly": {
+            "net": "0.0063000000",
+            "gross": "0.0075600000000000"
+          },
+          "price_monthly": {
+            "net": "3.8500000000",
+            "gross": "4.6200000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "hel1",
+          "price_hourly": {
+            "net": "0.0063000000",
+            "gross": "0.0075600000000000"
+          },
+          "price_monthly": {
+            "net": "3.8500000000",
+            "gross": "4.6200000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "sin",
+          "price_hourly": {
+            "net": "0.0119000000",
+            "gross": "0.0142800000000000"
+          },
+          "price_monthly": {
+            "net": "7.4000000000",
+            "gross": "8.8800000000000000"
+          },
+          "included_traffic": 1099511627776,
+          "price_per_tb_traffic": {
+            "net": "7.4000000000",
+            "gross": "8.8800000000000000"
+          }
+        },
+        {
+          "location": "ash",
+          "price_hourly": {
+            "net": "0.0072000000",
+            "gross": "0.0086400000000000"
+          },
+          "price_monthly": {
+            "net": "4.4900000000",
+            "gross": "5.3880000000000000"
+          },
+          "included_traffic": 1099511627776,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "hil",
+          "price_hourly": {
+            "net": "0.0072000000",
+            "gross": "0.0086400000000000"
+          },
+          "price_monthly": {
+            "net": "4.4900000000",
+            "gross": "5.3880000000000000"
+          },
+          "included_traffic": 1099511627776,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        }
+      ],
+      "storage_type": "local",
+      "cpu_type": "shared",
+      "architecture": "x86",
+      "deprecation": null
+    },
+    "provider": "hetzner",
+    "priceUSD_hourly": 0.00693,
+    "priceUSD_monthly": 4.24,
+    "originalPrice": {
+      "hourly": 0.0063,
+      "monthly": 3.85,
+      "currency": "EUR"
+    }
+  },
+  {
+    "platform": "cloud",
+    "type": "cloud-server",
+    "instanceType": "cpx21",
+    "vCPU": 3,
+    "memoryGiB": 4.0,
+    "diskType": "local",
+    "diskSizeGB": 80,
+    "priceEUR_hourly_net": 0.0112,
+    "priceEUR_monthly_net": 7.05,
+    "cpuType": "shared",
+    "architecture": "x86",
+    "regions": [
+      "fsn1",
+      "nbg1",
+      "hel1",
+      "sin",
+      "ash",
+      "hil"
+    ],
+    "deprecated": false,
+    "source": "hetzner_cloud_api",
+    "description": "CPX 21",
+    "lastUpdated": "2025-06-17T21:36:10.469270",
+    "hetzner_metadata": {
+      "platform": "cloud",
+      "apiSource": "cloud_api",
+      "serviceCategory": "compute"
+    },
+    "raw": {
+      "id": 23,
+      "name": "cpx21",
+      "description": "CPX 21",
+      "cores": 3,
+      "memory": 4.0,
+      "disk": 80,
+      "deprecated": false,
+      "prices": [
+        {
+          "location": "fsn1",
+          "price_hourly": {
+            "net": "0.0112000000",
+            "gross": "0.0134400000000000"
+          },
+          "price_monthly": {
+            "net": "7.0500000000",
+            "gross": "8.4600000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "nbg1",
+          "price_hourly": {
+            "net": "0.0112000000",
+            "gross": "0.0134400000000000"
+          },
+          "price_monthly": {
+            "net": "7.0500000000",
+            "gross": "8.4600000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "hel1",
+          "price_hourly": {
+            "net": "0.0112000000",
+            "gross": "0.0134400000000000"
+          },
+          "price_monthly": {
+            "net": "7.0500000000",
+            "gross": "8.4600000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "sin",
+          "price_hourly": {
+            "net": "0.0226000000",
+            "gross": "0.0271200000000000"
+          },
+          "price_monthly": {
+            "net": "14.1000000000",
+            "gross": "16.9200000000000000"
+          },
+          "included_traffic": 2199023255552,
+          "price_per_tb_traffic": {
+            "net": "7.4000000000",
+            "gross": "8.8800000000000000"
+          }
+        },
+        {
+          "location": "ash",
+          "price_hourly": {
+            "net": "0.0145000000",
+            "gross": "0.0174000000000000"
+          },
+          "price_monthly": {
+            "net": "8.9900000000",
+            "gross": "10.7880000000000000"
+          },
+          "included_traffic": 2199023255552,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "hil",
+          "price_hourly": {
+            "net": "0.0145000000",
+            "gross": "0.0174000000000000"
+          },
+          "price_monthly": {
+            "net": "8.9900000000",
+            "gross": "10.7880000000000000"
+          },
+          "included_traffic": 2199023255552,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        }
+      ],
+      "storage_type": "local",
+      "cpu_type": "shared",
+      "architecture": "x86",
+      "deprecation": null
+    },
+    "provider": "hetzner",
+    "priceUSD_hourly": 0.01232,
+    "priceUSD_monthly": 7.76,
+    "originalPrice": {
+      "hourly": 0.0112,
+      "monthly": 7.05,
+      "currency": "EUR"
+    }
+  },
+  {
+    "platform": "cloud",
+    "type": "cloud-server",
+    "instanceType": "cpx31",
+    "vCPU": 4,
+    "memoryGiB": 8.0,
+    "diskType": "local",
+    "diskSizeGB": 160,
+    "priceEUR_hourly_net": 0.0211,
+    "priceEUR_monthly_net": 13.1,
+    "cpuType": "shared",
+    "architecture": "x86",
+    "regions": [
+      "fsn1",
+      "nbg1",
+      "hel1",
+      "sin",
+      "ash",
+      "hil"
+    ],
+    "deprecated": false,
+    "source": "hetzner_cloud_api",
+    "description": "CPX 31",
+    "lastUpdated": "2025-06-17T21:36:10.469277",
+    "hetzner_metadata": {
+      "platform": "cloud",
+      "apiSource": "cloud_api",
+      "serviceCategory": "compute"
+    },
+    "raw": {
+      "id": 24,
+      "name": "cpx31",
+      "description": "CPX 31",
+      "cores": 4,
+      "memory": 8.0,
+      "disk": 160,
+      "deprecated": false,
+      "prices": [
+        {
+          "location": "fsn1",
+          "price_hourly": {
+            "net": "0.0211000000",
+            "gross": "0.0253200000000000"
+          },
+          "price_monthly": {
+            "net": "13.1000000000",
+            "gross": "15.7200000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "nbg1",
+          "price_hourly": {
+            "net": "0.0211000000",
+            "gross": "0.0253200000000000"
+          },
+          "price_monthly": {
+            "net": "13.1000000000",
+            "gross": "15.7200000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "hel1",
+          "price_hourly": {
+            "net": "0.0211000000",
+            "gross": "0.0253200000000000"
+          },
+          "price_monthly": {
+            "net": "13.1000000000",
+            "gross": "15.7200000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "sin",
+          "price_hourly": {
+            "net": "0.0397000000",
+            "gross": "0.0476400000000000"
+          },
+          "price_monthly": {
+            "net": "24.8000000000",
+            "gross": "29.7600000000000000"
+          },
+          "included_traffic": 3298534883328,
+          "price_per_tb_traffic": {
+            "net": "7.4000000000",
+            "gross": "8.8800000000000000"
+          }
+        },
+        {
+          "location": "ash",
+          "price_hourly": {
+            "net": "0.0257000000",
+            "gross": "0.0308400000000000"
+          },
+          "price_monthly": {
+            "net": "15.9900000000",
+            "gross": "19.1880000000000000"
+          },
+          "included_traffic": 3298534883328,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "hil",
+          "price_hourly": {
+            "net": "0.0257000000",
+            "gross": "0.0308400000000000"
+          },
+          "price_monthly": {
+            "net": "15.9900000000",
+            "gross": "19.1880000000000000"
+          },
+          "included_traffic": 3298534883328,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        }
+      ],
+      "storage_type": "local",
+      "cpu_type": "shared",
+      "architecture": "x86",
+      "deprecation": null
+    },
+    "provider": "hetzner",
+    "priceUSD_hourly": 0.02321,
+    "priceUSD_monthly": 14.41,
+    "originalPrice": {
+      "hourly": 0.0211,
+      "monthly": 13.1,
+      "currency": "EUR"
+    }
+  },
+  {
+    "platform": "cloud",
+    "type": "cloud-server",
+    "instanceType": "cpx41",
+    "vCPU": 8,
+    "memoryGiB": 16.0,
+    "diskType": "local",
+    "diskSizeGB": 240,
+    "priceEUR_hourly_net": 0.0409,
+    "priceEUR_monthly_net": 24.7,
+    "cpuType": "shared",
+    "architecture": "x86",
+    "regions": [
+      "fsn1",
+      "nbg1",
+      "hel1",
+      "sin",
+      "ash",
+      "hil"
+    ],
+    "deprecated": false,
+    "source": "hetzner_cloud_api",
+    "description": "CPX 41",
+    "lastUpdated": "2025-06-17T21:36:10.469281",
+    "hetzner_metadata": {
+      "platform": "cloud",
+      "apiSource": "cloud_api",
+      "serviceCategory": "compute"
+    },
+    "raw": {
+      "id": 25,
+      "name": "cpx41",
+      "description": "CPX 41",
+      "cores": 8,
+      "memory": 16.0,
+      "disk": 240,
+      "deprecated": false,
+      "prices": [
+        {
+          "location": "fsn1",
+          "price_hourly": {
+            "net": "0.0409000000",
+            "gross": "0.0490800000000000"
+          },
+          "price_monthly": {
+            "net": "24.7000000000",
+            "gross": "29.6400000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "nbg1",
+          "price_hourly": {
+            "net": "0.0409000000",
+            "gross": "0.0490800000000000"
+          },
+          "price_monthly": {
+            "net": "24.7000000000",
+            "gross": "29.6400000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "hel1",
+          "price_hourly": {
+            "net": "0.0409000000",
+            "gross": "0.0490800000000000"
+          },
+          "price_monthly": {
+            "net": "24.7000000000",
+            "gross": "29.6400000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "sin",
+          "price_hourly": {
+            "net": "0.0683000000",
+            "gross": "0.0819600000000000"
+          },
+          "price_monthly": {
+            "net": "42.6000000000",
+            "gross": "51.1200000000000000"
+          },
+          "included_traffic": 4398046511104,
+          "price_per_tb_traffic": {
+            "net": "7.4000000000",
+            "gross": "8.8800000000000000"
+          }
+        },
+        {
+          "location": "ash",
+          "price_hourly": {
+            "net": "0.0481000000",
+            "gross": "0.0577200000000000"
+          },
+          "price_monthly": {
+            "net": "29.9900000000",
+            "gross": "35.9880000000000000"
+          },
+          "included_traffic": 4398046511104,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "hil",
+          "price_hourly": {
+            "net": "0.0481000000",
+            "gross": "0.0577200000000000"
+          },
+          "price_monthly": {
+            "net": "29.9900000000",
+            "gross": "35.9880000000000000"
+          },
+          "included_traffic": 4398046511104,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        }
+      ],
+      "storage_type": "local",
+      "cpu_type": "shared",
+      "architecture": "x86",
+      "deprecation": null
+    },
+    "provider": "hetzner",
+    "priceUSD_hourly": 0.04499,
+    "priceUSD_monthly": 27.17,
+    "originalPrice": {
+      "hourly": 0.0409,
+      "monthly": 24.7,
+      "currency": "EUR"
+    }
+  },
+  {
+    "platform": "cloud",
+    "type": "cloud-server",
+    "instanceType": "cpx51",
+    "vCPU": 16,
+    "memoryGiB": 32.0,
+    "diskType": "local",
+    "diskSizeGB": 360,
+    "priceEUR_hourly_net": 0.0872,
+    "priceEUR_monthly_net": 54.4,
+    "cpuType": "shared",
+    "architecture": "x86",
+    "regions": [
+      "fsn1",
+      "nbg1",
+      "hel1",
+      "sin",
+      "ash",
+      "hil"
+    ],
+    "deprecated": false,
+    "source": "hetzner_cloud_api",
+    "description": "CPX 51",
+    "lastUpdated": "2025-06-17T21:36:10.469284",
+    "hetzner_metadata": {
+      "platform": "cloud",
+      "apiSource": "cloud_api",
+      "serviceCategory": "compute"
+    },
+    "raw": {
+      "id": 26,
+      "name": "cpx51",
+      "description": "CPX 51",
+      "cores": 16,
+      "memory": 32.0,
+      "disk": 360,
+      "deprecated": false,
+      "prices": [
+        {
+          "location": "fsn1",
+          "price_hourly": {
+            "net": "0.0872000000",
+            "gross": "0.1046400000000000"
+          },
+          "price_monthly": {
+            "net": "54.4000000000",
+            "gross": "65.2800000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "nbg1",
+          "price_hourly": {
+            "net": "0.0872000000",
+            "gross": "0.1046400000000000"
+          },
+          "price_monthly": {
+            "net": "54.4000000000",
+            "gross": "65.2800000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "hel1",
+          "price_hourly": {
+            "net": "0.0872000000",
+            "gross": "0.1046400000000000"
+          },
+          "price_monthly": {
+            "net": "54.4000000000",
+            "gross": "65.2800000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "sin",
+          "price_hourly": {
+            "net": "0.1232000000",
+            "gross": "0.1478400000000000"
+          },
+          "price_monthly": {
+            "net": "76.9000000000",
+            "gross": "92.2800000000000000"
+          },
+          "included_traffic": 5497558138880,
+          "price_per_tb_traffic": {
+            "net": "7.4000000000",
+            "gross": "8.8800000000000000"
+          }
+        },
+        {
+          "location": "ash",
+          "price_hourly": {
+            "net": "0.0962000000",
+            "gross": "0.1154400000000000"
+          },
+          "price_monthly": {
+            "net": "59.9900000000",
+            "gross": "71.9880000000000000"
+          },
+          "included_traffic": 5497558138880,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "hil",
+          "price_hourly": {
+            "net": "0.0962000000",
+            "gross": "0.1154400000000000"
+          },
+          "price_monthly": {
+            "net": "59.9900000000",
+            "gross": "71.9880000000000000"
+          },
+          "included_traffic": 5497558138880,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        }
+      ],
+      "storage_type": "local",
+      "cpu_type": "shared",
+      "architecture": "x86",
+      "deprecation": null
+    },
+    "provider": "hetzner",
+    "priceUSD_hourly": 0.09592,
+    "priceUSD_monthly": 59.84,
+    "originalPrice": {
+      "hourly": 0.0872,
+      "monthly": 54.4,
+      "currency": "EUR"
+    }
+  },
+  {
+    "platform": "cloud",
+    "type": "cloud-server",
+    "instanceType": "cax11",
+    "vCPU": 2,
+    "memoryGiB": 4.0,
+    "diskType": "local",
+    "diskSizeGB": 40,
+    "priceEUR_hourly_net": 0.0053,
+    "priceEUR_monthly_net": 3.29,
+    "cpuType": "shared",
+    "architecture": "arm",
+    "regions": [
+      "fsn1",
+      "nbg1",
+      "hel1"
+    ],
+    "deprecated": false,
+    "source": "hetzner_cloud_api",
+    "description": "CAX11",
+    "lastUpdated": "2025-06-17T21:36:10.469287",
+    "hetzner_metadata": {
+      "platform": "cloud",
+      "apiSource": "cloud_api",
+      "serviceCategory": "compute"
+    },
+    "raw": {
+      "id": 45,
+      "name": "cax11",
+      "description": "CAX11",
+      "cores": 2,
+      "memory": 4.0,
+      "disk": 40,
+      "deprecated": false,
+      "prices": [
+        {
+          "location": "fsn1",
+          "price_hourly": {
+            "net": "0.0053000000",
+            "gross": "0.0063600000000000"
+          },
+          "price_monthly": {
+            "net": "3.2900000000",
+            "gross": "3.9480000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "nbg1",
+          "price_hourly": {
+            "net": "0.0053000000",
+            "gross": "0.0063600000000000"
+          },
+          "price_monthly": {
+            "net": "3.2900000000",
+            "gross": "3.9480000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "hel1",
+          "price_hourly": {
+            "net": "0.0053000000",
+            "gross": "0.0063600000000000"
+          },
+          "price_monthly": {
+            "net": "3.2900000000",
+            "gross": "3.9480000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        }
+      ],
+      "storage_type": "local",
+      "cpu_type": "shared",
+      "architecture": "arm",
+      "deprecation": null
+    },
+    "provider": "hetzner",
+    "priceUSD_hourly": 0.00583,
+    "priceUSD_monthly": 3.62,
+    "originalPrice": {
+      "hourly": 0.0053,
+      "monthly": 3.29,
+      "currency": "EUR"
+    }
+  },
+  {
+    "platform": "cloud",
+    "type": "cloud-server",
+    "instanceType": "cax21",
+    "vCPU": 4,
+    "memoryGiB": 8.0,
+    "diskType": "local",
+    "diskSizeGB": 80,
+    "priceEUR_hourly_net": 0.0096,
+    "priceEUR_monthly_net": 5.99,
+    "cpuType": "shared",
+    "architecture": "arm",
+    "regions": [
+      "fsn1",
+      "nbg1",
+      "hel1"
+    ],
+    "deprecated": false,
+    "source": "hetzner_cloud_api",
+    "description": "CAX21",
+    "lastUpdated": "2025-06-17T21:36:10.469290",
+    "hetzner_metadata": {
+      "platform": "cloud",
+      "apiSource": "cloud_api",
+      "serviceCategory": "compute"
+    },
+    "raw": {
+      "id": 93,
+      "name": "cax21",
+      "description": "CAX21",
+      "cores": 4,
+      "memory": 8.0,
+      "disk": 80,
+      "deprecated": false,
+      "prices": [
+        {
+          "location": "fsn1",
+          "price_hourly": {
+            "net": "0.0096000000",
+            "gross": "0.0115200000000000"
+          },
+          "price_monthly": {
+            "net": "5.9900000000",
+            "gross": "7.1880000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "nbg1",
+          "price_hourly": {
+            "net": "0.0096000000",
+            "gross": "0.0115200000000000"
+          },
+          "price_monthly": {
+            "net": "5.9900000000",
+            "gross": "7.1880000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "hel1",
+          "price_hourly": {
+            "net": "0.0096000000",
+            "gross": "0.0115200000000000"
+          },
+          "price_monthly": {
+            "net": "5.9900000000",
+            "gross": "7.1880000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        }
+      ],
+      "storage_type": "local",
+      "cpu_type": "shared",
+      "architecture": "arm",
+      "deprecation": null
+    },
+    "provider": "hetzner",
+    "priceUSD_hourly": 0.01056,
+    "priceUSD_monthly": 6.59,
+    "originalPrice": {
+      "hourly": 0.0096,
+      "monthly": 5.99,
+      "currency": "EUR"
+    }
+  },
+  {
+    "platform": "cloud",
+    "type": "cloud-server",
+    "instanceType": "cax31",
+    "vCPU": 8,
+    "memoryGiB": 16.0,
+    "diskType": "local",
+    "diskSizeGB": 160,
+    "priceEUR_hourly_net": 0.0192,
+    "priceEUR_monthly_net": 11.99,
+    "cpuType": "shared",
+    "architecture": "arm",
+    "regions": [
+      "fsn1",
+      "nbg1",
+      "hel1"
+    ],
+    "deprecated": false,
+    "source": "hetzner_cloud_api",
+    "description": "CAX31",
+    "lastUpdated": "2025-06-17T21:36:10.469293",
+    "hetzner_metadata": {
+      "platform": "cloud",
+      "apiSource": "cloud_api",
+      "serviceCategory": "compute"
+    },
+    "raw": {
+      "id": 94,
+      "name": "cax31",
+      "description": "CAX31",
+      "cores": 8,
+      "memory": 16.0,
+      "disk": 160,
+      "deprecated": false,
+      "prices": [
+        {
+          "location": "fsn1",
+          "price_hourly": {
+            "net": "0.0192000000",
+            "gross": "0.0230400000000000"
+          },
+          "price_monthly": {
+            "net": "11.9900000000",
+            "gross": "14.3880000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "nbg1",
+          "price_hourly": {
+            "net": "0.0192000000",
+            "gross": "0.0230400000000000"
+          },
+          "price_monthly": {
+            "net": "11.9900000000",
+            "gross": "14.3880000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "hel1",
+          "price_hourly": {
+            "net": "0.0192000000",
+            "gross": "0.0230400000000000"
+          },
+          "price_monthly": {
+            "net": "11.9900000000",
+            "gross": "14.3880000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        }
+      ],
+      "storage_type": "local",
+      "cpu_type": "shared",
+      "architecture": "arm",
+      "deprecation": null
+    },
+    "provider": "hetzner",
+    "priceUSD_hourly": 0.02112,
+    "priceUSD_monthly": 13.19,
+    "originalPrice": {
+      "hourly": 0.0192,
+      "monthly": 11.99,
+      "currency": "EUR"
+    }
+  },
+  {
+    "platform": "cloud",
+    "type": "cloud-server",
+    "instanceType": "cax41",
+    "vCPU": 16,
+    "memoryGiB": 32.0,
+    "diskType": "local",
+    "diskSizeGB": 320,
+    "priceEUR_hourly_net": 0.0384,
+    "priceEUR_monthly_net": 23.99,
+    "cpuType": "shared",
+    "architecture": "arm",
+    "regions": [
+      "fsn1",
+      "nbg1",
+      "hel1"
+    ],
+    "deprecated": false,
+    "source": "hetzner_cloud_api",
+    "description": "CAX41",
+    "lastUpdated": "2025-06-17T21:36:10.469295",
+    "hetzner_metadata": {
+      "platform": "cloud",
+      "apiSource": "cloud_api",
+      "serviceCategory": "compute"
+    },
+    "raw": {
+      "id": 95,
+      "name": "cax41",
+      "description": "CAX41",
+      "cores": 16,
+      "memory": 32.0,
+      "disk": 320,
+      "deprecated": false,
+      "prices": [
+        {
+          "location": "fsn1",
+          "price_hourly": {
+            "net": "0.0384000000",
+            "gross": "0.0460800000000000"
+          },
+          "price_monthly": {
+            "net": "23.9900000000",
+            "gross": "28.7880000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "nbg1",
+          "price_hourly": {
+            "net": "0.0384000000",
+            "gross": "0.0460800000000000"
+          },
+          "price_monthly": {
+            "net": "23.9900000000",
+            "gross": "28.7880000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "hel1",
+          "price_hourly": {
+            "net": "0.0384000000",
+            "gross": "0.0460800000000000"
+          },
+          "price_monthly": {
+            "net": "23.9900000000",
+            "gross": "28.7880000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        }
+      ],
+      "storage_type": "local",
+      "cpu_type": "shared",
+      "architecture": "arm",
+      "deprecation": null
+    },
+    "provider": "hetzner",
+    "priceUSD_hourly": 0.04224,
+    "priceUSD_monthly": 26.39,
+    "originalPrice": {
+      "hourly": 0.0384,
+      "monthly": 23.99,
+      "currency": "EUR"
+    }
+  },
+  {
+    "platform": "cloud",
+    "type": "cloud-server",
+    "instanceType": "ccx13",
+    "vCPU": 2,
+    "memoryGiB": 8.0,
+    "diskType": "local",
+    "diskSizeGB": 80,
+    "priceEUR_hourly_net": 0.0192,
+    "priceEUR_monthly_net": 11.99,
+    "cpuType": "dedicated",
+    "architecture": "x86",
+    "regions": [
+      "fsn1",
+      "nbg1",
+      "hel1",
+      "sin",
+      "ash",
+      "hil"
+    ],
+    "deprecated": false,
+    "source": "hetzner_cloud_api",
+    "description": "CCX13 Dedicated CPU",
+    "lastUpdated": "2025-06-17T21:36:10.469298",
+    "hetzner_metadata": {
+      "platform": "cloud",
+      "apiSource": "cloud_api",
+      "serviceCategory": "compute"
+    },
+    "raw": {
+      "id": 96,
+      "name": "ccx13",
+      "description": "CCX13 Dedicated CPU",
+      "cores": 2,
+      "memory": 8.0,
+      "disk": 80,
+      "deprecated": false,
+      "prices": [
+        {
+          "location": "fsn1",
+          "price_hourly": {
+            "net": "0.0192000000",
+            "gross": "0.0230400000000000"
+          },
+          "price_monthly": {
+            "net": "11.9900000000",
+            "gross": "14.3880000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "nbg1",
+          "price_hourly": {
+            "net": "0.0192000000",
+            "gross": "0.0230400000000000"
+          },
+          "price_monthly": {
+            "net": "11.9900000000",
+            "gross": "14.3880000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "hel1",
+          "price_hourly": {
+            "net": "0.0192000000",
+            "gross": "0.0230400000000000"
+          },
+          "price_monthly": {
+            "net": "11.9900000000",
+            "gross": "14.3880000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "sin",
+          "price_hourly": {
+            "net": "0.0337000000",
+            "gross": "0.0404400000000000"
+          },
+          "price_monthly": {
+            "net": "21.0000000000",
+            "gross": "25.2000000000000000"
+          },
+          "included_traffic": 1099511627776,
+          "price_per_tb_traffic": {
+            "net": "7.4000000000",
+            "gross": "8.8800000000000000"
+          }
+        },
+        {
+          "location": "ash",
+          "price_hourly": {
+            "net": "0.0209000000",
+            "gross": "0.0250800000000000"
+          },
+          "price_monthly": {
+            "net": "12.9900000000",
+            "gross": "15.5880000000000000"
+          },
+          "included_traffic": 1099511627776,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "hil",
+          "price_hourly": {
+            "net": "0.0209000000",
+            "gross": "0.0250800000000000"
+          },
+          "price_monthly": {
+            "net": "12.9900000000",
+            "gross": "15.5880000000000000"
+          },
+          "included_traffic": 1099511627776,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        }
+      ],
+      "storage_type": "local",
+      "cpu_type": "dedicated",
+      "architecture": "x86",
+      "deprecation": null
+    },
+    "provider": "hetzner",
+    "priceUSD_hourly": 0.02112,
+    "priceUSD_monthly": 13.19,
+    "originalPrice": {
+      "hourly": 0.0192,
+      "monthly": 11.99,
+      "currency": "EUR"
+    }
+  },
+  {
+    "platform": "cloud",
+    "type": "cloud-server",
+    "instanceType": "ccx23",
+    "vCPU": 4,
+    "memoryGiB": 16.0,
+    "diskType": "local",
+    "diskSizeGB": 160,
+    "priceEUR_hourly_net": 0.0384,
+    "priceEUR_monthly_net": 23.99,
+    "cpuType": "dedicated",
+    "architecture": "x86",
+    "regions": [
+      "fsn1",
+      "nbg1",
+      "hel1",
+      "sin",
+      "ash",
+      "hil"
+    ],
+    "deprecated": false,
+    "source": "hetzner_cloud_api",
+    "description": "CCX23 Dedicated CPU",
+    "lastUpdated": "2025-06-17T21:36:10.469301",
+    "hetzner_metadata": {
+      "platform": "cloud",
+      "apiSource": "cloud_api",
+      "serviceCategory": "compute"
+    },
+    "raw": {
+      "id": 97,
+      "name": "ccx23",
+      "description": "CCX23 Dedicated CPU",
+      "cores": 4,
+      "memory": 16.0,
+      "disk": 160,
+      "deprecated": false,
+      "prices": [
+        {
+          "location": "fsn1",
+          "price_hourly": {
+            "net": "0.0384000000",
+            "gross": "0.0460800000000000"
+          },
+          "price_monthly": {
+            "net": "23.9900000000",
+            "gross": "28.7880000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "nbg1",
+          "price_hourly": {
+            "net": "0.0384000000",
+            "gross": "0.0460800000000000"
+          },
+          "price_monthly": {
+            "net": "23.9900000000",
+            "gross": "28.7880000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "hel1",
+          "price_hourly": {
+            "net": "0.0384000000",
+            "gross": "0.0460800000000000"
+          },
+          "price_monthly": {
+            "net": "23.9900000000",
+            "gross": "28.7880000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "sin",
+          "price_hourly": {
+            "net": "0.0631000000",
+            "gross": "0.0757200000000000"
+          },
+          "price_monthly": {
+            "net": "39.4000000000",
+            "gross": "47.2800000000000000"
+          },
+          "included_traffic": 2199023255552,
+          "price_per_tb_traffic": {
+            "net": "7.4000000000",
+            "gross": "8.8800000000000000"
+          }
+        },
+        {
+          "location": "ash",
+          "price_hourly": {
+            "net": "0.0417000000",
+            "gross": "0.0500400000000000"
+          },
+          "price_monthly": {
+            "net": "25.9900000000",
+            "gross": "31.1880000000000000"
+          },
+          "included_traffic": 2199023255552,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "hil",
+          "price_hourly": {
+            "net": "0.0417000000",
+            "gross": "0.0500400000000000"
+          },
+          "price_monthly": {
+            "net": "25.9900000000",
+            "gross": "31.1880000000000000"
+          },
+          "included_traffic": 2199023255552,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        }
+      ],
+      "storage_type": "local",
+      "cpu_type": "dedicated",
+      "architecture": "x86",
+      "deprecation": null
+    },
+    "provider": "hetzner",
+    "priceUSD_hourly": 0.04224,
+    "priceUSD_monthly": 26.39,
+    "originalPrice": {
+      "hourly": 0.0384,
+      "monthly": 23.99,
+      "currency": "EUR"
+    }
+  },
+  {
+    "platform": "cloud",
+    "type": "cloud-server",
+    "instanceType": "ccx33",
+    "vCPU": 8,
+    "memoryGiB": 32.0,
+    "diskType": "local",
+    "diskSizeGB": 240,
+    "priceEUR_hourly_net": 0.0769,
+    "priceEUR_monthly_net": 47.99,
+    "cpuType": "dedicated",
+    "architecture": "x86",
+    "regions": [
+      "fsn1",
+      "nbg1",
+      "hel1",
+      "sin",
+      "ash",
+      "hil"
+    ],
+    "deprecated": false,
+    "source": "hetzner_cloud_api",
+    "description": "CCX33 Dedicated CPU",
+    "lastUpdated": "2025-06-17T21:36:10.469304",
+    "hetzner_metadata": {
+      "platform": "cloud",
+      "apiSource": "cloud_api",
+      "serviceCategory": "compute"
+    },
+    "raw": {
+      "id": 98,
+      "name": "ccx33",
+      "description": "CCX33 Dedicated CPU",
+      "cores": 8,
+      "memory": 32.0,
+      "disk": 240,
+      "deprecated": false,
+      "prices": [
+        {
+          "location": "fsn1",
+          "price_hourly": {
+            "net": "0.0769000000",
+            "gross": "0.0922800000000000"
+          },
+          "price_monthly": {
+            "net": "47.9900000000",
+            "gross": "57.5880000000000000"
+          },
+          "included_traffic": 32985348833280,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "nbg1",
+          "price_hourly": {
+            "net": "0.0769000000",
+            "gross": "0.0922800000000000"
+          },
+          "price_monthly": {
+            "net": "47.9900000000",
+            "gross": "57.5880000000000000"
+          },
+          "included_traffic": 32985348833280,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "hel1",
+          "price_hourly": {
+            "net": "0.0769000000",
+            "gross": "0.0922800000000000"
+          },
+          "price_monthly": {
+            "net": "47.9900000000",
+            "gross": "57.5880000000000000"
+          },
+          "included_traffic": 32985348833280,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "sin",
+          "price_hourly": {
+            "net": "0.1192000000",
+            "gross": "0.1430400000000000"
+          },
+          "price_monthly": {
+            "net": "74.4000000000",
+            "gross": "89.2800000000000000"
+          },
+          "included_traffic": 3298534883328,
+          "price_per_tb_traffic": {
+            "net": "7.4000000000",
+            "gross": "8.8800000000000000"
+          }
+        },
+        {
+          "location": "ash",
+          "price_hourly": {
+            "net": "0.0802000000",
+            "gross": "0.0962400000000000"
+          },
+          "price_monthly": {
+            "net": "49.9900000000",
+            "gross": "59.9880000000000000"
+          },
+          "included_traffic": 3298534883328,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "hil",
+          "price_hourly": {
+            "net": "0.0802000000",
+            "gross": "0.0962400000000000"
+          },
+          "price_monthly": {
+            "net": "49.9900000000",
+            "gross": "59.9880000000000000"
+          },
+          "included_traffic": 3298534883328,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        }
+      ],
+      "storage_type": "local",
+      "cpu_type": "dedicated",
+      "architecture": "x86",
+      "deprecation": null
+    },
+    "provider": "hetzner",
+    "priceUSD_hourly": 0.08459,
+    "priceUSD_monthly": 52.79,
+    "originalPrice": {
+      "hourly": 0.0769,
+      "monthly": 47.99,
+      "currency": "EUR"
+    }
+  },
+  {
+    "platform": "cloud",
+    "type": "cloud-server",
+    "instanceType": "ccx43",
+    "vCPU": 16,
+    "memoryGiB": 64.0,
+    "diskType": "local",
+    "diskSizeGB": 360,
+    "priceEUR_hourly_net": 0.1538,
+    "priceEUR_monthly_net": 95.99,
+    "cpuType": "dedicated",
+    "architecture": "x86",
+    "regions": [
+      "fsn1",
+      "nbg1",
+      "hel1",
+      "sin",
+      "ash",
+      "hil"
+    ],
+    "deprecated": false,
+    "source": "hetzner_cloud_api",
+    "description": "CCX43 Dedicated CPU",
+    "lastUpdated": "2025-06-17T21:36:10.469308",
+    "hetzner_metadata": {
+      "platform": "cloud",
+      "apiSource": "cloud_api",
+      "serviceCategory": "compute"
+    },
+    "raw": {
+      "id": 99,
+      "name": "ccx43",
+      "description": "CCX43 Dedicated CPU",
+      "cores": 16,
+      "memory": 64.0,
+      "disk": 360,
+      "deprecated": false,
+      "prices": [
+        {
+          "location": "fsn1",
+          "price_hourly": {
+            "net": "0.1538000000",
+            "gross": "0.1845600000000000"
+          },
+          "price_monthly": {
+            "net": "95.9900000000",
+            "gross": "115.1880000000000000"
+          },
+          "included_traffic": 43980465111040,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "nbg1",
+          "price_hourly": {
+            "net": "0.1538000000",
+            "gross": "0.1845600000000000"
+          },
+          "price_monthly": {
+            "net": "95.9900000000",
+            "gross": "115.1880000000000000"
+          },
+          "included_traffic": 43980465111040,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "hel1",
+          "price_hourly": {
+            "net": "0.1538000000",
+            "gross": "0.1845600000000000"
+          },
+          "price_monthly": {
+            "net": "95.9900000000",
+            "gross": "115.1880000000000000"
+          },
+          "included_traffic": 43980465111040,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "sin",
+          "price_hourly": {
+            "net": "0.2196000000",
+            "gross": "0.2635200000000000"
+          },
+          "price_monthly": {
+            "net": "137.0000000000",
+            "gross": "164.4000000000000000"
+          },
+          "included_traffic": 4398046511104,
+          "price_per_tb_traffic": {
+            "net": "7.4000000000",
+            "gross": "8.8800000000000000"
+          }
+        },
+        {
+          "location": "ash",
+          "price_hourly": {
+            "net": "0.1603000000",
+            "gross": "0.1923600000000000"
+          },
+          "price_monthly": {
+            "net": "99.9900000000",
+            "gross": "119.9880000000000000"
+          },
+          "included_traffic": 4398046511104,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "hil",
+          "price_hourly": {
+            "net": "0.1603000000",
+            "gross": "0.1923600000000000"
+          },
+          "price_monthly": {
+            "net": "99.9900000000",
+            "gross": "119.9880000000000000"
+          },
+          "included_traffic": 4398046511104,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        }
+      ],
+      "storage_type": "local",
+      "cpu_type": "dedicated",
+      "architecture": "x86",
+      "deprecation": null
+    },
+    "provider": "hetzner",
+    "priceUSD_hourly": 0.16918,
+    "priceUSD_monthly": 105.59,
+    "originalPrice": {
+      "hourly": 0.1538,
+      "monthly": 95.99,
+      "currency": "EUR"
+    }
+  },
+  {
+    "platform": "cloud",
+    "type": "cloud-server",
+    "instanceType": "ccx53",
+    "vCPU": 32,
+    "memoryGiB": 128.0,
+    "diskType": "local",
+    "diskSizeGB": 600,
+    "priceEUR_hourly_net": 0.3077,
+    "priceEUR_monthly_net": 191.99,
+    "cpuType": "dedicated",
+    "architecture": "x86",
+    "regions": [
+      "fsn1",
+      "nbg1",
+      "hel1",
+      "sin",
+      "ash",
+      "hil"
+    ],
+    "deprecated": false,
+    "source": "hetzner_cloud_api",
+    "description": "CCX53 Dedicated CPU",
+    "lastUpdated": "2025-06-17T21:36:10.469311",
+    "hetzner_metadata": {
+      "platform": "cloud",
+      "apiSource": "cloud_api",
+      "serviceCategory": "compute"
+    },
+    "raw": {
+      "id": 100,
+      "name": "ccx53",
+      "description": "CCX53 Dedicated CPU",
+      "cores": 32,
+      "memory": 128.0,
+      "disk": 600,
+      "deprecated": false,
+      "prices": [
+        {
+          "location": "fsn1",
+          "price_hourly": {
+            "net": "0.3077000000",
+            "gross": "0.3692400000000000"
+          },
+          "price_monthly": {
+            "net": "191.9900000000",
+            "gross": "230.3880000000000000"
+          },
+          "included_traffic": 54975581388800,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "nbg1",
+          "price_hourly": {
+            "net": "0.3077000000",
+            "gross": "0.3692400000000000"
+          },
+          "price_monthly": {
+            "net": "191.9900000000",
+            "gross": "230.3880000000000000"
+          },
+          "included_traffic": 54975581388800,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "hel1",
+          "price_hourly": {
+            "net": "0.3077000000",
+            "gross": "0.3692400000000000"
+          },
+          "price_monthly": {
+            "net": "191.9900000000",
+            "gross": "230.3880000000000000"
+          },
+          "included_traffic": 54975581388800,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "sin",
+          "price_hourly": {
+            "net": "0.4712000000",
+            "gross": "0.5654400000000000"
+          },
+          "price_monthly": {
+            "net": "294.0000000000",
+            "gross": "352.8000000000000000"
+          },
+          "included_traffic": 6597069766656,
+          "price_per_tb_traffic": {
+            "net": "7.4000000000",
+            "gross": "8.8800000000000000"
+          }
+        },
+        {
+          "location": "ash",
+          "price_hourly": {
+            "net": "0.3205000000",
+            "gross": "0.3846000000000000"
+          },
+          "price_monthly": {
+            "net": "199.9900000000",
+            "gross": "239.9880000000000000"
+          },
+          "included_traffic": 6597069766656,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "hil",
+          "price_hourly": {
+            "net": "0.3205000000",
+            "gross": "0.3846000000000000"
+          },
+          "price_monthly": {
+            "net": "199.9900000000",
+            "gross": "239.9880000000000000"
+          },
+          "included_traffic": 6597069766656,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        }
+      ],
+      "storage_type": "local",
+      "cpu_type": "dedicated",
+      "architecture": "x86",
+      "deprecation": null
+    },
+    "provider": "hetzner",
+    "priceUSD_hourly": 0.33847,
+    "priceUSD_monthly": 211.19,
+    "originalPrice": {
+      "hourly": 0.3077,
+      "monthly": 191.99,
+      "currency": "EUR"
+    }
+  },
+  {
+    "platform": "cloud",
+    "type": "cloud-server",
+    "instanceType": "ccx63",
+    "vCPU": 48,
+    "memoryGiB": 192.0,
+    "diskType": "local",
+    "diskSizeGB": 960,
+    "priceEUR_hourly_net": 0.4615,
+    "priceEUR_monthly_net": 287.99,
+    "cpuType": "dedicated",
+    "architecture": "x86",
+    "regions": [
+      "fsn1",
+      "nbg1",
+      "hel1",
+      "sin",
+      "ash",
+      "hil"
+    ],
+    "deprecated": false,
+    "source": "hetzner_cloud_api",
+    "description": "CCX63 Dedicated CPU",
+    "lastUpdated": "2025-06-17T21:36:10.469314",
+    "hetzner_metadata": {
+      "platform": "cloud",
+      "apiSource": "cloud_api",
+      "serviceCategory": "compute"
+    },
+    "raw": {
+      "id": 101,
+      "name": "ccx63",
+      "description": "CCX63 Dedicated CPU",
+      "cores": 48,
+      "memory": 192.0,
+      "disk": 960,
+      "deprecated": false,
+      "prices": [
+        {
+          "location": "fsn1",
+          "price_hourly": {
+            "net": "0.4615000000",
+            "gross": "0.5538000000000000"
+          },
+          "price_monthly": {
+            "net": "287.9900000000",
+            "gross": "345.5880000000000000"
+          },
+          "included_traffic": 65970697666560,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "nbg1",
+          "price_hourly": {
+            "net": "0.4615000000",
+            "gross": "0.5538000000000000"
+          },
+          "price_monthly": {
+            "net": "287.9900000000",
+            "gross": "345.5880000000000000"
+          },
+          "included_traffic": 65970697666560,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "hel1",
+          "price_hourly": {
+            "net": "0.4615000000",
+            "gross": "0.5538000000000000"
+          },
+          "price_monthly": {
+            "net": "287.9900000000",
+            "gross": "345.5880000000000000"
+          },
+          "included_traffic": 65970697666560,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "sin",
+          "price_hourly": {
+            "net": "0.7724000000",
+            "gross": "0.9268800000000000"
+          },
+          "price_monthly": {
+            "net": "482.0000000000",
+            "gross": "578.4000000000000000"
+          },
+          "included_traffic": 8796093022208,
+          "price_per_tb_traffic": {
+            "net": "7.4000000000",
+            "gross": "8.8800000000000000"
+          }
+        },
+        {
+          "location": "ash",
+          "price_hourly": {
+            "net": "0.4808000000",
+            "gross": "0.5769600000000000"
+          },
+          "price_monthly": {
+            "net": "299.9900000000",
+            "gross": "359.9880000000000000"
+          },
+          "included_traffic": 8796093022208,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "hil",
+          "price_hourly": {
+            "net": "0.4808000000",
+            "gross": "0.5769600000000000"
+          },
+          "price_monthly": {
+            "net": "299.9900000000",
+            "gross": "359.9880000000000000"
+          },
+          "included_traffic": 8796093022208,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        }
+      ],
+      "storage_type": "local",
+      "cpu_type": "dedicated",
+      "architecture": "x86",
+      "deprecation": null
+    },
+    "provider": "hetzner",
+    "priceUSD_hourly": 0.50765,
+    "priceUSD_monthly": 316.79,
+    "originalPrice": {
+      "hourly": 0.4615,
+      "monthly": 287.99,
+      "currency": "EUR"
+    }
+  },
+  {
+    "platform": "cloud",
+    "type": "cloud-server",
+    "instanceType": "cx22",
+    "vCPU": 2,
+    "memoryGiB": 4.0,
+    "diskType": "local",
+    "diskSizeGB": 40,
+    "priceEUR_hourly_net": 0.0052,
+    "priceEUR_monthly_net": 3.29,
+    "cpuType": "shared",
+    "architecture": "x86",
+    "regions": [
+      "fsn1",
+      "nbg1",
+      "hel1"
+    ],
+    "deprecated": false,
+    "source": "hetzner_cloud_api",
+    "description": "CX22",
+    "lastUpdated": "2025-06-17T21:36:10.469316",
+    "hetzner_metadata": {
+      "platform": "cloud",
+      "apiSource": "cloud_api",
+      "serviceCategory": "compute"
+    },
+    "raw": {
+      "id": 104,
+      "name": "cx22",
+      "description": "CX22",
+      "cores": 2,
+      "memory": 4.0,
+      "disk": 40,
+      "deprecated": false,
+      "prices": [
+        {
+          "location": "fsn1",
+          "price_hourly": {
+            "net": "0.0052000000",
+            "gross": "0.0062400000000000"
+          },
+          "price_monthly": {
+            "net": "3.2900000000",
+            "gross": "3.9480000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "nbg1",
+          "price_hourly": {
+            "net": "0.0052000000",
+            "gross": "0.0062400000000000"
+          },
+          "price_monthly": {
+            "net": "3.2900000000",
+            "gross": "3.9480000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "hel1",
+          "price_hourly": {
+            "net": "0.0052000000",
+            "gross": "0.0062400000000000"
+          },
+          "price_monthly": {
+            "net": "3.2900000000",
+            "gross": "3.9480000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        }
+      ],
+      "storage_type": "local",
+      "cpu_type": "shared",
+      "architecture": "x86",
+      "deprecation": null
+    },
+    "provider": "hetzner",
+    "priceUSD_hourly": 0.00572,
+    "priceUSD_monthly": 3.62,
+    "originalPrice": {
+      "hourly": 0.0052,
+      "monthly": 3.29,
+      "currency": "EUR"
+    }
+  },
+  {
+    "platform": "cloud",
+    "type": "cloud-server",
+    "instanceType": "cx32",
+    "vCPU": 4,
+    "memoryGiB": 8.0,
+    "diskType": "local",
+    "diskSizeGB": 80,
+    "priceEUR_hourly_net": 0.0105,
+    "priceEUR_monthly_net": 6.3,
+    "cpuType": "shared",
+    "architecture": "x86",
+    "regions": [
+      "fsn1",
+      "nbg1",
+      "hel1"
+    ],
+    "deprecated": false,
+    "source": "hetzner_cloud_api",
+    "description": "CX32",
+    "lastUpdated": "2025-06-17T21:36:10.469319",
+    "hetzner_metadata": {
+      "platform": "cloud",
+      "apiSource": "cloud_api",
+      "serviceCategory": "compute"
+    },
+    "raw": {
+      "id": 105,
+      "name": "cx32",
+      "description": "CX32",
+      "cores": 4,
+      "memory": 8.0,
+      "disk": 80,
+      "deprecated": false,
+      "prices": [
+        {
+          "location": "fsn1",
+          "price_hourly": {
+            "net": "0.0105000000",
+            "gross": "0.0126000000000000"
+          },
+          "price_monthly": {
+            "net": "6.3000000000",
+            "gross": "7.5600000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "nbg1",
+          "price_hourly": {
+            "net": "0.0105000000",
+            "gross": "0.0126000000000000"
+          },
+          "price_monthly": {
+            "net": "6.3000000000",
+            "gross": "7.5600000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "hel1",
+          "price_hourly": {
+            "net": "0.0105000000",
+            "gross": "0.0126000000000000"
+          },
+          "price_monthly": {
+            "net": "6.3000000000",
+            "gross": "7.5600000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        }
+      ],
+      "storage_type": "local",
+      "cpu_type": "shared",
+      "architecture": "x86",
+      "deprecation": null
+    },
+    "provider": "hetzner",
+    "priceUSD_hourly": 0.01155,
+    "priceUSD_monthly": 6.93,
+    "originalPrice": {
+      "hourly": 0.0105,
+      "monthly": 6.3,
+      "currency": "EUR"
+    }
+  },
+  {
+    "platform": "cloud",
+    "type": "cloud-server",
+    "instanceType": "cx42",
+    "vCPU": 8,
+    "memoryGiB": 16.0,
+    "diskType": "local",
+    "diskSizeGB": 160,
+    "priceEUR_hourly_net": 0.0265,
+    "priceEUR_monthly_net": 15.9,
+    "cpuType": "shared",
+    "architecture": "x86",
+    "regions": [
+      "fsn1",
+      "nbg1",
+      "hel1"
+    ],
+    "deprecated": false,
+    "source": "hetzner_cloud_api",
+    "description": "CX42",
+    "lastUpdated": "2025-06-17T21:36:10.469322",
+    "hetzner_metadata": {
+      "platform": "cloud",
+      "apiSource": "cloud_api",
+      "serviceCategory": "compute"
+    },
+    "raw": {
+      "id": 106,
+      "name": "cx42",
+      "description": "CX42",
+      "cores": 8,
+      "memory": 16.0,
+      "disk": 160,
+      "deprecated": false,
+      "prices": [
+        {
+          "location": "fsn1",
+          "price_hourly": {
+            "net": "0.0265000000",
+            "gross": "0.0318000000000000"
+          },
+          "price_monthly": {
+            "net": "15.9000000000",
+            "gross": "19.0800000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "nbg1",
+          "price_hourly": {
+            "net": "0.0265000000",
+            "gross": "0.0318000000000000"
+          },
+          "price_monthly": {
+            "net": "15.9000000000",
+            "gross": "19.0800000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "hel1",
+          "price_hourly": {
+            "net": "0.0265000000",
+            "gross": "0.0318000000000000"
+          },
+          "price_monthly": {
+            "net": "15.9000000000",
+            "gross": "19.0800000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        }
+      ],
+      "storage_type": "local",
+      "cpu_type": "shared",
+      "architecture": "x86",
+      "deprecation": null
+    },
+    "provider": "hetzner",
+    "priceUSD_hourly": 0.02915,
+    "priceUSD_monthly": 17.49,
+    "originalPrice": {
+      "hourly": 0.0265,
+      "monthly": 15.9,
+      "currency": "EUR"
+    }
+  },
+  {
+    "platform": "cloud",
+    "type": "cloud-server",
+    "instanceType": "cx52",
+    "vCPU": 16,
+    "memoryGiB": 32.0,
+    "diskType": "local",
+    "diskSizeGB": 320,
+    "priceEUR_hourly_net": 0.0532,
+    "priceEUR_monthly_net": 31.9,
+    "cpuType": "shared",
+    "architecture": "x86",
+    "regions": [
+      "fsn1",
+      "nbg1",
+      "hel1"
+    ],
+    "deprecated": false,
+    "source": "hetzner_cloud_api",
+    "description": "CX52",
+    "lastUpdated": "2025-06-17T21:36:10.469326",
+    "hetzner_metadata": {
+      "platform": "cloud",
+      "apiSource": "cloud_api",
+      "serviceCategory": "compute"
+    },
+    "raw": {
+      "id": 107,
+      "name": "cx52",
+      "description": "CX52",
+      "cores": 16,
+      "memory": 32.0,
+      "disk": 320,
+      "deprecated": false,
+      "prices": [
+        {
+          "location": "fsn1",
+          "price_hourly": {
+            "net": "0.0532000000",
+            "gross": "0.0638400000000000"
+          },
+          "price_monthly": {
+            "net": "31.9000000000",
+            "gross": "38.2800000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "nbg1",
+          "price_hourly": {
+            "net": "0.0532000000",
+            "gross": "0.0638400000000000"
+          },
+          "price_monthly": {
+            "net": "31.9000000000",
+            "gross": "38.2800000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        },
+        {
+          "location": "hel1",
+          "price_hourly": {
+            "net": "0.0532000000",
+            "gross": "0.0638400000000000"
+          },
+          "price_monthly": {
+            "net": "31.9000000000",
+            "gross": "38.2800000000000000"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000000000",
+            "gross": "1.2000000000000000"
+          }
+        }
+      ],
+      "storage_type": "local",
+      "cpu_type": "shared",
+      "architecture": "x86",
+      "deprecation": null
+    },
+    "provider": "hetzner",
+    "priceUSD_hourly": 0.05852,
+    "priceUSD_monthly": 35.09,
+    "originalPrice": {
+      "hourly": 0.0532,
+      "monthly": 31.9,
+      "currency": "EUR"
+    }
+  },
+  {
+    "platform": "cloud",
+    "type": "cloud-loadbalancer",
+    "instanceType": "lb11",
+    "max_connections": 10000,
+    "max_services": 5,
+    "max_targets": 25,
+    "max_assigned_certificates": 10,
+    "priceEUR_hourly_net": 0.0088,
+    "priceEUR_monthly_net": 5.39,
+    "regions": [
+      "fsn1",
+      "nbg1",
+      "hel1",
+      "sin",
+      "hil",
+      "ash"
+    ],
+    "deprecated": null,
+    "source": "hetzner_cloud_api",
+    "description": "LB11",
+    "lastUpdated": "2025-06-17T21:36:10.810322",
+    "hetzner_metadata": {
+      "platform": "cloud",
+      "apiSource": "cloud_api",
+      "serviceCategory": "networking"
+    },
+    "raw": {
+      "id": 1,
+      "name": "lb11",
+      "description": "LB11",
+      "max_connections": 10000,
+      "max_services": 5,
+      "max_targets": 25,
+      "max_assigned_certificates": 10,
+      "deprecated": null,
+      "prices": [
+        {
+          "location": "fsn1",
+          "price_hourly": {
+            "net": "0.0088",
+            "gross": "0.0106"
+          },
+          "price_monthly": {
+            "net": "5.3900",
+            "gross": "6.4680"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000",
+            "gross": "1.2000"
+          }
+        },
+        {
+          "location": "nbg1",
+          "price_hourly": {
+            "net": "0.0088",
+            "gross": "0.0106"
+          },
+          "price_monthly": {
+            "net": "5.3900",
+            "gross": "6.4680"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000",
+            "gross": "1.2000"
+          }
+        },
+        {
+          "location": "hel1",
+          "price_hourly": {
+            "net": "0.0088",
+            "gross": "0.0106"
+          },
+          "price_monthly": {
+            "net": "5.3900",
+            "gross": "6.4680"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000",
+            "gross": "1.2000"
+          }
+        },
+        {
+          "location": "ash",
+          "price_hourly": {
+            "net": "0.0088",
+            "gross": "0.0106"
+          },
+          "price_monthly": {
+            "net": "5.3900",
+            "gross": "6.4680"
+          },
+          "included_traffic": 1099511627776,
+          "price_per_tb_traffic": {
+            "net": "1.0000",
+            "gross": "1.2000"
+          }
+        },
+        {
+          "location": "hil",
+          "price_hourly": {
+            "net": "0.0088",
+            "gross": "0.0106"
+          },
+          "price_monthly": {
+            "net": "5.3900",
+            "gross": "6.4680"
+          },
+          "included_traffic": 1099511627776,
+          "price_per_tb_traffic": {
+            "net": "1.0000",
+            "gross": "1.2000"
+          }
+        },
+        {
+          "location": "sin",
+          "price_hourly": {
+            "net": "0.0088",
+            "gross": "0.0106"
+          },
+          "price_monthly": {
+            "net": "5.3900",
+            "gross": "6.4680"
+          },
+          "included_traffic": 1099511627776,
+          "price_per_tb_traffic": {
+            "net": "7.4000",
+            "gross": "8.8800"
+          }
+        }
+      ]
+    },
+    "provider": "hetzner",
+    "priceUSD_hourly": 0.00968,
+    "priceUSD_monthly": 5.93,
+    "originalPrice": {
+      "hourly": 0.0088,
+      "monthly": 5.39,
+      "currency": "EUR"
+    }
+  },
+  {
+    "platform": "cloud",
+    "type": "cloud-loadbalancer",
+    "instanceType": "lb21",
+    "max_connections": 20000,
+    "max_services": 15,
+    "max_targets": 75,
+    "max_assigned_certificates": 25,
+    "priceEUR_hourly_net": 0.0253,
+    "priceEUR_monthly_net": 16.4,
+    "regions": [
+      "fsn1",
+      "nbg1",
+      "hel1",
+      "sin",
+      "hil",
+      "ash"
+    ],
+    "deprecated": null,
+    "source": "hetzner_cloud_api",
+    "description": "LB21",
+    "lastUpdated": "2025-06-17T21:36:10.810336",
+    "hetzner_metadata": {
+      "platform": "cloud",
+      "apiSource": "cloud_api",
+      "serviceCategory": "networking"
+    },
+    "raw": {
+      "id": 2,
+      "name": "lb21",
+      "description": "LB21",
+      "max_connections": 20000,
+      "max_services": 15,
+      "max_targets": 75,
+      "max_assigned_certificates": 25,
+      "deprecated": null,
+      "prices": [
+        {
+          "location": "fsn1",
+          "price_hourly": {
+            "net": "0.0253",
+            "gross": "0.0304"
+          },
+          "price_monthly": {
+            "net": "16.4000",
+            "gross": "19.6800"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000",
+            "gross": "1.2000"
+          }
+        },
+        {
+          "location": "nbg1",
+          "price_hourly": {
+            "net": "0.0253",
+            "gross": "0.0304"
+          },
+          "price_monthly": {
+            "net": "16.4000",
+            "gross": "19.6800"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000",
+            "gross": "1.2000"
+          }
+        },
+        {
+          "location": "hel1",
+          "price_hourly": {
+            "net": "0.0253",
+            "gross": "0.0304"
+          },
+          "price_monthly": {
+            "net": "16.4000",
+            "gross": "19.6800"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000",
+            "gross": "1.2000"
+          }
+        },
+        {
+          "location": "ash",
+          "price_hourly": {
+            "net": "0.0253",
+            "gross": "0.0304"
+          },
+          "price_monthly": {
+            "net": "16.4000",
+            "gross": "19.6800"
+          },
+          "included_traffic": 2199023255552,
+          "price_per_tb_traffic": {
+            "net": "1.0000",
+            "gross": "1.2000"
+          }
+        },
+        {
+          "location": "hil",
+          "price_hourly": {
+            "net": "0.0253",
+            "gross": "0.0304"
+          },
+          "price_monthly": {
+            "net": "16.4000",
+            "gross": "19.6800"
+          },
+          "included_traffic": 2199023255552,
+          "price_per_tb_traffic": {
+            "net": "1.0000",
+            "gross": "1.2000"
+          }
+        },
+        {
+          "location": "sin",
+          "price_hourly": {
+            "net": "0.0253",
+            "gross": "0.0304"
+          },
+          "price_monthly": {
+            "net": "16.4000",
+            "gross": "19.6800"
+          },
+          "included_traffic": 2199023255552,
+          "price_per_tb_traffic": {
+            "net": "7.4000",
+            "gross": "8.8800"
+          }
+        }
+      ]
+    },
+    "provider": "hetzner",
+    "priceUSD_hourly": 0.02783,
+    "priceUSD_monthly": 18.04,
+    "originalPrice": {
+      "hourly": 0.0253,
+      "monthly": 16.4,
+      "currency": "EUR"
+    }
+  },
+  {
+    "platform": "cloud",
+    "type": "cloud-loadbalancer",
+    "instanceType": "lb31",
+    "max_connections": 40000,
+    "max_services": 30,
+    "max_targets": 150,
+    "max_assigned_certificates": 50,
+    "priceEUR_hourly_net": 0.0495,
+    "priceEUR_monthly_net": 32.9,
+    "regions": [
+      "fsn1",
+      "nbg1",
+      "hel1",
+      "sin",
+      "hil",
+      "ash"
+    ],
+    "deprecated": null,
+    "source": "hetzner_cloud_api",
+    "description": "LB31",
+    "lastUpdated": "2025-06-17T21:36:10.810341",
+    "hetzner_metadata": {
+      "platform": "cloud",
+      "apiSource": "cloud_api",
+      "serviceCategory": "networking"
+    },
+    "raw": {
+      "id": 3,
+      "name": "lb31",
+      "description": "LB31",
+      "max_connections": 40000,
+      "max_services": 30,
+      "max_targets": 150,
+      "max_assigned_certificates": 50,
+      "deprecated": null,
+      "prices": [
+        {
+          "location": "fsn1",
+          "price_hourly": {
+            "net": "0.0495",
+            "gross": "0.0594"
+          },
+          "price_monthly": {
+            "net": "32.9000",
+            "gross": "39.4800"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000",
+            "gross": "1.2000"
+          }
+        },
+        {
+          "location": "nbg1",
+          "price_hourly": {
+            "net": "0.0495",
+            "gross": "0.0594"
+          },
+          "price_monthly": {
+            "net": "32.9000",
+            "gross": "39.4800"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000",
+            "gross": "1.2000"
+          }
+        },
+        {
+          "location": "hel1",
+          "price_hourly": {
+            "net": "0.0495",
+            "gross": "0.0594"
+          },
+          "price_monthly": {
+            "net": "32.9000",
+            "gross": "39.4800"
+          },
+          "included_traffic": 21990232555520,
+          "price_per_tb_traffic": {
+            "net": "1.0000",
+            "gross": "1.2000"
+          }
+        },
+        {
+          "location": "ash",
+          "price_hourly": {
+            "net": "0.0495",
+            "gross": "0.0594"
+          },
+          "price_monthly": {
+            "net": "32.9000",
+            "gross": "39.4800"
+          },
+          "included_traffic": 3298534883328,
+          "price_per_tb_traffic": {
+            "net": "1.0000",
+            "gross": "1.2000"
+          }
+        },
+        {
+          "location": "hil",
+          "price_hourly": {
+            "net": "0.0495",
+            "gross": "0.0594"
+          },
+          "price_monthly": {
+            "net": "32.9000",
+            "gross": "39.4800"
+          },
+          "included_traffic": 3298534883328,
+          "price_per_tb_traffic": {
+            "net": "1.0000",
+            "gross": "1.2000"
+          }
+        },
+        {
+          "location": "sin",
+          "price_hourly": {
+            "net": "0.0495",
+            "gross": "0.0594"
+          },
+          "price_monthly": {
+            "net": "32.9000",
+            "gross": "39.4800"
+          },
+          "included_traffic": 3298534883328,
+          "price_per_tb_traffic": {
+            "net": "7.4000",
+            "gross": "8.8800"
+          }
+        }
+      ]
+    },
+    "provider": "hetzner",
+    "priceUSD_hourly": 0.05445,
+    "priceUSD_monthly": 36.19,
+    "originalPrice": {
+      "hourly": 0.0495,
+      "monthly": 32.9,
+      "currency": "EUR"
+    }
+  }
+]
