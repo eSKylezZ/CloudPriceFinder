@@ -7,8 +7,6 @@
     "memoryGiB": 2.0,
     "diskType": "local",
     "diskSizeGB": 40,
-    "priceEUR_hourly_net": 0.0063,
-    "priceEUR_monthly_net": 3.85,
     "cpuType": "shared",
     "architecture": "x86",
     "regions": [
@@ -19,16 +17,58 @@
       "ash",
       "hil"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      },
+      {
+        "code": "sin",
+        "city": "Singapore",
+        "country": "Singapore",
+        "countryCode": "SG",
+        "region": "Singapore"
+      },
+      {
+        "code": "ash",
+        "city": "Ashburn",
+        "country": "United States",
+        "countryCode": "US",
+        "region": "Virginia"
+      },
+      {
+        "code": "hil",
+        "city": "Hildesheim",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Lower Saxony"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CPX 11 (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-18T00:16:22.932658",
+    "description": "CPX 11",
+    "lastUpdated": "2025-06-18T11:29:56.382021",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 22,
@@ -141,8 +181,12 @@
       "architecture": "x86",
       "deprecation": null
     },
-    "networkOptions": "ipv4_ipv6",
-    "ipType": "ipv4_ipv6",
+    "networkType": "ipv4_ipv6",
+    "ipConfiguration": "IPv4 + IPv6",
+    "priceEUR_hourly_net": 0.0063,
+    "priceEUR_monthly_net": 3.85,
+    "includesPublicIPv4": true,
+    "includesPublicIPv6": true,
     "provider": "hetzner",
     "priceUSD_hourly": 0.00693,
     "priceUSD_monthly": 4.24,
@@ -155,13 +199,11 @@
   {
     "platform": "cloud",
     "type": "cloud-server",
-    "instanceType": "cpx11",
+    "instanceType": "cpx11 (IPv6-only)",
     "vCPU": 2,
     "memoryGiB": 2.0,
     "diskType": "local",
     "diskSizeGB": 40,
-    "priceEUR_hourly_net": 0.004652777777777778,
-    "priceEUR_monthly_net": 3.35,
     "cpuType": "shared",
     "architecture": "x86",
     "regions": [
@@ -172,16 +214,58 @@
       "ash",
       "hil"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      },
+      {
+        "code": "sin",
+        "city": "Singapore",
+        "country": "Singapore",
+        "countryCode": "SG",
+        "region": "Singapore"
+      },
+      {
+        "code": "ash",
+        "city": "Ashburn",
+        "country": "United States",
+        "countryCode": "US",
+        "region": "Virginia"
+      },
+      {
+        "code": "hil",
+        "city": "Hildesheim",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Lower Saxony"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CPX 11 (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-18T00:16:22.932658",
+    "description": "CPX 11 - IPv6-only configuration saves €0.50/month",
+    "lastUpdated": "2025-06-18T11:29:56.382021",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 22,
@@ -294,8 +378,13 @@
       "architecture": "x86",
       "deprecation": null
     },
-    "networkOptions": "ipv6_only",
-    "ipType": "ipv6",
+    "networkType": "ipv6_only",
+    "ipConfiguration": "IPv6-only",
+    "priceEUR_hourly_net": 0.004652777777777778,
+    "priceEUR_monthly_net": 3.35,
+    "includesPublicIPv4": false,
+    "includesPublicIPv6": true,
+    "ipv4_savings": 0.5,
     "provider": "hetzner",
     "priceUSD_hourly": 0.005118,
     "priceUSD_monthly": 3.69,
@@ -313,8 +402,6 @@
     "memoryGiB": 4.0,
     "diskType": "local",
     "diskSizeGB": 80,
-    "priceEUR_hourly_net": 0.0112,
-    "priceEUR_monthly_net": 7.05,
     "cpuType": "shared",
     "architecture": "x86",
     "regions": [
@@ -325,16 +412,58 @@
       "ash",
       "hil"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      },
+      {
+        "code": "sin",
+        "city": "Singapore",
+        "country": "Singapore",
+        "countryCode": "SG",
+        "region": "Singapore"
+      },
+      {
+        "code": "ash",
+        "city": "Ashburn",
+        "country": "United States",
+        "countryCode": "US",
+        "region": "Virginia"
+      },
+      {
+        "code": "hil",
+        "city": "Hildesheim",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Lower Saxony"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CPX 21 (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-18T00:16:22.932693",
+    "description": "CPX 21",
+    "lastUpdated": "2025-06-18T11:29:56.382058",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 23,
@@ -447,8 +576,12 @@
       "architecture": "x86",
       "deprecation": null
     },
-    "networkOptions": "ipv4_ipv6",
-    "ipType": "ipv4_ipv6",
+    "networkType": "ipv4_ipv6",
+    "ipConfiguration": "IPv4 + IPv6",
+    "priceEUR_hourly_net": 0.0112,
+    "priceEUR_monthly_net": 7.05,
+    "includesPublicIPv4": true,
+    "includesPublicIPv6": true,
     "provider": "hetzner",
     "priceUSD_hourly": 0.01232,
     "priceUSD_monthly": 7.76,
@@ -461,13 +594,11 @@
   {
     "platform": "cloud",
     "type": "cloud-server",
-    "instanceType": "cpx21",
+    "instanceType": "cpx21 (IPv6-only)",
     "vCPU": 3,
     "memoryGiB": 4.0,
     "diskType": "local",
     "diskSizeGB": 80,
-    "priceEUR_hourly_net": 0.009097222222222222,
-    "priceEUR_monthly_net": 6.55,
     "cpuType": "shared",
     "architecture": "x86",
     "regions": [
@@ -478,16 +609,58 @@
       "ash",
       "hil"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      },
+      {
+        "code": "sin",
+        "city": "Singapore",
+        "country": "Singapore",
+        "countryCode": "SG",
+        "region": "Singapore"
+      },
+      {
+        "code": "ash",
+        "city": "Ashburn",
+        "country": "United States",
+        "countryCode": "US",
+        "region": "Virginia"
+      },
+      {
+        "code": "hil",
+        "city": "Hildesheim",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Lower Saxony"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CPX 21 (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-18T00:16:22.932693",
+    "description": "CPX 21 - IPv6-only configuration saves €0.50/month",
+    "lastUpdated": "2025-06-18T11:29:56.382058",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 23,
@@ -600,8 +773,13 @@
       "architecture": "x86",
       "deprecation": null
     },
-    "networkOptions": "ipv6_only",
-    "ipType": "ipv6",
+    "networkType": "ipv6_only",
+    "ipConfiguration": "IPv6-only",
+    "priceEUR_hourly_net": 0.009097222222222222,
+    "priceEUR_monthly_net": 6.55,
+    "includesPublicIPv4": false,
+    "includesPublicIPv6": true,
+    "ipv4_savings": 0.5,
     "provider": "hetzner",
     "priceUSD_hourly": 0.010007,
     "priceUSD_monthly": 7.21,
@@ -619,8 +797,6 @@
     "memoryGiB": 8.0,
     "diskType": "local",
     "diskSizeGB": 160,
-    "priceEUR_hourly_net": 0.0211,
-    "priceEUR_monthly_net": 13.1,
     "cpuType": "shared",
     "architecture": "x86",
     "regions": [
@@ -631,16 +807,58 @@
       "ash",
       "hil"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      },
+      {
+        "code": "sin",
+        "city": "Singapore",
+        "country": "Singapore",
+        "countryCode": "SG",
+        "region": "Singapore"
+      },
+      {
+        "code": "ash",
+        "city": "Ashburn",
+        "country": "United States",
+        "countryCode": "US",
+        "region": "Virginia"
+      },
+      {
+        "code": "hil",
+        "city": "Hildesheim",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Lower Saxony"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CPX 31 (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-18T00:16:22.932701",
+    "description": "CPX 31",
+    "lastUpdated": "2025-06-18T11:29:56.382106",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 24,
@@ -753,8 +971,12 @@
       "architecture": "x86",
       "deprecation": null
     },
-    "networkOptions": "ipv4_ipv6",
-    "ipType": "ipv4_ipv6",
+    "networkType": "ipv4_ipv6",
+    "ipConfiguration": "IPv4 + IPv6",
+    "priceEUR_hourly_net": 0.0211,
+    "priceEUR_monthly_net": 13.1,
+    "includesPublicIPv4": true,
+    "includesPublicIPv6": true,
     "provider": "hetzner",
     "priceUSD_hourly": 0.02321,
     "priceUSD_monthly": 14.41,
@@ -767,13 +989,11 @@
   {
     "platform": "cloud",
     "type": "cloud-server",
-    "instanceType": "cpx31",
+    "instanceType": "cpx31 (IPv6-only)",
     "vCPU": 4,
     "memoryGiB": 8.0,
     "diskType": "local",
     "diskSizeGB": 160,
-    "priceEUR_hourly_net": 0.017499999999999998,
-    "priceEUR_monthly_net": 12.6,
     "cpuType": "shared",
     "architecture": "x86",
     "regions": [
@@ -784,16 +1004,58 @@
       "ash",
       "hil"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      },
+      {
+        "code": "sin",
+        "city": "Singapore",
+        "country": "Singapore",
+        "countryCode": "SG",
+        "region": "Singapore"
+      },
+      {
+        "code": "ash",
+        "city": "Ashburn",
+        "country": "United States",
+        "countryCode": "US",
+        "region": "Virginia"
+      },
+      {
+        "code": "hil",
+        "city": "Hildesheim",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Lower Saxony"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CPX 31 (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-18T00:16:22.932701",
+    "description": "CPX 31 - IPv6-only configuration saves €0.50/month",
+    "lastUpdated": "2025-06-18T11:29:56.382106",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 24,
@@ -906,8 +1168,13 @@
       "architecture": "x86",
       "deprecation": null
     },
-    "networkOptions": "ipv6_only",
-    "ipType": "ipv6",
+    "networkType": "ipv6_only",
+    "ipConfiguration": "IPv6-only",
+    "priceEUR_hourly_net": 0.017499999999999998,
+    "priceEUR_monthly_net": 12.6,
+    "includesPublicIPv4": false,
+    "includesPublicIPv6": true,
+    "ipv4_savings": 0.5,
     "provider": "hetzner",
     "priceUSD_hourly": 0.01925,
     "priceUSD_monthly": 13.86,
@@ -925,8 +1192,6 @@
     "memoryGiB": 16.0,
     "diskType": "local",
     "diskSizeGB": 240,
-    "priceEUR_hourly_net": 0.0409,
-    "priceEUR_monthly_net": 24.7,
     "cpuType": "shared",
     "architecture": "x86",
     "regions": [
@@ -937,16 +1202,58 @@
       "ash",
       "hil"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      },
+      {
+        "code": "sin",
+        "city": "Singapore",
+        "country": "Singapore",
+        "countryCode": "SG",
+        "region": "Singapore"
+      },
+      {
+        "code": "ash",
+        "city": "Ashburn",
+        "country": "United States",
+        "countryCode": "US",
+        "region": "Virginia"
+      },
+      {
+        "code": "hil",
+        "city": "Hildesheim",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Lower Saxony"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CPX 41 (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-18T00:16:22.932707",
+    "description": "CPX 41",
+    "lastUpdated": "2025-06-18T11:29:56.382125",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 25,
@@ -1059,8 +1366,12 @@
       "architecture": "x86",
       "deprecation": null
     },
-    "networkOptions": "ipv4_ipv6",
-    "ipType": "ipv4_ipv6",
+    "networkType": "ipv4_ipv6",
+    "ipConfiguration": "IPv4 + IPv6",
+    "priceEUR_hourly_net": 0.0409,
+    "priceEUR_monthly_net": 24.7,
+    "includesPublicIPv4": true,
+    "includesPublicIPv6": true,
     "provider": "hetzner",
     "priceUSD_hourly": 0.04499,
     "priceUSD_monthly": 27.17,
@@ -1073,13 +1384,11 @@
   {
     "platform": "cloud",
     "type": "cloud-server",
-    "instanceType": "cpx41",
+    "instanceType": "cpx41 (IPv6-only)",
     "vCPU": 8,
     "memoryGiB": 16.0,
     "diskType": "local",
     "diskSizeGB": 240,
-    "priceEUR_hourly_net": 0.03361111111111111,
-    "priceEUR_monthly_net": 24.2,
     "cpuType": "shared",
     "architecture": "x86",
     "regions": [
@@ -1090,16 +1399,58 @@
       "ash",
       "hil"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      },
+      {
+        "code": "sin",
+        "city": "Singapore",
+        "country": "Singapore",
+        "countryCode": "SG",
+        "region": "Singapore"
+      },
+      {
+        "code": "ash",
+        "city": "Ashburn",
+        "country": "United States",
+        "countryCode": "US",
+        "region": "Virginia"
+      },
+      {
+        "code": "hil",
+        "city": "Hildesheim",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Lower Saxony"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CPX 41 (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-18T00:16:22.932707",
+    "description": "CPX 41 - IPv6-only configuration saves €0.50/month",
+    "lastUpdated": "2025-06-18T11:29:56.382125",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 25,
@@ -1212,8 +1563,13 @@
       "architecture": "x86",
       "deprecation": null
     },
-    "networkOptions": "ipv6_only",
-    "ipType": "ipv6",
+    "networkType": "ipv6_only",
+    "ipConfiguration": "IPv6-only",
+    "priceEUR_hourly_net": 0.03361111111111111,
+    "priceEUR_monthly_net": 24.2,
+    "includesPublicIPv4": false,
+    "includesPublicIPv6": true,
+    "ipv4_savings": 0.5,
     "provider": "hetzner",
     "priceUSD_hourly": 0.036972,
     "priceUSD_monthly": 26.62,
@@ -1231,8 +1587,6 @@
     "memoryGiB": 32.0,
     "diskType": "local",
     "diskSizeGB": 360,
-    "priceEUR_hourly_net": 0.0872,
-    "priceEUR_monthly_net": 54.4,
     "cpuType": "shared",
     "architecture": "x86",
     "regions": [
@@ -1243,16 +1597,58 @@
       "ash",
       "hil"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      },
+      {
+        "code": "sin",
+        "city": "Singapore",
+        "country": "Singapore",
+        "countryCode": "SG",
+        "region": "Singapore"
+      },
+      {
+        "code": "ash",
+        "city": "Ashburn",
+        "country": "United States",
+        "countryCode": "US",
+        "region": "Virginia"
+      },
+      {
+        "code": "hil",
+        "city": "Hildesheim",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Lower Saxony"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CPX 51 (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-18T00:16:22.932713",
+    "description": "CPX 51",
+    "lastUpdated": "2025-06-18T11:29:56.382140",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 26,
@@ -1365,8 +1761,12 @@
       "architecture": "x86",
       "deprecation": null
     },
-    "networkOptions": "ipv4_ipv6",
-    "ipType": "ipv4_ipv6",
+    "networkType": "ipv4_ipv6",
+    "ipConfiguration": "IPv4 + IPv6",
+    "priceEUR_hourly_net": 0.0872,
+    "priceEUR_monthly_net": 54.4,
+    "includesPublicIPv4": true,
+    "includesPublicIPv6": true,
     "provider": "hetzner",
     "priceUSD_hourly": 0.09592,
     "priceUSD_monthly": 59.84,
@@ -1379,13 +1779,11 @@
   {
     "platform": "cloud",
     "type": "cloud-server",
-    "instanceType": "cpx51",
+    "instanceType": "cpx51 (IPv6-only)",
     "vCPU": 16,
     "memoryGiB": 32.0,
     "diskType": "local",
     "diskSizeGB": 360,
-    "priceEUR_hourly_net": 0.07486111111111111,
-    "priceEUR_monthly_net": 53.9,
     "cpuType": "shared",
     "architecture": "x86",
     "regions": [
@@ -1396,16 +1794,58 @@
       "ash",
       "hil"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      },
+      {
+        "code": "sin",
+        "city": "Singapore",
+        "country": "Singapore",
+        "countryCode": "SG",
+        "region": "Singapore"
+      },
+      {
+        "code": "ash",
+        "city": "Ashburn",
+        "country": "United States",
+        "countryCode": "US",
+        "region": "Virginia"
+      },
+      {
+        "code": "hil",
+        "city": "Hildesheim",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Lower Saxony"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CPX 51 (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-18T00:16:22.932713",
+    "description": "CPX 51 - IPv6-only configuration saves €0.50/month",
+    "lastUpdated": "2025-06-18T11:29:56.382140",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 26,
@@ -1518,8 +1958,13 @@
       "architecture": "x86",
       "deprecation": null
     },
-    "networkOptions": "ipv6_only",
-    "ipType": "ipv6",
+    "networkType": "ipv6_only",
+    "ipConfiguration": "IPv6-only",
+    "priceEUR_hourly_net": 0.07486111111111111,
+    "priceEUR_monthly_net": 53.9,
+    "includesPublicIPv4": false,
+    "includesPublicIPv6": true,
+    "ipv4_savings": 0.5,
     "provider": "hetzner",
     "priceUSD_hourly": 0.082347,
     "priceUSD_monthly": 59.29,
@@ -1537,8 +1982,6 @@
     "memoryGiB": 4.0,
     "diskType": "local",
     "diskSizeGB": 40,
-    "priceEUR_hourly_net": 0.0053,
-    "priceEUR_monthly_net": 3.29,
     "cpuType": "shared",
     "architecture": "arm",
     "regions": [
@@ -1546,16 +1989,37 @@
       "nbg1",
       "hel1"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CAX11 (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-18T00:16:22.932718",
+    "description": "CAX11",
+    "lastUpdated": "2025-06-18T11:29:56.382159",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 45,
@@ -1620,8 +2084,12 @@
       "architecture": "arm",
       "deprecation": null
     },
-    "networkOptions": "ipv4_ipv6",
-    "ipType": "ipv4_ipv6",
+    "networkType": "ipv4_ipv6",
+    "ipConfiguration": "IPv4 + IPv6",
+    "priceEUR_hourly_net": 0.0053,
+    "priceEUR_monthly_net": 3.29,
+    "includesPublicIPv4": true,
+    "includesPublicIPv6": true,
     "provider": "hetzner",
     "priceUSD_hourly": 0.00583,
     "priceUSD_monthly": 3.62,
@@ -1634,13 +2102,11 @@
   {
     "platform": "cloud",
     "type": "cloud-server",
-    "instanceType": "cax11",
+    "instanceType": "cax11 (IPv6-only)",
     "vCPU": 2,
     "memoryGiB": 4.0,
     "diskType": "local",
     "diskSizeGB": 40,
-    "priceEUR_hourly_net": 0.003875,
-    "priceEUR_monthly_net": 2.79,
     "cpuType": "shared",
     "architecture": "arm",
     "regions": [
@@ -1648,16 +2114,37 @@
       "nbg1",
       "hel1"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CAX11 (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-18T00:16:22.932718",
+    "description": "CAX11 - IPv6-only configuration saves €0.50/month",
+    "lastUpdated": "2025-06-18T11:29:56.382159",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 45,
@@ -1722,8 +2209,13 @@
       "architecture": "arm",
       "deprecation": null
     },
-    "networkOptions": "ipv6_only",
-    "ipType": "ipv6",
+    "networkType": "ipv6_only",
+    "ipConfiguration": "IPv6-only",
+    "priceEUR_hourly_net": 0.003875,
+    "priceEUR_monthly_net": 2.79,
+    "includesPublicIPv4": false,
+    "includesPublicIPv6": true,
+    "ipv4_savings": 0.5,
     "provider": "hetzner",
     "priceUSD_hourly": 0.004263,
     "priceUSD_monthly": 3.07,
@@ -1741,8 +2233,6 @@
     "memoryGiB": 8.0,
     "diskType": "local",
     "diskSizeGB": 80,
-    "priceEUR_hourly_net": 0.0096,
-    "priceEUR_monthly_net": 5.99,
     "cpuType": "shared",
     "architecture": "arm",
     "regions": [
@@ -1750,16 +2240,37 @@
       "nbg1",
       "hel1"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CAX21 (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-18T00:16:22.932725",
+    "description": "CAX21",
+    "lastUpdated": "2025-06-18T11:29:56.382172",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 93,
@@ -1824,8 +2335,12 @@
       "architecture": "arm",
       "deprecation": null
     },
-    "networkOptions": "ipv4_ipv6",
-    "ipType": "ipv4_ipv6",
+    "networkType": "ipv4_ipv6",
+    "ipConfiguration": "IPv4 + IPv6",
+    "priceEUR_hourly_net": 0.0096,
+    "priceEUR_monthly_net": 5.99,
+    "includesPublicIPv4": true,
+    "includesPublicIPv6": true,
     "provider": "hetzner",
     "priceUSD_hourly": 0.01056,
     "priceUSD_monthly": 6.59,
@@ -1838,13 +2353,11 @@
   {
     "platform": "cloud",
     "type": "cloud-server",
-    "instanceType": "cax21",
+    "instanceType": "cax21 (IPv6-only)",
     "vCPU": 4,
     "memoryGiB": 8.0,
     "diskType": "local",
     "diskSizeGB": 80,
-    "priceEUR_hourly_net": 0.007625000000000001,
-    "priceEUR_monthly_net": 5.49,
     "cpuType": "shared",
     "architecture": "arm",
     "regions": [
@@ -1852,16 +2365,37 @@
       "nbg1",
       "hel1"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CAX21 (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-18T00:16:22.932725",
+    "description": "CAX21 - IPv6-only configuration saves €0.50/month",
+    "lastUpdated": "2025-06-18T11:29:56.382172",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 93,
@@ -1926,8 +2460,13 @@
       "architecture": "arm",
       "deprecation": null
     },
-    "networkOptions": "ipv6_only",
-    "ipType": "ipv6",
+    "networkType": "ipv6_only",
+    "ipConfiguration": "IPv6-only",
+    "priceEUR_hourly_net": 0.007625000000000001,
+    "priceEUR_monthly_net": 5.49,
+    "includesPublicIPv4": false,
+    "includesPublicIPv6": true,
+    "ipv4_savings": 0.5,
     "provider": "hetzner",
     "priceUSD_hourly": 0.008388,
     "priceUSD_monthly": 6.04,
@@ -1945,8 +2484,6 @@
     "memoryGiB": 16.0,
     "diskType": "local",
     "diskSizeGB": 160,
-    "priceEUR_hourly_net": 0.0192,
-    "priceEUR_monthly_net": 11.99,
     "cpuType": "shared",
     "architecture": "arm",
     "regions": [
@@ -1954,16 +2491,37 @@
       "nbg1",
       "hel1"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CAX31 (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-18T00:16:22.932730",
+    "description": "CAX31",
+    "lastUpdated": "2025-06-18T11:29:56.382185",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 94,
@@ -2028,8 +2586,12 @@
       "architecture": "arm",
       "deprecation": null
     },
-    "networkOptions": "ipv4_ipv6",
-    "ipType": "ipv4_ipv6",
+    "networkType": "ipv4_ipv6",
+    "ipConfiguration": "IPv4 + IPv6",
+    "priceEUR_hourly_net": 0.0192,
+    "priceEUR_monthly_net": 11.99,
+    "includesPublicIPv4": true,
+    "includesPublicIPv6": true,
     "provider": "hetzner",
     "priceUSD_hourly": 0.02112,
     "priceUSD_monthly": 13.19,
@@ -2042,13 +2604,11 @@
   {
     "platform": "cloud",
     "type": "cloud-server",
-    "instanceType": "cax31",
+    "instanceType": "cax31 (IPv6-only)",
     "vCPU": 8,
     "memoryGiB": 16.0,
     "diskType": "local",
     "diskSizeGB": 160,
-    "priceEUR_hourly_net": 0.015958333333333335,
-    "priceEUR_monthly_net": 11.49,
     "cpuType": "shared",
     "architecture": "arm",
     "regions": [
@@ -2056,16 +2616,37 @@
       "nbg1",
       "hel1"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CAX31 (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-18T00:16:22.932730",
+    "description": "CAX31 - IPv6-only configuration saves €0.50/month",
+    "lastUpdated": "2025-06-18T11:29:56.382185",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 94,
@@ -2130,8 +2711,13 @@
       "architecture": "arm",
       "deprecation": null
     },
-    "networkOptions": "ipv6_only",
-    "ipType": "ipv6",
+    "networkType": "ipv6_only",
+    "ipConfiguration": "IPv6-only",
+    "priceEUR_hourly_net": 0.015958333333333335,
+    "priceEUR_monthly_net": 11.49,
+    "includesPublicIPv4": false,
+    "includesPublicIPv6": true,
+    "ipv4_savings": 0.5,
     "provider": "hetzner",
     "priceUSD_hourly": 0.017554,
     "priceUSD_monthly": 12.64,
@@ -2149,8 +2735,6 @@
     "memoryGiB": 32.0,
     "diskType": "local",
     "diskSizeGB": 320,
-    "priceEUR_hourly_net": 0.0384,
-    "priceEUR_monthly_net": 23.99,
     "cpuType": "shared",
     "architecture": "arm",
     "regions": [
@@ -2158,16 +2742,37 @@
       "nbg1",
       "hel1"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CAX41 (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-18T00:16:22.932735",
+    "description": "CAX41",
+    "lastUpdated": "2025-06-18T11:29:56.382198",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 95,
@@ -2232,8 +2837,12 @@
       "architecture": "arm",
       "deprecation": null
     },
-    "networkOptions": "ipv4_ipv6",
-    "ipType": "ipv4_ipv6",
+    "networkType": "ipv4_ipv6",
+    "ipConfiguration": "IPv4 + IPv6",
+    "priceEUR_hourly_net": 0.0384,
+    "priceEUR_monthly_net": 23.99,
+    "includesPublicIPv4": true,
+    "includesPublicIPv6": true,
     "provider": "hetzner",
     "priceUSD_hourly": 0.04224,
     "priceUSD_monthly": 26.39,
@@ -2246,13 +2855,11 @@
   {
     "platform": "cloud",
     "type": "cloud-server",
-    "instanceType": "cax41",
+    "instanceType": "cax41 (IPv6-only)",
     "vCPU": 16,
     "memoryGiB": 32.0,
     "diskType": "local",
     "diskSizeGB": 320,
-    "priceEUR_hourly_net": 0.032625,
-    "priceEUR_monthly_net": 23.49,
     "cpuType": "shared",
     "architecture": "arm",
     "regions": [
@@ -2260,16 +2867,37 @@
       "nbg1",
       "hel1"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CAX41 (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-18T00:16:22.932735",
+    "description": "CAX41 - IPv6-only configuration saves €0.50/month",
+    "lastUpdated": "2025-06-18T11:29:56.382198",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 95,
@@ -2334,8 +2962,13 @@
       "architecture": "arm",
       "deprecation": null
     },
-    "networkOptions": "ipv6_only",
-    "ipType": "ipv6",
+    "networkType": "ipv6_only",
+    "ipConfiguration": "IPv6-only",
+    "priceEUR_hourly_net": 0.032625,
+    "priceEUR_monthly_net": 23.49,
+    "includesPublicIPv4": false,
+    "includesPublicIPv6": true,
+    "ipv4_savings": 0.5,
     "provider": "hetzner",
     "priceUSD_hourly": 0.035888,
     "priceUSD_monthly": 25.84,
@@ -2353,8 +2986,6 @@
     "memoryGiB": 8.0,
     "diskType": "local",
     "diskSizeGB": 80,
-    "priceEUR_hourly_net": 0.0192,
-    "priceEUR_monthly_net": 11.99,
     "cpuType": "dedicated",
     "architecture": "x86",
     "regions": [
@@ -2365,16 +2996,58 @@
       "ash",
       "hil"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      },
+      {
+        "code": "sin",
+        "city": "Singapore",
+        "country": "Singapore",
+        "countryCode": "SG",
+        "region": "Singapore"
+      },
+      {
+        "code": "ash",
+        "city": "Ashburn",
+        "country": "United States",
+        "countryCode": "US",
+        "region": "Virginia"
+      },
+      {
+        "code": "hil",
+        "city": "Hildesheim",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Lower Saxony"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CCX13 Dedicated CPU (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-18T00:16:22.932739",
+    "description": "CCX13 Dedicated CPU",
+    "lastUpdated": "2025-06-18T11:29:56.382214",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 96,
@@ -2487,8 +3160,12 @@
       "architecture": "x86",
       "deprecation": null
     },
-    "networkOptions": "ipv4_ipv6",
-    "ipType": "ipv4_ipv6",
+    "networkType": "ipv4_ipv6",
+    "ipConfiguration": "IPv4 + IPv6",
+    "priceEUR_hourly_net": 0.0192,
+    "priceEUR_monthly_net": 11.99,
+    "includesPublicIPv4": true,
+    "includesPublicIPv6": true,
     "provider": "hetzner",
     "priceUSD_hourly": 0.02112,
     "priceUSD_monthly": 13.19,
@@ -2501,13 +3178,11 @@
   {
     "platform": "cloud",
     "type": "cloud-server",
-    "instanceType": "ccx13",
+    "instanceType": "ccx13 (IPv6-only)",
     "vCPU": 2,
     "memoryGiB": 8.0,
     "diskType": "local",
     "diskSizeGB": 80,
-    "priceEUR_hourly_net": 0.015958333333333335,
-    "priceEUR_monthly_net": 11.49,
     "cpuType": "dedicated",
     "architecture": "x86",
     "regions": [
@@ -2518,16 +3193,58 @@
       "ash",
       "hil"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      },
+      {
+        "code": "sin",
+        "city": "Singapore",
+        "country": "Singapore",
+        "countryCode": "SG",
+        "region": "Singapore"
+      },
+      {
+        "code": "ash",
+        "city": "Ashburn",
+        "country": "United States",
+        "countryCode": "US",
+        "region": "Virginia"
+      },
+      {
+        "code": "hil",
+        "city": "Hildesheim",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Lower Saxony"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CCX13 Dedicated CPU (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-18T00:16:22.932739",
+    "description": "CCX13 Dedicated CPU - IPv6-only configuration saves €0.50/month",
+    "lastUpdated": "2025-06-18T11:29:56.382214",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 96,
@@ -2640,8 +3357,13 @@
       "architecture": "x86",
       "deprecation": null
     },
-    "networkOptions": "ipv6_only",
-    "ipType": "ipv6",
+    "networkType": "ipv6_only",
+    "ipConfiguration": "IPv6-only",
+    "priceEUR_hourly_net": 0.015958333333333335,
+    "priceEUR_monthly_net": 11.49,
+    "includesPublicIPv4": false,
+    "includesPublicIPv6": true,
+    "ipv4_savings": 0.5,
     "provider": "hetzner",
     "priceUSD_hourly": 0.017554,
     "priceUSD_monthly": 12.64,
@@ -2659,8 +3381,6 @@
     "memoryGiB": 16.0,
     "diskType": "local",
     "diskSizeGB": 160,
-    "priceEUR_hourly_net": 0.0384,
-    "priceEUR_monthly_net": 23.99,
     "cpuType": "dedicated",
     "architecture": "x86",
     "regions": [
@@ -2671,16 +3391,58 @@
       "ash",
       "hil"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      },
+      {
+        "code": "sin",
+        "city": "Singapore",
+        "country": "Singapore",
+        "countryCode": "SG",
+        "region": "Singapore"
+      },
+      {
+        "code": "ash",
+        "city": "Ashburn",
+        "country": "United States",
+        "countryCode": "US",
+        "region": "Virginia"
+      },
+      {
+        "code": "hil",
+        "city": "Hildesheim",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Lower Saxony"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CCX23 Dedicated CPU (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-18T00:16:22.932744",
+    "description": "CCX23 Dedicated CPU",
+    "lastUpdated": "2025-06-18T11:29:56.382228",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 97,
@@ -2793,8 +3555,12 @@
       "architecture": "x86",
       "deprecation": null
     },
-    "networkOptions": "ipv4_ipv6",
-    "ipType": "ipv4_ipv6",
+    "networkType": "ipv4_ipv6",
+    "ipConfiguration": "IPv4 + IPv6",
+    "priceEUR_hourly_net": 0.0384,
+    "priceEUR_monthly_net": 23.99,
+    "includesPublicIPv4": true,
+    "includesPublicIPv6": true,
     "provider": "hetzner",
     "priceUSD_hourly": 0.04224,
     "priceUSD_monthly": 26.39,
@@ -2807,13 +3573,11 @@
   {
     "platform": "cloud",
     "type": "cloud-server",
-    "instanceType": "ccx23",
+    "instanceType": "ccx23 (IPv6-only)",
     "vCPU": 4,
     "memoryGiB": 16.0,
     "diskType": "local",
     "diskSizeGB": 160,
-    "priceEUR_hourly_net": 0.032625,
-    "priceEUR_monthly_net": 23.49,
     "cpuType": "dedicated",
     "architecture": "x86",
     "regions": [
@@ -2824,16 +3588,58 @@
       "ash",
       "hil"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      },
+      {
+        "code": "sin",
+        "city": "Singapore",
+        "country": "Singapore",
+        "countryCode": "SG",
+        "region": "Singapore"
+      },
+      {
+        "code": "ash",
+        "city": "Ashburn",
+        "country": "United States",
+        "countryCode": "US",
+        "region": "Virginia"
+      },
+      {
+        "code": "hil",
+        "city": "Hildesheim",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Lower Saxony"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CCX23 Dedicated CPU (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-18T00:16:22.932744",
+    "description": "CCX23 Dedicated CPU - IPv6-only configuration saves €0.50/month",
+    "lastUpdated": "2025-06-18T11:29:56.382228",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 97,
@@ -2946,8 +3752,13 @@
       "architecture": "x86",
       "deprecation": null
     },
-    "networkOptions": "ipv6_only",
-    "ipType": "ipv6",
+    "networkType": "ipv6_only",
+    "ipConfiguration": "IPv6-only",
+    "priceEUR_hourly_net": 0.032625,
+    "priceEUR_monthly_net": 23.49,
+    "includesPublicIPv4": false,
+    "includesPublicIPv6": true,
+    "ipv4_savings": 0.5,
     "provider": "hetzner",
     "priceUSD_hourly": 0.035888,
     "priceUSD_monthly": 25.84,
@@ -2965,8 +3776,6 @@
     "memoryGiB": 32.0,
     "diskType": "local",
     "diskSizeGB": 240,
-    "priceEUR_hourly_net": 0.0769,
-    "priceEUR_monthly_net": 47.99,
     "cpuType": "dedicated",
     "architecture": "x86",
     "regions": [
@@ -2977,16 +3786,58 @@
       "ash",
       "hil"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      },
+      {
+        "code": "sin",
+        "city": "Singapore",
+        "country": "Singapore",
+        "countryCode": "SG",
+        "region": "Singapore"
+      },
+      {
+        "code": "ash",
+        "city": "Ashburn",
+        "country": "United States",
+        "countryCode": "US",
+        "region": "Virginia"
+      },
+      {
+        "code": "hil",
+        "city": "Hildesheim",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Lower Saxony"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CCX33 Dedicated CPU (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-18T00:16:22.932751",
+    "description": "CCX33 Dedicated CPU",
+    "lastUpdated": "2025-06-18T11:29:56.382242",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 98,
@@ -3099,8 +3950,12 @@
       "architecture": "x86",
       "deprecation": null
     },
-    "networkOptions": "ipv4_ipv6",
-    "ipType": "ipv4_ipv6",
+    "networkType": "ipv4_ipv6",
+    "ipConfiguration": "IPv4 + IPv6",
+    "priceEUR_hourly_net": 0.0769,
+    "priceEUR_monthly_net": 47.99,
+    "includesPublicIPv4": true,
+    "includesPublicIPv6": true,
     "provider": "hetzner",
     "priceUSD_hourly": 0.08459,
     "priceUSD_monthly": 52.79,
@@ -3113,13 +3968,11 @@
   {
     "platform": "cloud",
     "type": "cloud-server",
-    "instanceType": "ccx33",
+    "instanceType": "ccx33 (IPv6-only)",
     "vCPU": 8,
     "memoryGiB": 32.0,
     "diskType": "local",
     "diskSizeGB": 240,
-    "priceEUR_hourly_net": 0.06595833333333334,
-    "priceEUR_monthly_net": 47.49,
     "cpuType": "dedicated",
     "architecture": "x86",
     "regions": [
@@ -3130,16 +3983,58 @@
       "ash",
       "hil"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      },
+      {
+        "code": "sin",
+        "city": "Singapore",
+        "country": "Singapore",
+        "countryCode": "SG",
+        "region": "Singapore"
+      },
+      {
+        "code": "ash",
+        "city": "Ashburn",
+        "country": "United States",
+        "countryCode": "US",
+        "region": "Virginia"
+      },
+      {
+        "code": "hil",
+        "city": "Hildesheim",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Lower Saxony"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CCX33 Dedicated CPU (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-18T00:16:22.932751",
+    "description": "CCX33 Dedicated CPU - IPv6-only configuration saves €0.50/month",
+    "lastUpdated": "2025-06-18T11:29:56.382242",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 98,
@@ -3252,8 +4147,13 @@
       "architecture": "x86",
       "deprecation": null
     },
-    "networkOptions": "ipv6_only",
-    "ipType": "ipv6",
+    "networkType": "ipv6_only",
+    "ipConfiguration": "IPv6-only",
+    "priceEUR_hourly_net": 0.06595833333333334,
+    "priceEUR_monthly_net": 47.49,
+    "includesPublicIPv4": false,
+    "includesPublicIPv6": true,
+    "ipv4_savings": 0.5,
     "provider": "hetzner",
     "priceUSD_hourly": 0.072554,
     "priceUSD_monthly": 52.24,
@@ -3271,8 +4171,6 @@
     "memoryGiB": 64.0,
     "diskType": "local",
     "diskSizeGB": 360,
-    "priceEUR_hourly_net": 0.1538,
-    "priceEUR_monthly_net": 95.99,
     "cpuType": "dedicated",
     "architecture": "x86",
     "regions": [
@@ -3283,16 +4181,58 @@
       "ash",
       "hil"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      },
+      {
+        "code": "sin",
+        "city": "Singapore",
+        "country": "Singapore",
+        "countryCode": "SG",
+        "region": "Singapore"
+      },
+      {
+        "code": "ash",
+        "city": "Ashburn",
+        "country": "United States",
+        "countryCode": "US",
+        "region": "Virginia"
+      },
+      {
+        "code": "hil",
+        "city": "Hildesheim",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Lower Saxony"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CCX43 Dedicated CPU (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-18T00:16:22.932756",
+    "description": "CCX43 Dedicated CPU",
+    "lastUpdated": "2025-06-18T11:29:56.382259",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 99,
@@ -3405,8 +4345,12 @@
       "architecture": "x86",
       "deprecation": null
     },
-    "networkOptions": "ipv4_ipv6",
-    "ipType": "ipv4_ipv6",
+    "networkType": "ipv4_ipv6",
+    "ipConfiguration": "IPv4 + IPv6",
+    "priceEUR_hourly_net": 0.1538,
+    "priceEUR_monthly_net": 95.99,
+    "includesPublicIPv4": true,
+    "includesPublicIPv6": true,
     "provider": "hetzner",
     "priceUSD_hourly": 0.16918,
     "priceUSD_monthly": 105.59,
@@ -3419,13 +4363,11 @@
   {
     "platform": "cloud",
     "type": "cloud-server",
-    "instanceType": "ccx43",
+    "instanceType": "ccx43 (IPv6-only)",
     "vCPU": 16,
     "memoryGiB": 64.0,
     "diskType": "local",
     "diskSizeGB": 360,
-    "priceEUR_hourly_net": 0.132625,
-    "priceEUR_monthly_net": 95.49,
     "cpuType": "dedicated",
     "architecture": "x86",
     "regions": [
@@ -3436,16 +4378,58 @@
       "ash",
       "hil"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      },
+      {
+        "code": "sin",
+        "city": "Singapore",
+        "country": "Singapore",
+        "countryCode": "SG",
+        "region": "Singapore"
+      },
+      {
+        "code": "ash",
+        "city": "Ashburn",
+        "country": "United States",
+        "countryCode": "US",
+        "region": "Virginia"
+      },
+      {
+        "code": "hil",
+        "city": "Hildesheim",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Lower Saxony"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CCX43 Dedicated CPU (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-18T00:16:22.932756",
+    "description": "CCX43 Dedicated CPU - IPv6-only configuration saves €0.50/month",
+    "lastUpdated": "2025-06-18T11:29:56.382259",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 99,
@@ -3558,8 +4542,13 @@
       "architecture": "x86",
       "deprecation": null
     },
-    "networkOptions": "ipv6_only",
-    "ipType": "ipv6",
+    "networkType": "ipv6_only",
+    "ipConfiguration": "IPv6-only",
+    "priceEUR_hourly_net": 0.132625,
+    "priceEUR_monthly_net": 95.49,
+    "includesPublicIPv4": false,
+    "includesPublicIPv6": true,
+    "ipv4_savings": 0.5,
     "provider": "hetzner",
     "priceUSD_hourly": 0.145888,
     "priceUSD_monthly": 105.04,
@@ -3577,8 +4566,6 @@
     "memoryGiB": 128.0,
     "diskType": "local",
     "diskSizeGB": 600,
-    "priceEUR_hourly_net": 0.3077,
-    "priceEUR_monthly_net": 191.99,
     "cpuType": "dedicated",
     "architecture": "x86",
     "regions": [
@@ -3589,16 +4576,58 @@
       "ash",
       "hil"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      },
+      {
+        "code": "sin",
+        "city": "Singapore",
+        "country": "Singapore",
+        "countryCode": "SG",
+        "region": "Singapore"
+      },
+      {
+        "code": "ash",
+        "city": "Ashburn",
+        "country": "United States",
+        "countryCode": "US",
+        "region": "Virginia"
+      },
+      {
+        "code": "hil",
+        "city": "Hildesheim",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Lower Saxony"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CCX53 Dedicated CPU (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-18T00:16:22.932761",
+    "description": "CCX53 Dedicated CPU",
+    "lastUpdated": "2025-06-18T11:29:56.382275",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 100,
@@ -3711,8 +4740,12 @@
       "architecture": "x86",
       "deprecation": null
     },
-    "networkOptions": "ipv4_ipv6",
-    "ipType": "ipv4_ipv6",
+    "networkType": "ipv4_ipv6",
+    "ipConfiguration": "IPv4 + IPv6",
+    "priceEUR_hourly_net": 0.3077,
+    "priceEUR_monthly_net": 191.99,
+    "includesPublicIPv4": true,
+    "includesPublicIPv6": true,
     "provider": "hetzner",
     "priceUSD_hourly": 0.33847,
     "priceUSD_monthly": 211.19,
@@ -3725,13 +4758,11 @@
   {
     "platform": "cloud",
     "type": "cloud-server",
-    "instanceType": "ccx53",
+    "instanceType": "ccx53 (IPv6-only)",
     "vCPU": 32,
     "memoryGiB": 128.0,
     "diskType": "local",
     "diskSizeGB": 600,
-    "priceEUR_hourly_net": 0.26595833333333335,
-    "priceEUR_monthly_net": 191.49,
     "cpuType": "dedicated",
     "architecture": "x86",
     "regions": [
@@ -3742,16 +4773,58 @@
       "ash",
       "hil"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      },
+      {
+        "code": "sin",
+        "city": "Singapore",
+        "country": "Singapore",
+        "countryCode": "SG",
+        "region": "Singapore"
+      },
+      {
+        "code": "ash",
+        "city": "Ashburn",
+        "country": "United States",
+        "countryCode": "US",
+        "region": "Virginia"
+      },
+      {
+        "code": "hil",
+        "city": "Hildesheim",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Lower Saxony"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CCX53 Dedicated CPU (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-18T00:16:22.932761",
+    "description": "CCX53 Dedicated CPU - IPv6-only configuration saves €0.50/month",
+    "lastUpdated": "2025-06-18T11:29:56.382275",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 100,
@@ -3864,8 +4937,13 @@
       "architecture": "x86",
       "deprecation": null
     },
-    "networkOptions": "ipv6_only",
-    "ipType": "ipv6",
+    "networkType": "ipv6_only",
+    "ipConfiguration": "IPv6-only",
+    "priceEUR_hourly_net": 0.26595833333333335,
+    "priceEUR_monthly_net": 191.49,
+    "includesPublicIPv4": false,
+    "includesPublicIPv6": true,
+    "ipv4_savings": 0.5,
     "provider": "hetzner",
     "priceUSD_hourly": 0.292554,
     "priceUSD_monthly": 210.64,
@@ -3883,8 +4961,6 @@
     "memoryGiB": 192.0,
     "diskType": "local",
     "diskSizeGB": 960,
-    "priceEUR_hourly_net": 0.4615,
-    "priceEUR_monthly_net": 287.99,
     "cpuType": "dedicated",
     "architecture": "x86",
     "regions": [
@@ -3895,16 +4971,58 @@
       "ash",
       "hil"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      },
+      {
+        "code": "sin",
+        "city": "Singapore",
+        "country": "Singapore",
+        "countryCode": "SG",
+        "region": "Singapore"
+      },
+      {
+        "code": "ash",
+        "city": "Ashburn",
+        "country": "United States",
+        "countryCode": "US",
+        "region": "Virginia"
+      },
+      {
+        "code": "hil",
+        "city": "Hildesheim",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Lower Saxony"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CCX63 Dedicated CPU (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-18T00:16:22.932766",
+    "description": "CCX63 Dedicated CPU",
+    "lastUpdated": "2025-06-18T11:29:56.382289",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 101,
@@ -4017,8 +5135,12 @@
       "architecture": "x86",
       "deprecation": null
     },
-    "networkOptions": "ipv4_ipv6",
-    "ipType": "ipv4_ipv6",
+    "networkType": "ipv4_ipv6",
+    "ipConfiguration": "IPv4 + IPv6",
+    "priceEUR_hourly_net": 0.4615,
+    "priceEUR_monthly_net": 287.99,
+    "includesPublicIPv4": true,
+    "includesPublicIPv6": true,
     "provider": "hetzner",
     "priceUSD_hourly": 0.50765,
     "priceUSD_monthly": 316.79,
@@ -4031,13 +5153,11 @@
   {
     "platform": "cloud",
     "type": "cloud-server",
-    "instanceType": "ccx63",
+    "instanceType": "ccx63 (IPv6-only)",
     "vCPU": 48,
     "memoryGiB": 192.0,
     "diskType": "local",
     "diskSizeGB": 960,
-    "priceEUR_hourly_net": 0.39929166666666666,
-    "priceEUR_monthly_net": 287.49,
     "cpuType": "dedicated",
     "architecture": "x86",
     "regions": [
@@ -4048,16 +5168,58 @@
       "ash",
       "hil"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      },
+      {
+        "code": "sin",
+        "city": "Singapore",
+        "country": "Singapore",
+        "countryCode": "SG",
+        "region": "Singapore"
+      },
+      {
+        "code": "ash",
+        "city": "Ashburn",
+        "country": "United States",
+        "countryCode": "US",
+        "region": "Virginia"
+      },
+      {
+        "code": "hil",
+        "city": "Hildesheim",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Lower Saxony"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CCX63 Dedicated CPU (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-18T00:16:22.932766",
+    "description": "CCX63 Dedicated CPU - IPv6-only configuration saves €0.50/month",
+    "lastUpdated": "2025-06-18T11:29:56.382289",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 101,
@@ -4170,8 +5332,13 @@
       "architecture": "x86",
       "deprecation": null
     },
-    "networkOptions": "ipv6_only",
-    "ipType": "ipv6",
+    "networkType": "ipv6_only",
+    "ipConfiguration": "IPv6-only",
+    "priceEUR_hourly_net": 0.39929166666666666,
+    "priceEUR_monthly_net": 287.49,
+    "includesPublicIPv4": false,
+    "includesPublicIPv6": true,
+    "ipv4_savings": 0.5,
     "provider": "hetzner",
     "priceUSD_hourly": 0.439221,
     "priceUSD_monthly": 316.24,
@@ -4189,8 +5356,6 @@
     "memoryGiB": 4.0,
     "diskType": "local",
     "diskSizeGB": 40,
-    "priceEUR_hourly_net": 0.0052,
-    "priceEUR_monthly_net": 3.29,
     "cpuType": "shared",
     "architecture": "x86",
     "regions": [
@@ -4198,16 +5363,37 @@
       "nbg1",
       "hel1"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CX22 (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-18T00:16:22.932771",
+    "description": "CX22",
+    "lastUpdated": "2025-06-18T11:29:56.382299",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 104,
@@ -4272,8 +5458,12 @@
       "architecture": "x86",
       "deprecation": null
     },
-    "networkOptions": "ipv4_ipv6",
-    "ipType": "ipv4_ipv6",
+    "networkType": "ipv4_ipv6",
+    "ipConfiguration": "IPv4 + IPv6",
+    "priceEUR_hourly_net": 0.0052,
+    "priceEUR_monthly_net": 3.29,
+    "includesPublicIPv4": true,
+    "includesPublicIPv6": true,
     "provider": "hetzner",
     "priceUSD_hourly": 0.00572,
     "priceUSD_monthly": 3.62,
@@ -4286,13 +5476,11 @@
   {
     "platform": "cloud",
     "type": "cloud-server",
-    "instanceType": "cx22",
+    "instanceType": "cx22 (IPv6-only)",
     "vCPU": 2,
     "memoryGiB": 4.0,
     "diskType": "local",
     "diskSizeGB": 40,
-    "priceEUR_hourly_net": 0.003875,
-    "priceEUR_monthly_net": 2.79,
     "cpuType": "shared",
     "architecture": "x86",
     "regions": [
@@ -4300,16 +5488,37 @@
       "nbg1",
       "hel1"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CX22 (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-18T00:16:22.932771",
+    "description": "CX22 - IPv6-only configuration saves €0.50/month",
+    "lastUpdated": "2025-06-18T11:29:56.382299",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 104,
@@ -4374,8 +5583,13 @@
       "architecture": "x86",
       "deprecation": null
     },
-    "networkOptions": "ipv6_only",
-    "ipType": "ipv6",
+    "networkType": "ipv6_only",
+    "ipConfiguration": "IPv6-only",
+    "priceEUR_hourly_net": 0.003875,
+    "priceEUR_monthly_net": 2.79,
+    "includesPublicIPv4": false,
+    "includesPublicIPv6": true,
+    "ipv4_savings": 0.5,
     "provider": "hetzner",
     "priceUSD_hourly": 0.004263,
     "priceUSD_monthly": 3.07,
@@ -4393,8 +5607,6 @@
     "memoryGiB": 8.0,
     "diskType": "local",
     "diskSizeGB": 80,
-    "priceEUR_hourly_net": 0.0105,
-    "priceEUR_monthly_net": 6.3,
     "cpuType": "shared",
     "architecture": "x86",
     "regions": [
@@ -4402,16 +5614,37 @@
       "nbg1",
       "hel1"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CX32 (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-18T00:16:22.932778",
+    "description": "CX32",
+    "lastUpdated": "2025-06-18T11:29:56.382309",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 105,
@@ -4476,8 +5709,12 @@
       "architecture": "x86",
       "deprecation": null
     },
-    "networkOptions": "ipv4_ipv6",
-    "ipType": "ipv4_ipv6",
+    "networkType": "ipv4_ipv6",
+    "ipConfiguration": "IPv4 + IPv6",
+    "priceEUR_hourly_net": 0.0105,
+    "priceEUR_monthly_net": 6.3,
+    "includesPublicIPv4": true,
+    "includesPublicIPv6": true,
     "provider": "hetzner",
     "priceUSD_hourly": 0.01155,
     "priceUSD_monthly": 6.93,
@@ -4490,13 +5727,11 @@
   {
     "platform": "cloud",
     "type": "cloud-server",
-    "instanceType": "cx32",
+    "instanceType": "cx32 (IPv6-only)",
     "vCPU": 4,
     "memoryGiB": 8.0,
     "diskType": "local",
     "diskSizeGB": 80,
-    "priceEUR_hourly_net": 0.008055555555555555,
-    "priceEUR_monthly_net": 5.8,
     "cpuType": "shared",
     "architecture": "x86",
     "regions": [
@@ -4504,16 +5739,37 @@
       "nbg1",
       "hel1"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CX32 (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-18T00:16:22.932778",
+    "description": "CX32 - IPv6-only configuration saves €0.50/month",
+    "lastUpdated": "2025-06-18T11:29:56.382309",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 105,
@@ -4578,8 +5834,13 @@
       "architecture": "x86",
       "deprecation": null
     },
-    "networkOptions": "ipv6_only",
-    "ipType": "ipv6",
+    "networkType": "ipv6_only",
+    "ipConfiguration": "IPv6-only",
+    "priceEUR_hourly_net": 0.008055555555555555,
+    "priceEUR_monthly_net": 5.8,
+    "includesPublicIPv4": false,
+    "includesPublicIPv6": true,
+    "ipv4_savings": 0.5,
     "provider": "hetzner",
     "priceUSD_hourly": 0.008861,
     "priceUSD_monthly": 6.38,
@@ -4597,8 +5858,6 @@
     "memoryGiB": 16.0,
     "diskType": "local",
     "diskSizeGB": 160,
-    "priceEUR_hourly_net": 0.0265,
-    "priceEUR_monthly_net": 15.9,
     "cpuType": "shared",
     "architecture": "x86",
     "regions": [
@@ -4606,16 +5865,37 @@
       "nbg1",
       "hel1"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CX42 (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-18T00:16:22.932783",
+    "description": "CX42",
+    "lastUpdated": "2025-06-18T11:29:56.382319",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 106,
@@ -4680,8 +5960,12 @@
       "architecture": "x86",
       "deprecation": null
     },
-    "networkOptions": "ipv4_ipv6",
-    "ipType": "ipv4_ipv6",
+    "networkType": "ipv4_ipv6",
+    "ipConfiguration": "IPv4 + IPv6",
+    "priceEUR_hourly_net": 0.0265,
+    "priceEUR_monthly_net": 15.9,
+    "includesPublicIPv4": true,
+    "includesPublicIPv6": true,
     "provider": "hetzner",
     "priceUSD_hourly": 0.02915,
     "priceUSD_monthly": 17.49,
@@ -4694,13 +5978,11 @@
   {
     "platform": "cloud",
     "type": "cloud-server",
-    "instanceType": "cx42",
+    "instanceType": "cx42 (IPv6-only)",
     "vCPU": 8,
     "memoryGiB": 16.0,
     "diskType": "local",
     "diskSizeGB": 160,
-    "priceEUR_hourly_net": 0.021388888888888888,
-    "priceEUR_monthly_net": 15.4,
     "cpuType": "shared",
     "architecture": "x86",
     "regions": [
@@ -4708,16 +5990,37 @@
       "nbg1",
       "hel1"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CX42 (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-18T00:16:22.932783",
+    "description": "CX42 - IPv6-only configuration saves €0.50/month",
+    "lastUpdated": "2025-06-18T11:29:56.382319",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 106,
@@ -4782,8 +6085,13 @@
       "architecture": "x86",
       "deprecation": null
     },
-    "networkOptions": "ipv6_only",
-    "ipType": "ipv6",
+    "networkType": "ipv6_only",
+    "ipConfiguration": "IPv6-only",
+    "priceEUR_hourly_net": 0.021388888888888888,
+    "priceEUR_monthly_net": 15.4,
+    "includesPublicIPv4": false,
+    "includesPublicIPv6": true,
+    "ipv4_savings": 0.5,
     "provider": "hetzner",
     "priceUSD_hourly": 0.023528,
     "priceUSD_monthly": 16.94,
@@ -4801,8 +6109,6 @@
     "memoryGiB": 32.0,
     "diskType": "local",
     "diskSizeGB": 320,
-    "priceEUR_hourly_net": 0.0532,
-    "priceEUR_monthly_net": 31.9,
     "cpuType": "shared",
     "architecture": "x86",
     "regions": [
@@ -4810,16 +6116,37 @@
       "nbg1",
       "hel1"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CX52 (IPv4 + IPv6)",
-    "lastUpdated": "2025-06-18T00:16:22.932788",
+    "description": "CX52",
+    "lastUpdated": "2025-06-18T11:29:56.382331",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 107,
@@ -4884,8 +6211,12 @@
       "architecture": "x86",
       "deprecation": null
     },
-    "networkOptions": "ipv4_ipv6",
-    "ipType": "ipv4_ipv6",
+    "networkType": "ipv4_ipv6",
+    "ipConfiguration": "IPv4 + IPv6",
+    "priceEUR_hourly_net": 0.0532,
+    "priceEUR_monthly_net": 31.9,
+    "includesPublicIPv4": true,
+    "includesPublicIPv6": true,
     "provider": "hetzner",
     "priceUSD_hourly": 0.05852,
     "priceUSD_monthly": 35.09,
@@ -4898,13 +6229,11 @@
   {
     "platform": "cloud",
     "type": "cloud-server",
-    "instanceType": "cx52",
+    "instanceType": "cx52 (IPv6-only)",
     "vCPU": 16,
     "memoryGiB": 32.0,
     "diskType": "local",
     "diskSizeGB": 320,
-    "priceEUR_hourly_net": 0.04361111111111111,
-    "priceEUR_monthly_net": 31.4,
     "cpuType": "shared",
     "architecture": "x86",
     "regions": [
@@ -4912,16 +6241,37 @@
       "nbg1",
       "hel1"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
-    "description": "CX52 (IPv6 only, €0.5 discount)",
-    "lastUpdated": "2025-06-18T00:16:22.932788",
+    "description": "CX52 - IPv6-only configuration saves €0.50/month",
+    "lastUpdated": "2025-06-18T11:29:56.382331",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
-      "serviceCategory": "compute",
-      "networkType": "ipv6_only",
-      "discountApplied": 0.5
+      "serviceCategory": "compute"
     },
     "raw": {
       "id": 107,
@@ -4986,8 +6336,13 @@
       "architecture": "x86",
       "deprecation": null
     },
-    "networkOptions": "ipv6_only",
-    "ipType": "ipv6",
+    "networkType": "ipv6_only",
+    "ipConfiguration": "IPv6-only",
+    "priceEUR_hourly_net": 0.04361111111111111,
+    "priceEUR_monthly_net": 31.4,
+    "includesPublicIPv4": false,
+    "includesPublicIPv6": true,
+    "ipv4_savings": 0.5,
     "provider": "hetzner",
     "priceUSD_hourly": 0.047972,
     "priceUSD_monthly": 34.54,
@@ -5018,7 +6373,7 @@
     "deprecated": null,
     "source": "hetzner_cloud_api",
     "description": "LB11",
-    "lastUpdated": "2025-06-18T00:16:23.240264",
+    "lastUpdated": "2025-06-18T11:29:56.695126",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -5162,7 +6517,7 @@
     "deprecated": null,
     "source": "hetzner_cloud_api",
     "description": "LB21",
-    "lastUpdated": "2025-06-18T00:16:23.240279",
+    "lastUpdated": "2025-06-18T11:29:56.695141",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
@@ -5306,7 +6661,7 @@
     "deprecated": null,
     "source": "hetzner_cloud_api",
     "description": "LB31",
-    "lastUpdated": "2025-06-18T00:16:23.240284",
+    "lastUpdated": "2025-06-18T11:29:56.695146",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "cloud_api",
