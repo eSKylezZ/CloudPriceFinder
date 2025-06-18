@@ -93,7 +93,6 @@ class HetznerCloudCollector:
         try:
             server_types = self.client.server_types.get_all()
             locations = self.client.locations.get_all()
-            pricing = self.client.pricing.get()
             
             # Create location mapping
             location_map = self._get_location_mapping(locations)
@@ -102,14 +101,8 @@ class HetznerCloudCollector:
             
             for server_type in server_types:
                 try:
-                    # Get pricing for this server type
-                    server_pricing = None
-                    for price_info in pricing.server_types:
-                        if price_info.server_type.name == server_type.name:
-                            server_pricing = price_info
-                            break
-                    
-                    if not server_pricing:
+                    # Check if server type has pricing information
+                    if not hasattr(server_type, 'prices') or not server_type.prices:
                         logger.warning(f"No pricing found for server type: {server_type.name}")
                         continue
                     
@@ -117,7 +110,7 @@ class HetznerCloudCollector:
                     regional_pricing = []
                     locations_list = []
                     
-                    for price in server_pricing.prices:
+                    for price in server_type.prices:
                         location_code = price.location.name
                         locations_list.append(location_code)
                         
@@ -125,8 +118,8 @@ class HetznerCloudCollector:
                             'location': location_code,
                             'hourly_net': float(price.price_hourly.net),
                             'monthly_net': float(price.price_monthly.net),
-                            'included_traffic': 0,  # Will be filled from other sources
-                            'traffic_price_per_tb': 0
+                            'included_traffic': getattr(price, 'included_traffic', 0),
+                            'traffic_price_per_tb': float(getattr(price, 'price_per_tb_traffic', {}).get('net', 0))
                         })
                     
                     # Calculate price ranges
@@ -262,30 +255,24 @@ class HetznerCloudCollector:
         
         try:
             lb_types = self.client.load_balancer_types.get_all()
-            pricing = self.client.pricing.get()
             
             processed_lbs = []
             
             for lb_type in lb_types:
                 try:
-                    # Get pricing for this LB type
-                    lb_pricing = None
-                    for price_info in pricing.load_balancer_types:
-                        if price_info.load_balancer_type.name == lb_type.name:
-                            lb_pricing = price_info
-                            break
-                    
-                    if not lb_pricing:
+                    # Check if LB type has pricing information
+                    if not hasattr(lb_type, 'prices') or not lb_type.prices:
+                        logger.warning(f"No pricing found for load balancer type: {lb_type.name}")
                         continue
                     
                     # Process pricing (usually same across regions for LBs)
-                    if lb_pricing.prices:
-                        price = lb_pricing.prices[0]  # Take first price
+                    if lb_type.prices:
+                        price = lb_type.prices[0]  # Take first price
                         hourly_price = float(price.price_hourly.net)
                         monthly_price = float(price.price_monthly.net)
                         
                         # Get all locations
-                        locations = [p.location.name for p in lb_pricing.prices]
+                        locations = [p.location.name for p in lb_type.prices]
                     else:
                         continue
                     
@@ -324,77 +311,14 @@ class HetznerCloudCollector:
             return []
     
     def _collect_other_services(self) -> List[Dict[str, Any]]:
-        """Collect other pricing services (volumes, IPs, etc.)."""
-        logger.info("Fetching other service pricing...")
+        """Collect other services (for now, skip since pricing API not directly available)."""
+        logger.info("Skipping other service pricing (not available via hcloud library)")
         
-        try:
-            pricing = self.client.pricing.get()
-            processed_services = []
-            
-            # Process volume pricing
-            if hasattr(pricing, 'volume') and pricing.volume:
-                for price in pricing.volume:
-                    location = price.location.name if price.location else 'all'
-                    hourly_price = float(price.price_hourly.net)
-                    monthly_price = float(price.price_monthly.net)
-                    
-                    volume_data = {
-                        'platform': 'cloud',
-                        'type': 'cloud-volume',
-                        'instanceType': 'Block Storage',
-                        'unit': 'per GB/month',
-                        'location': location,
-                        'priceEUR_hourly_net': hourly_price,
-                        'priceEUR_monthly_net': monthly_price,
-                        'regions': [location] if location != 'all' else [],
-                        'source': 'hetzner_cloud_api',
-                        'description': 'Block storage volume pricing per GB',
-                        'lastUpdated': datetime.now().isoformat(),
-                        'hetzner_metadata': {
-                            'platform': 'cloud',
-                            'apiSource': 'hcloud_library',
-                            'serviceCategory': 'storage'
-                        }
-                    }
-                    
-                    processed_services.append(volume_data)
-            
-            # Process floating IP pricing
-            if hasattr(pricing, 'floating_ip') and pricing.floating_ip:
-                for price in pricing.floating_ip:
-                    location = price.location.name if price.location else 'all'
-                    ip_type = getattr(price, 'type', 'ipv4')
-                    hourly_price = float(price.price_hourly.net)
-                    monthly_price = float(price.price_monthly.net)
-                    
-                    ip_data = {
-                        'platform': 'cloud',
-                        'type': 'cloud-floating-ip',
-                        'instanceType': f'Floating IP ({ip_type.upper()})',
-                        'ipType': ip_type,
-                        'location': location,
-                        'priceEUR_hourly_net': hourly_price,
-                        'priceEUR_monthly_net': monthly_price,
-                        'regions': [location] if location != 'all' else [],
-                        'source': 'hetzner_cloud_api',
-                        'description': f'Floating {ip_type.upper()} address pricing',
-                        'lastUpdated': datetime.now().isoformat(),
-                        'hetzner_metadata': {
-                            'platform': 'cloud',
-                            'apiSource': 'hcloud_library',
-                            'serviceCategory': 'networking',
-                            'ipVersion': ip_type
-                        }
-                    }
-                    
-                    processed_services.append(ip_data)
-            
-            logger.info(f"Processed {len(processed_services)} other services")
-            return processed_services
-            
-        except Exception as e:
-            logger.error(f"Error fetching other services: {e}")
-            return []
+        # Note: The hcloud library doesn't expose a separate pricing client
+        # Volume, floating IP, and other service pricing would need to be 
+        # fetched via direct API calls or alternative methods
+        
+        return []
     
     def _get_location_mapping(self, locations: List[Location]) -> Dict[str, Dict[str, str]]:
         """Create mapping of location codes to detailed information."""

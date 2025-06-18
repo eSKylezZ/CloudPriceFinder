@@ -291,7 +291,7 @@ class CloudDataOrchestrator:
             for provider, count in summary['byProvider'].items():
                 print(f"  {provider}: {count} instances")
             
-            if summary['errors']:
+            if summary.get('errors') and isinstance(summary['errors'], dict):
                 print(f"\n⚠️ Errors encountered:")
                 for provider, error in summary['errors'].items():
                     print(f"  {provider}: {error}")
