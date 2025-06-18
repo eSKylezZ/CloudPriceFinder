@@ -184,7 +184,7 @@ class HetznerCloudCollector:
                     
                     # Calculate IPv6-only pricing
                     ipv6_only_monthly = max(0, monthly_price - ipv4_primary_ip_cost) if ipv4_primary_ip_cost > 0 else None
-                    ipv6_only_hourly = ipv6_only_monthly / (24 * 30) if ipv6_only_monthly and ipv6_only_monthly > 0 else None
+                    ipv6_only_hourly = ipv6_only_monthly / 730.44 if ipv6_only_monthly and ipv6_only_monthly > 0 else None
                     
                     # Create server entry with pricing options
                     server_data = {
@@ -243,8 +243,8 @@ class HetznerCloudCollector:
                                 'description': f'IPv6-only (saves €{ipv4_primary_ip_cost:.2f}/month)' if ipv4_primary_ip_cost > 0 else 'IPv6-only',
                                 'priceRange': {
                                     'hourly': {
-                                        'min': max(0, min_hourly - ipv4_primary_ip_cost / (24 * 30)) if ipv4_primary_ip_cost else None,
-                                        'max': max(0, max_hourly - ipv4_primary_ip_cost / (24 * 30)) if ipv4_primary_ip_cost else None
+                                        'min': max(0, min_hourly - ipv4_primary_ip_cost / 730.44) if ipv4_primary_ip_cost else None,
+                                        'max': max(0, max_hourly - ipv4_primary_ip_cost / 730.44) if ipv4_primary_ip_cost else None
                                     },
                                     'monthly': {
                                         'min': max(0, min_monthly - ipv4_primary_ip_cost) if ipv4_primary_ip_cost else None,
@@ -285,6 +285,7 @@ class HetznerCloudCollector:
         try:
             # Get LB types from hcloud library
             lb_types = self.client.load_balancer_types.get_all()
+            locations = self.client.locations.get_all()
             
             # Get pricing data via direct API call
             import requests
@@ -305,6 +306,9 @@ class HetznerCloudCollector:
                 for pricing_entry in pricing_data['pricing'].get('load_balancer_types', []):
                     pricing_by_type[pricing_entry.get('name')] = pricing_entry
             
+            # Create location mapping for flags
+            location_map = self._get_location_mapping(locations)
+            
             processed_lbs = []
             
             for lb_type in lb_types:
@@ -323,12 +327,24 @@ class HetznerCloudCollector:
                         monthly_price = float(price.get('price_monthly', {}).get('net', 0))
                         
                         # Get all locations
-                        locations = [p.get('location') for p in pricing_info['prices'] if p.get('location')]
+                        locations_list = [p.get('location') for p in pricing_info['prices'] if p.get('location')]
                         
                         if hourly_price == 0 and monthly_price == 0:
                             continue
                     else:
                         continue
+                    
+                    # Process location details for flags
+                    location_details = []
+                    for location_code in locations_list:
+                        location_info = location_map.get(location_code, {})
+                        location_details.append({
+                            'code': location_code,
+                            'city': location_info.get('city', location_code),
+                            'country': location_info.get('country', 'Unknown'),
+                            'countryCode': location_info.get('countryCode', 'XX'),
+                            'region': location_info.get('region', 'Unknown')
+                        })
                     
                     lb_data = {
                         'platform': 'cloud',
@@ -340,7 +356,8 @@ class HetznerCloudCollector:
                         'max_assigned_certificates': getattr(lb_type, 'max_assigned_certificates', 0),
                         'priceEUR_hourly_net': hourly_price,
                         'priceEUR_monthly_net': monthly_price,
-                        'regions': locations,
+                        'regions': locations_list,
+                        'locationDetails': location_details,
                         'deprecated': getattr(lb_type, 'deprecated', False),
                         'source': 'hetzner_cloud_api',
                         'description': getattr(lb_type, 'description', ''),

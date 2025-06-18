@@ -37,6 +37,23 @@ instances.forEach(instance => {
 });
 const networkOptions = Array.from(networkOptionsSet).filter(Boolean);
 
+// Extract all unique regions/locations
+const regionsSet = new Set<string>();
+instances.forEach(instance => {
+  if (instance.locationDetails && Array.isArray(instance.locationDetails)) {
+    instance.locationDetails.forEach(location => {
+      if (location.country) {
+        regionsSet.add(location.country);
+      }
+    });
+  } else if (instance.regions && Array.isArray(instance.regions)) {
+    instance.regions.forEach(region => {
+      regionsSet.add(region);
+    });
+  }
+});
+const regions = Array.from(regionsSet).sort();
+
 // Calculate ranges for sliders
 const vCPURange = instances.length > 0 ? {
   min: Math.min(...instances.map(i => i.vCPU || 1).filter(Boolean)),
@@ -78,6 +95,29 @@ const priceRange = instances.length > 0 ? {
         ))}
       </div>
     </div>
+
+    <!-- Region Filter -->
+    {regions.length > 0 && (
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">
+        Regions
+      </label>
+      <div class="space-y-2 max-h-32 overflow-y-auto">
+        {regions.map((region) => (
+          <label class="flex items-center">
+            <input
+              type="checkbox"
+              name="region"
+              value={region}
+              checked={region === 'Germany' || region === 'germany'}
+              class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            />
+            <span class="ml-2 text-sm text-gray-600">{region}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+    )}
 
     <!-- vCPU Range -->
     <div>
@@ -268,6 +308,9 @@ const priceRange = instances.length > 0 ? {
     const providers = Array.from(document.querySelectorAll('input[name="provider"]:checked'))
       .map(input => (input as HTMLInputElement).value);
     
+    const regions = Array.from(document.querySelectorAll('input[name="region"]:checked'))
+      .map(input => (input as HTMLInputElement).value);
+    
     const instanceTypes = Array.from(document.querySelectorAll('input[name="instanceType"]:checked'))
       .map(input => (input as HTMLInputElement).value);
     
@@ -287,6 +330,7 @@ const priceRange = instances.length > 0 ? {
     const filterEvent = new CustomEvent('filtersChanged', {
       detail: {
         providers,
+        regions,
         instanceTypes,
         ipTypes,
         networkOptions,
@@ -304,7 +348,13 @@ const priceRange = instances.length > 0 ? {
   function clearFilters() {
     // Reset all checkboxes to checked
     document.querySelectorAll('input[type="checkbox"]').forEach(input => {
-      (input as HTMLInputElement).checked = true;
+      const inputElement = input as HTMLInputElement;
+      if (inputElement.name === 'region') {
+        // For regions, only check Germany by default
+        inputElement.checked = inputElement.value === 'Germany' || inputElement.value === 'germany';
+      } else {
+        inputElement.checked = true;
+      }
     });
     
     // Reset range inputs to their original values

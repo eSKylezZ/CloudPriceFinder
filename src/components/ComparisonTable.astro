@@ -106,14 +106,6 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'EU
       </h2>
       <div class="flex items-center space-x-4">
         <select
-          id="pricing-mode-select"
-          class="rounded border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500"
-        >
-          <option value="ipv4_ipv6">IPv4 + IPv6 Pricing</option>
-          <option value="ipv6_only">IPv6-only Pricing</option>
-          <option value="all">Show All Options</option>
-        </select>
-        <select
           id="sort-select"
           class="rounded border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500"
         >
@@ -288,7 +280,6 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'EU
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const sortSelect = document.getElementById('sort-select') as HTMLSelectElement;
-    const pricingModeSelect = document.getElementById('pricing-mode-select') as HTMLSelectElement;
     const tableBody = document.getElementById('table-body');
     const resultCount = document.getElementById('result-count');
     
@@ -304,18 +295,18 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'EU
       });
     }
     
-    // Handle pricing mode changes
-    if (pricingModeSelect) {
-      pricingModeSelect.addEventListener('change', () => {
-        currentPricingMode = pricingModeSelect.value;
-        updatePricingDisplay();
-      });
-    }
-    
     // Handle filtering
     document.addEventListener('filtersChanged', (event: Event) => {
       const customEvent = event as CustomEvent;
       const filters = customEvent.detail;
+      
+      // Update pricing mode based on network options filter
+      if (filters.networkOptions?.length === 1) {
+        currentPricingMode = filters.networkOptions[0];
+      } else {
+        currentPricingMode = 'ipv4_ipv6'; // default
+      }
+      
       filterAndRenderInstances(filters);
     });
     
@@ -341,6 +332,28 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'EU
         // Provider filter
         if (filters.providers?.length && !filters.providers.includes(instance.provider)) {
           return false;
+        }
+        
+        // Region filter
+        if (filters.regions?.length) {
+          let instanceHasSelectedRegion = false;
+          
+          // Check locationDetails for country match
+          if (instance.locationDetails && Array.isArray(instance.locationDetails)) {
+            instanceHasSelectedRegion = instance.locationDetails.some(location => 
+              filters.regions.includes(location.country)
+            );
+          }
+          // Fallback to legacy regions field
+          else if (instance.regions && Array.isArray(instance.regions)) {
+            instanceHasSelectedRegion = instance.regions.some(region => 
+              filters.regions.includes(region)
+            );
+          }
+          
+          if (!instanceHasSelectedRegion) {
+            return false;
+          }
         }
         
         // Instance type filter
