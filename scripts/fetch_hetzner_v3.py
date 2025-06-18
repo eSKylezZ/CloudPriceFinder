@@ -435,102 +435,452 @@ class HetznerDedicatedCollector:
             self.robot = None
     
     def collect_all_dedicated_services(self) -> List[Dict[str, Any]]:
-        """Collect all dedicated server services using official library."""
-        logger.info("🖥️  Collecting Hetzner Dedicated services using official library...")
+        """Collect all dedicated server services using official library and Robot API."""
+        logger.info("🖥️  Collecting Hetzner Dedicated services using Robot API...")
+        
+        processed_servers = []
         
         try:
-            # For now, provide sample dedicated server data since the Robot API endpoints are complex
-            processed_servers = []
+            # Method 1: Try using Robot API directly with requests (more reliable)
+            if self.has_credentials:
+                logger.info("Fetching server market data from Robot API...")
+                processed_servers.extend(self._fetch_server_market_data())
+                
+                logger.info("Fetching server products from Robot API...")
+                processed_servers.extend(self._fetch_server_products())
             
-            logger.info("Using sample dedicated server data (Robot API integration pending)")
-            
-            # Sample Hetzner dedicated server offerings
-            sample_servers = [
-                {
-                    'name': 'AX41-NVMe',
-                    'cpu': 'AMD Ryzen 5 3600',
-                    'cores': 6,
-                    'ram': 64,
-                    'storage': '2x 512 GB NVMe SSD',
-                    'price': 39.0,
-                    'datacenter': 'FSN1-DC14'
-                },
-                {
-                    'name': 'AX51-NVMe', 
-                    'cpu': 'AMD Ryzen 7 3700X',
-                    'cores': 8,
-                    'ram': 64,
-                    'storage': '2x 512 GB NVMe SSD',
-                    'price': 49.0,
-                    'datacenter': 'FSN1-DC14'
-                },
-                {
-                    'name': 'AX61-NVMe',
-                    'cpu': 'AMD Ryzen 7 3700X',
-                    'cores': 8,
-                    'ram': 64,
-                    'storage': '2x 1 TB NVMe SSD',
-                    'price': 59.0,
-                    'datacenter': 'NBG1-DC3'
-                },
-                {
-                    'name': 'AX101',
-                    'cpu': 'AMD Ryzen 9 5950X',
-                    'cores': 16,
-                    'ram': 128,
-                    'storage': '2x 3.84 TB NVMe SSD',
-                    'price': 129.0,
-                    'datacenter': 'FSN1-DC14'
-                }
-            ]
-            
-            for server in sample_servers:
-                try:
-                    server_data = {
-                        'platform': 'dedicated',
-                        'type': 'dedicated-server',
-                        'instanceType': server['name'],
-                        'description': f"Dedicated server {server['name']} - {server['cpu']}",
-                        'vCPU': server['cores'],
-                        'memoryGiB': server['ram'],
-                        'diskType': 'NVMe SSD' if 'NVMe' in server['storage'] else 'SSD',
-                        'diskSizeGB': 1024 if '512 GB' in server['storage'] else 2048 if '1 TB' in server['storage'] else 7680,
-                        'priceEUR_monthly_net': float(server['price']),
-                        'priceEUR_hourly_net': float(server['price']) / 730.44,
-                        'cpu_description': server['cpu'],
-                        'ram_description': f"{server['ram']} GB DDR4",
-                        'storage_description': server['storage'],
-                        'datacenter': server['datacenter'],
-                        'regions': ['Germany'],
-                        'source': 'hetzner_sample_data',
-                        'lastUpdated': datetime.now().isoformat(),
-                        'locationDetails': [{
-                            'code': server['datacenter'],
-                            'city': 'Falkenstein' if 'FSN' in server['datacenter'] else 'Nuremberg',
-                            'country': 'Germany',
-                            'countryCode': 'DE',
-                            'region': 'Germany'
-                        }],
-                        'hetzner_metadata': {
-                            'platform': 'dedicated',
-                            'apiSource': 'sample_data',
-                            'serviceCategory': 'dedicated_server',
-                            'datacenter': server['datacenter']
-                        }
-                    }
-                    
-                    processed_servers.append(server_data)
-                    
-                except Exception as e:
-                    logger.error(f"Error processing sample server: {e}")
-            
+            # Method 2: Fallback to sample data if no credentials or API fails
+            if not processed_servers:
+                logger.info("Using sample dedicated server data as fallback...")
+                processed_servers.extend(self._get_sample_server_data())
             
             logger.info(f"✅ Dedicated services: {len(processed_servers)} items")
             return processed_servers
             
         except Exception as e:
             logger.error(f"Error collecting dedicated services: {e}")
-            return []
+            # Fallback to sample data
+            return self._get_sample_server_data()
+    
+    def _fetch_server_market_data(self) -> List[Dict[str, Any]]:
+        """Fetch server market (auction) data from Robot API."""
+        servers = []
+        
+        try:
+            import requests
+            from requests.auth import HTTPBasicAuth
+            
+            auth = HTTPBasicAuth(config.robot_user, config.robot_password)
+            
+            # Robot API endpoint for server market
+            response = requests.get(
+                "https://robot-ws.your-server.de/order/server_market/product",
+                auth=auth,
+                headers={'Accept': 'application/json'},
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Parse the server market response
+                if isinstance(data, dict) and 'server_market' in data:
+                    for product in data['server_market']:
+                        servers.append(self._parse_server_market_product(product))
+                elif isinstance(data, list):
+                    for product in data:
+                        servers.append(self._parse_server_market_product(product))
+                        
+                logger.info(f"Fetched {len(servers)} server market products")
+                
+            else:
+                logger.warning(f"Server market API returned status {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            logger.error(f"Error fetching server market data: {e}")
+            
+        return servers
+    
+    def _fetch_server_products(self) -> List[Dict[str, Any]]:
+        """Fetch regular server products from Robot API."""
+        servers = []
+        
+        try:
+            import requests
+            from requests.auth import HTTPBasicAuth
+            
+            auth = HTTPBasicAuth(config.robot_user, config.robot_password)
+            
+            # Robot API endpoint for server products
+            response = requests.get(
+                "https://robot-ws.your-server.de/order/server/product", 
+                auth=auth,
+                headers={'Accept': 'application/json'},
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Parse the server products response
+                if isinstance(data, dict) and 'products' in data:
+                    for product in data['products']:
+                        servers.append(self._parse_server_product(product))
+                elif isinstance(data, list):
+                    for product in data:
+                        servers.append(self._parse_server_product(product))
+                        
+                logger.info(f"Fetched {len(servers)} server products")
+                
+            else:
+                logger.warning(f"Server products API returned status {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            logger.error(f"Error fetching server products: {e}")
+            
+        return servers
+    
+    def _parse_server_market_product(self, product: Dict[str, Any]) -> Dict[str, Any]:
+        """Parse a server market product into our standard format."""
+        try:
+            # Extract basic info
+            name = product.get('name', 'Unknown')
+            price_monthly = float(product.get('price', 0))
+            description = product.get('description', '')
+            
+            # Parse hardware specs from description or dedicated fields
+            cpu_info = product.get('cpu', '')
+            ram_info = product.get('ram', '')
+            hdd_info = product.get('hdd', '')
+            datacenter_info = product.get('datacenter', {})
+            
+            # Extract CPU cores (try to parse from cpu string)
+            cores = self._extract_cpu_cores(cpu_info)
+            
+            # Extract RAM amount (try to parse from ram string)
+            ram_gb = self._extract_ram_amount(ram_info)
+            
+            # Extract storage info
+            disk_size_gb, disk_type = self._extract_storage_info(hdd_info)
+            
+            # Get datacenter location
+            datacenter_name = datacenter_info.get('name', 'Unknown') if isinstance(datacenter_info, dict) else str(datacenter_info)
+            city = self._get_datacenter_city(datacenter_name)
+            
+            return {
+                'platform': 'dedicated',
+                'type': 'dedicated-auction',
+                'instanceType': name,
+                'description': f"Server Auction: {description}",
+                'vCPU': cores,
+                'memoryGiB': ram_gb,
+                'diskType': disk_type,
+                'diskSizeGB': disk_size_gb,
+                'priceEUR_monthly_net': price_monthly,
+                'priceEUR_hourly_net': price_monthly / 730.44,
+                'cpu_description': cpu_info,
+                'ram_description': ram_info,
+                'storage_description': hdd_info,
+                'datacenter': datacenter_name,
+                'regions': ['Germany'],
+                'source': 'hetzner_robot_market_api',
+                'lastUpdated': datetime.now().isoformat(),
+                'locationDetails': [{
+                    'code': datacenter_name,
+                    'city': city,
+                    'country': 'Germany',
+                    'countryCode': 'DE',
+                    'region': 'Germany'
+                }],
+                'hetzner_metadata': {
+                    'platform': 'dedicated',
+                    'apiSource': 'hetzner_robot_market',
+                    'serviceCategory': 'dedicated_auction',
+                    'product_id': product.get('id'),
+                    'datacenter': datacenter_name
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"Error parsing server market product: {e}")
+            return self._create_fallback_server_entry('market-unknown', 'Unknown Market Server')
+    
+    def _parse_server_product(self, product: Dict[str, Any]) -> Dict[str, Any]:
+        """Parse a regular server product into our standard format."""
+        try:
+            # Extract basic info
+            name = product.get('name', 'Unknown')
+            price_monthly = float(product.get('price', 0))
+            description = product.get('description', '')
+            
+            # Parse hardware specs
+            cpu_info = product.get('cpu', '')
+            ram_info = product.get('ram', '')
+            hdd_info = product.get('hdd', '')
+            
+            # Extract specs
+            cores = self._extract_cpu_cores(cpu_info)
+            ram_gb = self._extract_ram_amount(ram_info)
+            disk_size_gb, disk_type = self._extract_storage_info(hdd_info)
+            
+            return {
+                'platform': 'dedicated',
+                'type': 'dedicated-server',
+                'instanceType': name,
+                'description': f"Dedicated Server: {description}",
+                'vCPU': cores,
+                'memoryGiB': ram_gb,
+                'diskType': disk_type,
+                'diskSizeGB': disk_size_gb,
+                'priceEUR_monthly_net': price_monthly,
+                'priceEUR_hourly_net': price_monthly / 730.44,
+                'cpu_description': cpu_info,
+                'ram_description': ram_info,
+                'storage_description': hdd_info,
+                'regions': ['Germany'],
+                'source': 'hetzner_robot_products_api',
+                'lastUpdated': datetime.now().isoformat(),
+                'locationDetails': [{
+                    'code': 'DE',
+                    'city': 'Germany',
+                    'country': 'Germany',
+                    'countryCode': 'DE',
+                    'region': 'Germany'
+                }],
+                'hetzner_metadata': {
+                    'platform': 'dedicated',
+                    'apiSource': 'hetzner_robot_products',
+                    'serviceCategory': 'dedicated_server',
+                    'product_id': product.get('id')
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"Error parsing server product: {e}")
+            return self._create_fallback_server_entry('product-unknown', 'Unknown Server Product')
+    
+    def _extract_cpu_cores(self, cpu_info: str) -> int:
+        """Extract number of CPU cores from CPU description."""
+        if not cpu_info:
+            return 4  # Default
+            
+        cpu_lower = cpu_info.lower()
+        
+        # Common patterns for core detection
+        core_patterns = [
+            r'(\d+)\s*cores?',
+            r'(\d+)\s*core',
+            r'(\d+)c/',
+            r'(\d+)c\s',
+        ]
+        
+        import re
+        for pattern in core_patterns:
+            match = re.search(pattern, cpu_lower)
+            if match:
+                return int(match.group(1))
+        
+        # Fallback: known CPU models
+        if 'ryzen 5' in cpu_lower or 'i5' in cpu_lower:
+            return 6
+        elif 'ryzen 7' in cpu_lower or 'i7' in cpu_lower:
+            return 8
+        elif 'ryzen 9' in cpu_lower or 'i9' in cpu_lower:
+            return 12
+        elif 'xeon' in cpu_lower:
+            return 8  # Conservative estimate
+            
+        return 4  # Default fallback
+    
+    def _extract_ram_amount(self, ram_info: str) -> int:
+        """Extract RAM amount in GB from RAM description."""
+        if not ram_info:
+            return 16  # Default
+            
+        import re
+        
+        # Look for patterns like "64 GB", "32GB", "128 GB DDR4"
+        patterns = [
+            r'(\d+)\s*GB',
+            r'(\d+)\s*gb',
+            r'(\d+)GB',
+            r'(\d+)gb'
+        ]
+        
+        for pattern in patterns:
+            match = re.search(pattern, ram_info)
+            if match:
+                return int(match.group(1))
+        
+        return 16  # Default fallback
+    
+    def _extract_storage_info(self, storage_info: str) -> tuple[int, str]:
+        """Extract storage size and type from storage description."""
+        if not storage_info:
+            return 1000, 'SSD'  # Default
+            
+        import re
+        storage_lower = storage_info.lower()
+        
+        # Extract size
+        size_gb = 1000  # Default
+        size_patterns = [
+            r'(\d+)\s*tb',
+            r'(\d+)\s*gb',
+            r'(\d+)tb',
+            r'(\d+)gb'
+        ]
+        
+        for pattern in size_patterns:
+            match = re.search(pattern, storage_lower)
+            if match:
+                size = int(match.group(1))
+                if 'tb' in pattern:
+                    size_gb = size * 1000  # Convert TB to GB
+                else:
+                    size_gb = size
+                break
+        
+        # Extract type
+        disk_type = 'SSD'  # Default
+        if 'nvme' in storage_lower:
+            disk_type = 'NVMe SSD'
+        elif 'ssd' in storage_lower:
+            disk_type = 'SSD'
+        elif 'hdd' in storage_lower or 'sata' in storage_lower:
+            disk_type = 'HDD'
+        
+        return size_gb, disk_type
+    
+    def _get_datacenter_city(self, datacenter_name: str) -> str:
+        """Get city name from datacenter code."""
+        datacenter_map = {
+            'FSN1': 'Falkenstein',
+            'NBG1': 'Nuremberg',
+            'HEL1': 'Helsinki',
+            'ASH': 'Ashburn',
+            'HIL': 'Hildesheim'
+        }
+        
+        for code, city in datacenter_map.items():
+            if code in datacenter_name:
+                return city
+        
+        return 'Germany'  # Default
+    
+    def _create_fallback_server_entry(self, instance_type: str, description: str) -> Dict[str, Any]:
+        """Create a fallback server entry when parsing fails."""
+        return {
+            'platform': 'dedicated',
+            'type': 'dedicated-server',
+            'instanceType': instance_type,
+            'description': description,
+            'vCPU': 4,
+            'memoryGiB': 16,
+            'diskType': 'SSD',
+            'diskSizeGB': 1000,
+            'priceEUR_monthly_net': 50.0,
+            'priceEUR_hourly_net': 50.0 / 730.44,
+            'regions': ['Germany'],
+            'source': 'hetzner_fallback',
+            'lastUpdated': datetime.now().isoformat(),
+            'locationDetails': [{
+                'code': 'DE',
+                'city': 'Germany',
+                'country': 'Germany',
+                'countryCode': 'DE',
+                'region': 'Germany'
+            }],
+            'hetzner_metadata': {
+                'platform': 'dedicated',
+                'apiSource': 'fallback',
+                'serviceCategory': 'dedicated_server'
+            }
+        }
+    
+    def _get_sample_server_data(self) -> List[Dict[str, Any]]:
+        """Get sample server data as fallback."""
+        sample_servers = [
+            {
+                'name': 'AX41-NVMe',
+                'cpu': 'AMD Ryzen 5 3600',
+                'cores': 6,
+                'ram': 64,
+                'storage': '2x 512 GB NVMe SSD',
+                'price': 39.0,
+                'datacenter': 'FSN1-DC14'
+            },
+            {
+                'name': 'AX51-NVMe', 
+                'cpu': 'AMD Ryzen 7 3700X',
+                'cores': 8,
+                'ram': 64,
+                'storage': '2x 512 GB NVMe SSD',
+                'price': 49.0,
+                'datacenter': 'FSN1-DC14'
+            },
+            {
+                'name': 'AX61-NVMe',
+                'cpu': 'AMD Ryzen 7 3700X',
+                'cores': 8,
+                'ram': 64,
+                'storage': '2x 1 TB NVMe SSD',
+                'price': 59.0,
+                'datacenter': 'NBG1-DC3'
+            },
+            {
+                'name': 'AX101',
+                'cpu': 'AMD Ryzen 9 5950X',
+                'cores': 16,
+                'ram': 128,
+                'storage': '2x 3.84 TB NVMe SSD',
+                'price': 129.0,
+                'datacenter': 'FSN1-DC14'
+            }
+        ]
+        
+        processed_servers = []
+        for server in sample_servers:
+            try:
+                server_data = {
+                    'platform': 'dedicated',
+                    'type': 'dedicated-server',
+                    'instanceType': server['name'],
+                    'description': f"Dedicated server {server['name']} - {server['cpu']}",
+                    'vCPU': server['cores'],
+                    'memoryGiB': server['ram'],
+                    'diskType': 'NVMe SSD' if 'NVMe' in server['storage'] else 'SSD',
+                    'diskSizeGB': 1024 if '512 GB' in server['storage'] else 2048 if '1 TB' in server['storage'] else 7680,
+                    'priceEUR_monthly_net': float(server['price']),
+                    'priceEUR_hourly_net': float(server['price']) / 730.44,
+                    'cpu_description': server['cpu'],
+                    'ram_description': f"{server['ram']} GB DDR4",
+                    'storage_description': server['storage'],
+                    'datacenter': server['datacenter'],
+                    'regions': ['Germany'],
+                    'source': 'hetzner_sample_data',
+                    'lastUpdated': datetime.now().isoformat(),
+                    'locationDetails': [{
+                        'code': server['datacenter'],
+                        'city': 'Falkenstein' if 'FSN' in server['datacenter'] else 'Nuremberg',
+                        'country': 'Germany',
+                        'countryCode': 'DE',
+                        'region': 'Germany'
+                    }],
+                    'hetzner_metadata': {
+                        'platform': 'dedicated',
+                        'apiSource': 'sample_data',
+                        'serviceCategory': 'dedicated_server',
+                        'datacenter': server['datacenter']
+                    }
+                }
+                
+                processed_servers.append(server_data)
+                
+            except Exception as e:
+                logger.error(f"Error processing sample server: {e}")
+        
+        return processed_servers
 
 class HetznerDataCollector:
     """Main collector orchestrating both cloud and dedicated services."""
