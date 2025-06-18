@@ -494,25 +494,34 @@ class HetznerDedicatedCollector:
                     if data:
                         logger.info(f"Sample item keys: {list(data[0].keys()) if isinstance(data[0], dict) else 'Not a dict'}")
                 
-                # Parse the server market response
-                if isinstance(data, dict) and 'server_market' in data:
-                    for product in data['server_market']:
-                        servers.append(self._parse_server_market_product(product))
+                # Parse the server market response based on actual API structure
+                if isinstance(data, dict) and 'product' in data:
+                    # Single product response
+                    logger.info("Found single product in response")
+                    servers.append(self._parse_server_market_product(data['product']))
+                elif isinstance(data, list):
+                    # List of product responses
+                    logger.info(f"Found list of {len(data)} products")
+                    for item in data:
+                        if isinstance(item, dict) and 'product' in item:
+                            servers.append(self._parse_server_market_product(item['product']))
+                        else:
+                            servers.append(self._parse_server_market_product(item))
                 elif isinstance(data, dict):
-                    # Try other possible root keys
+                    # Try other possible root keys or treat as direct product
                     for key in ['products', 'servers', 'data', 'items']:
                         if key in data and isinstance(data[key], list):
                             logger.info(f"Found data under key '{key}'")
                             for product in data[key]:
-                                servers.append(self._parse_server_market_product(product))
+                                if isinstance(product, dict) and 'product' in product:
+                                    servers.append(self._parse_server_market_product(product['product']))
+                                else:
+                                    servers.append(self._parse_server_market_product(product))
                             break
                     else:
-                        # If no known key found, try the direct dict as a product
-                        logger.info("Treating response dict as single product")
+                        # Treat as direct product
+                        logger.info("Treating response dict as direct product")
                         servers.append(self._parse_server_market_product(data))
-                elif isinstance(data, list):
-                    for product in data:
-                        servers.append(self._parse_server_market_product(product))
                         
                 logger.info(f"Fetched {len(servers)} server market products")
                 
@@ -591,66 +600,58 @@ class HetznerDedicatedCollector:
         try:
             # Debug: Log available fields
             logger.debug(f"Parsing market product with keys: {list(product.keys())}")
-            if len(str(product)) < 500:
+            if len(str(product)) < 1000:
                 logger.debug(f"Product data: {product}")
             
-            # Extract basic info - try multiple possible field names
-            name = (product.get('name') or 
-                   product.get('product_name') or 
-                   product.get('server_name') or 
-                   product.get('id') or 
-                   'Unknown')
+            # Extract basic info based on actual API structure
+            product_id = product.get('id', 'Unknown')
+            name = product.get('name', f'Server-{product_id}')
             
-            # Try multiple price field names
-            price_monthly = 0
-            for price_field in ['price', 'price_monthly', 'monthly_price', 'cost', 'price_excl_vat']:
-                if product.get(price_field):
-                    try:
-                        price_monthly = float(product[price_field])
-                        break
-                    except (ValueError, TypeError):
-                        continue
+            # Extract pricing - Robot API provides both net and VAT prices
+            price_monthly = float(product.get('price', 0))  # Net monthly price
+            price_hourly = float(product.get('price_hourly', 0))  # Net hourly price
             
-            # Try multiple description fields
-            description = (product.get('description') or 
-                         product.get('desc') or 
-                         product.get('product_description') or 
-                         '')
+            # Parse description - it's a list in the actual API
+            description_list = product.get('description', [])
+            if isinstance(description_list, list):
+                description = ' | '.join(description_list)
+            else:
+                description = str(description_list) if description_list else ''
             
-            # Parse hardware specs from description or dedicated fields
-            cpu_info = (product.get('cpu') or 
-                       product.get('processor') or 
-                       product.get('cpu_description') or 
-                       '')
+            # Hardware specs from the API
+            cpu_info = product.get('cpu', '')
+            memory_size = product.get('memory_size', 0)  # In GB
+            hdd_size = product.get('hdd_size', 0)  # In GB
+            hdd_count = product.get('hdd_count', 1)
+            hdd_text = product.get('hdd_text', '')
             
-            ram_info = (product.get('ram') or 
-                       product.get('memory') or 
-                       product.get('ram_description') or 
-                       '')
+            # Datacenter info
+            datacenter = product.get('datacenter', 'Unknown')
             
-            hdd_info = (product.get('hdd') or 
-                       product.get('storage') or 
-                       product.get('disk') or 
-                       product.get('hdd_description') or 
-                       '')
+            # Network info
+            network_speed = product.get('network_speed', '')
             
-            # Handle datacenter info
-            datacenter_info = product.get('datacenter', {})
-            if isinstance(datacenter_info, str):
-                datacenter_info = {'name': datacenter_info}
-            
-            # Extract CPU cores (try to parse from cpu string)
+            # Extract CPU cores from CPU string
             cores = self._extract_cpu_cores(cpu_info)
             
-            # Extract RAM amount (try to parse from ram string)
-            ram_gb = self._extract_ram_amount(ram_info)
+            # Use the memory_size directly from API (already in GB)
+            ram_gb = memory_size if memory_size > 0 else 16
             
-            # Extract storage info
-            disk_size_gb, disk_type = self._extract_storage_info(hdd_info)
+            # Calculate total storage and determine type
+            total_storage_gb = hdd_size * hdd_count if hdd_size > 0 else 1000
             
-            # Get datacenter location
-            datacenter_name = datacenter_info.get('name', 'Unknown') if isinstance(datacenter_info, dict) else str(datacenter_info)
-            city = self._get_datacenter_city(datacenter_name)
+            # Determine disk type from hdd_text
+            disk_type = 'SSD'
+            if hdd_text:
+                if 'nvme' in hdd_text.lower():
+                    disk_type = 'NVMe SSD'
+                elif 'ssd' in hdd_text.lower():
+                    disk_type = 'SSD'
+                elif 'hdd' in hdd_text.lower() or 'sata' in hdd_text.lower():
+                    disk_type = 'HDD'
+            
+            # Get datacenter location info
+            city = self._get_datacenter_city(datacenter)
             
             return {
                 'platform': 'dedicated',
@@ -660,18 +661,19 @@ class HetznerDedicatedCollector:
                 'vCPU': cores,
                 'memoryGiB': ram_gb,
                 'diskType': disk_type,
-                'diskSizeGB': disk_size_gb,
+                'diskSizeGB': total_storage_gb,
                 'priceEUR_monthly_net': price_monthly,
-                'priceEUR_hourly_net': price_monthly / 730.44,
+                'priceEUR_hourly_net': price_hourly,
                 'cpu_description': cpu_info,
-                'ram_description': ram_info,
-                'storage_description': hdd_info,
-                'datacenter': datacenter_name,
+                'ram_description': f"{ram_gb} GB ({memory_size} GB from API)",
+                'storage_description': f"{hdd_count}x {hdd_size} GB {hdd_text}",
+                'network_speed': network_speed,
+                'datacenter': datacenter,
                 'regions': ['Germany'],
                 'source': 'hetzner_robot_market_api',
                 'lastUpdated': datetime.now().isoformat(),
                 'locationDetails': [{
-                    'code': datacenter_name,
+                    'code': datacenter,
                     'city': city,
                     'country': 'Germany',
                     'countryCode': 'DE',
@@ -681,8 +683,12 @@ class HetznerDedicatedCollector:
                     'platform': 'dedicated',
                     'apiSource': 'hetzner_robot_market',
                     'serviceCategory': 'dedicated_auction',
-                    'product_id': product.get('id'),
-                    'datacenter': datacenter_name
+                    'product_id': product_id,
+                    'datacenter': datacenter,
+                    'cpu_benchmark': product.get('cpu_benchmark'),
+                    'traffic': product.get('traffic'),
+                    'next_reduce_date': product.get('next_reduce_date'),
+                    'fixed_price': product.get('fixed_price')
                 }
             }
             
