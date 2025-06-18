@@ -58,7 +58,7 @@ class HetznerCloudCollector:
         if not config.cloud_api_token:
             raise ValueError("HETZNER_API_TOKEN not provided")
             
-        self.client = HCloudClient(token=config.cloud_api_token)
+        self.client = HCloudClient(token=config.cloud_api_token) 
     
     def collect_all_cloud_services(self) -> List[Dict[str, Any]]:
         """Collect all cloud services data using official library."""
