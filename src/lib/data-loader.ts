@@ -19,8 +19,12 @@ export async function loadInstanceData(): Promise<CloudInstance[]> {
     const data = await fs.readFile(INSTANCES_FILE, 'utf-8');
     const instances: CloudInstance[] = JSON.parse(data);
     
-    // Sort by price by default
-    return instances.sort((a, b) => a.priceUSD_hourly - b.priceUSD_hourly);
+    // Sort by price by default - handle both USD and EUR pricing
+    return instances.sort((a, b) => {
+      const aPriceHourly = a.priceUSD_hourly || a.priceEUR_hourly_net || 0;
+      const bPriceHourly = b.priceUSD_hourly || b.priceEUR_hourly_net || 0;
+      return aPriceHourly - bPriceHourly;
+    });
   } catch (error) {
     console.error('Failed to load instance data:', error);
     return [];

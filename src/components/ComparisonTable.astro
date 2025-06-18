@@ -7,6 +7,7 @@ export interface Props {
 
 const { instances } = Astro.props;
 
+
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -105,20 +106,78 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'EU
         Instance Comparison
       </h2>
       <div class="flex items-center space-x-4">
-        <select
-          id="sort-select"
-          class="rounded border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500"
+        <button
+          id="column-controls-btn"
+          class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
         >
-          <option value="priceUSD_hourly">Price (Low to High)</option>
-          <option value="priceUSD_hourly-desc">Price (High to Low)</option>
-          <option value="vCPU">vCPU (Low to High)</option>
-          <option value="vCPU-desc">vCPU (High to Low)</option>
-          <option value="memoryGiB">Memory (Low to High)</option>
-          <option value="memoryGiB-desc">Memory (High to Low)</option>
-          <option value="provider">Provider (A-Z)</option>
-        </select>
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
+          </svg>
+          Columns
+        </button>
         <div class="text-sm text-gray-500" id="result-count">
           {instances.length} instances
+        </div>
+      </div>
+    </div>
+    
+    <!-- Column Controls Dropdown -->
+    <div id="column-controls" class="hidden absolute right-6 mt-2 w-64 bg-white rounded-md shadow-lg border border-gray-200 z-10">
+      <div class="p-4">
+        <h3 class="text-sm font-medium text-gray-900 mb-3">Show/Hide Columns</h3>
+        <div class="space-y-2 max-h-64 overflow-y-auto">
+          <label class="flex items-center">
+            <input type="checkbox" id="col-provider" checked class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+            <span class="ml-2 text-sm text-gray-700">Provider</span>
+          </label>
+          <label class="flex items-center">
+            <input type="checkbox" id="col-instanceType" checked class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+            <span class="ml-2 text-sm text-gray-700">Instance Type</span>
+          </label>
+          <label class="flex items-center">
+            <input type="checkbox" id="col-type" checked class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+            <span class="ml-2 text-sm text-gray-700">Type</span>
+          </label>
+          <label class="flex items-center">
+            <input type="checkbox" id="col-vCPU" checked class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+            <span class="ml-2 text-sm text-gray-700">vCPU</span>
+          </label>
+          <label class="flex items-center">
+            <input type="checkbox" id="col-memory" checked class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+            <span class="ml-2 text-sm text-gray-700">Memory</span>
+          </label>
+          <label class="flex items-center">
+            <input type="checkbox" id="col-disk" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+            <span class="ml-2 text-sm text-gray-700">Disk</span>
+          </label>
+          <label class="flex items-center">
+            <input type="checkbox" id="col-network" checked class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+            <span class="ml-2 text-sm text-gray-700">Network</span>
+          </label>
+          <label class="flex items-center">
+            <input type="checkbox" id="col-priceHour" checked class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+            <span class="ml-2 text-sm text-gray-700">Price/Hour</span>
+          </label>
+          <label class="flex items-center">
+            <input type="checkbox" id="col-priceMonth" checked class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+            <span class="ml-2 text-sm text-gray-700">Price/Month</span>
+          </label>
+          <label class="flex items-center">
+            <input type="checkbox" id="col-regions" checked class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+            <span class="ml-2 text-sm text-gray-700">Regions</span>
+          </label>
+          <label class="flex items-center">
+            <input type="checkbox" id="col-description" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+            <span class="ml-2 text-sm text-gray-700">Description</span>
+          </label>
+          <label class="flex items-center">
+            <input type="checkbox" id="col-datacenter" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+            <span class="ml-2 text-sm text-gray-700">Datacenter</span>
+          </label>
+          <label class="flex items-center">
+            <input type="checkbox" id="col-cpuBenchmark" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+            <span class="ml-2 text-sm text-gray-700">CPU Benchmark</span>
+          </label>
         </div>
       </div>
     </div>
@@ -128,49 +187,106 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'EU
     <table class="min-w-full divide-y divide-gray-200 text-sm" id="instances-table">
       <thead class="bg-gray-50">
         <tr>
-          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50">
-            Provider
+          <th class="col-provider px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 cursor-pointer hover:bg-gray-100 z-10" data-sort="provider">
+            <div class="flex items-center">
+              Provider
+              <svg class="w-4 h-4 ml-1 sort-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+              </svg>
+            </div>
           </th>
-          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50">
-            Instance Type
+          <th class="col-instanceType px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 cursor-pointer hover:bg-gray-100 z-10" data-sort="instanceType">
+            <div class="flex items-center">
+              Instance Type
+              <svg class="w-4 h-4 ml-1 sort-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+              </svg>
+            </div>
           </th>
-          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50">
-            Type
+          <th class="col-type px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 cursor-pointer hover:bg-gray-100 z-10" data-sort="type">
+            <div class="flex items-center">
+              Type
+              <svg class="w-4 h-4 ml-1 sort-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+              </svg>
+            </div>
           </th>
-          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50">
-            vCPU
+          <th class="col-vCPU px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 cursor-pointer hover:bg-gray-100 z-10" data-sort="vCPU">
+            <div class="flex items-center">
+              vCPU
+              <svg class="w-4 h-4 ml-1 sort-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+              </svg>
+            </div>
           </th>
-          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50">
-            Memory
+          <th class="col-memory px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 cursor-pointer hover:bg-gray-100 z-10" data-sort="memoryGiB">
+            <div class="flex items-center">
+              Memory
+              <svg class="w-4 h-4 ml-1 sort-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+              </svg>
+            </div>
           </th>
-          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50">
+          <th class="col-disk px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 cursor-pointer hover:bg-gray-100 hidden z-10" data-sort="diskSizeGB">
+            <div class="flex items-center">
+              Disk
+              <svg class="w-4 h-4 ml-1 sort-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+              </svg>
+            </div>
+          </th>
+          <th class="col-network px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 z-10">
             Network
           </th>
-          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50">
-            Price/Hour
+          <th class="col-priceHour px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 cursor-pointer hover:bg-gray-100 z-10" data-sort="priceUSD_hourly">
+            <div class="flex items-center">
+              Price/Hour
+              <svg class="w-4 h-4 ml-1 sort-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+              </svg>
+            </div>
           </th>
-          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50">
-            Price/Month
+          <th class="col-priceMonth px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 cursor-pointer hover:bg-gray-100 z-10" data-sort="priceUSD_monthly">
+            <div class="flex items-center">
+              Price/Month
+              <svg class="w-4 h-4 ml-1 sort-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+              </svg>
+            </div>
           </th>
-          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50">
+          <th class="col-regions px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 z-10">
             Regions
+          </th>
+          <th class="col-description px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 hidden z-10">
+            Description
+          </th>
+          <th class="col-datacenter px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 hidden z-10">
+            Datacenter
+          </th>
+          <th class="col-cpuBenchmark px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 cursor-pointer hover:bg-gray-100 hidden z-10" data-sort="cpu_benchmark">
+            <div class="flex items-center">
+              CPU Benchmark
+              <svg class="w-4 h-4 ml-1 sort-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+              </svg>
+            </div>
           </th>
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200" id="table-body">
         {instances.map((instance) => (
           <tr class="hover:bg-gray-50 instance-row" data-instance={JSON.stringify(instance)}>
-            <td class="px-3 py-3 whitespace-nowrap">
+            <td class="col-provider px-3 py-3 whitespace-nowrap">
               <span class={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getProviderBadgeColor(instance.provider)}`}>
                 {instance.provider.toUpperCase()}
               </span>
             </td>
-            <td class="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+            <td class="col-instanceType px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
               <div class="max-w-24 truncate">
                 {instance.instanceType}
               </div>
             </td>
-            <td class="px-3 py-3 whitespace-nowrap">
+            <td class="col-type px-3 py-3 whitespace-nowrap">
               <div class="flex flex-col space-y-1">
                 <span class={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getTypeBadgeColor(instance.type)}`}>
                   {formatTypeDisplay(instance.type)}
@@ -182,13 +298,21 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'EU
                 )}
               </div>
             </td>
-            <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-900">
+            <td class="col-vCPU px-3 py-3 whitespace-nowrap text-sm text-gray-900">
               {instance.vCPU || '-'}
             </td>
-            <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-900">
+            <td class="col-memory px-3 py-3 whitespace-nowrap text-sm text-gray-900">
               {instance.memoryGiB ? `${instance.memoryGiB} GiB` : '-'}
             </td>
-            <td class="px-3 py-3 whitespace-nowrap">
+            <td class="col-disk px-3 py-3 whitespace-nowrap text-sm text-gray-900 hidden">
+              <div class="flex flex-col">
+                <span>{instance.diskSizeGB ? `${instance.diskSizeGB} GB` : '-'}</span>
+                {instance.diskType && (
+                  <span class="text-xs text-gray-500">{instance.diskType}</span>
+                )}
+              </div>
+            </td>
+            <td class="col-network px-3 py-3 whitespace-nowrap">
               <div class="flex flex-col space-y-1" data-network-info="true">
                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-cyan-100 text-cyan-800 pricing-mode-indicator">
                   IPv4 + IPv6
@@ -198,7 +322,7 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'EU
                 </span>
               </div>
             </td>
-            <td class="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900 pricing-hourly">
+            <td class="col-priceHour px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900 pricing-hourly">
               <div class="flex flex-col">
                 <span class="pricing-value">
                   {formatPriceRange(
@@ -212,7 +336,7 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'EU
                 )}
               </div>
             </td>
-            <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-900 pricing-monthly">
+            <td class="col-priceMonth px-3 py-3 whitespace-nowrap text-sm text-gray-900 pricing-monthly">
               <div class="flex flex-col">
                 <span class="pricing-value">
                   {formatPriceRange(
@@ -226,8 +350,8 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'EU
                 )}
               </div>
             </td>
-            <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
-              <div class="flex flex-wrap gap-1 max-w-32">
+            <td class="col-regions px-3 py-3 whitespace-nowrap text-sm text-gray-500">
+              <div class="flex flex-wrap gap-1 max-w-32 relative regions-container" data-regions={JSON.stringify(instance.locationDetails || [])}>
                 {instance.locationDetails ? (
                   instance.locationDetails.slice(0, 3).map((location, index) => (
                     <div class="relative group">
@@ -240,7 +364,7 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'EU
                         />
                         <span class="text-xs">{location.code}</span>
                       </span>
-                      <div class="absolute z-10 invisible group-hover:visible bg-gray-900 text-white text-xs px-2 py-1 rounded shadow-lg bottom-full left-1/2 transform -translate-x-1/2 mb-1 whitespace-nowrap">
+                      <div class="absolute z-20 invisible group-hover:visible bg-gray-900 text-white text-xs px-2 py-1 rounded shadow-lg bottom-full left-1/2 transform -translate-x-1/2 mb-1 whitespace-nowrap">
                         <div class="font-medium">{location.city}, {location.country}</div>
                         <div class="text-gray-300">{location.region}</div>
                         <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
@@ -254,9 +378,42 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'EU
                   </div>
                 )}
                 {instance.locationDetails && instance.locationDetails.length > 3 && (
-                  <span class="text-xs text-gray-400">+{instance.locationDetails.length - 3}</span>
+                  <div class="relative regions-more-trigger cursor-pointer">
+                    <span class="text-xs text-gray-400 hover:text-gray-600">+{instance.locationDetails.length - 3}</span>
+                    <div class="all-regions-popup absolute z-30 invisible bg-white border border-gray-200 rounded-lg shadow-lg p-3 bottom-full right-0 mb-2 w-64">
+                      <div class="text-xs font-medium text-gray-900 mb-2">All Available Regions:</div>
+                      <div class="grid grid-cols-1 gap-1 max-h-40 overflow-y-auto">
+                        {instance.locationDetails.map((location) => (
+                          <div class="flex items-center space-x-2 py-1">
+                            <img 
+                              src={`https://flagsapi.com/${location.countryCode}/flat/16.png`}
+                              alt={location.country}
+                              class="w-4 h-3 rounded-sm flex-shrink-0"
+                              loading="lazy"
+                            />
+                            <div class="flex-1 min-w-0">
+                              <div class="text-xs font-medium text-gray-900 truncate">{location.city}, {location.country}</div>
+                              <div class="text-xs text-gray-500 truncate">{location.code} • {location.region}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div class="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-200"></div>
+                    </div>
+                  </div>
                 )}
               </div>
+            </td>
+            <td class="col-description px-3 py-3 whitespace-nowrap text-sm text-gray-500 hidden">
+              <div class="max-w-48 truncate" title={instance.description}>
+                {instance.description || '-'}
+              </div>
+            </td>
+            <td class="col-datacenter px-3 py-3 whitespace-nowrap text-sm text-gray-500 hidden">
+              {instance.datacenter || instance.hetzner_metadata?.datacenter || '-'}
+            </td>
+            <td class="col-cpuBenchmark px-3 py-3 whitespace-nowrap text-sm text-gray-900 hidden">
+              {instance.hetzner_metadata?.cpu_benchmark || '-'}
             </td>
           </tr>
         ))}
@@ -279,26 +436,115 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'EU
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const sortSelect = document.getElementById('sort-select') as HTMLSelectElement;
     const tableBody = document.getElementById('table-body');
     const resultCount = document.getElementById('result-count');
+    const columnControlsBtn = document.getElementById('column-controls-btn');
+    const columnControls = document.getElementById('column-controls');
     
     let allInstances = Array.from(document.querySelectorAll('.instance-row'))
       .map(row => JSON.parse((row as HTMLElement).dataset.instance || '{}'));
     let currentPricingMode = 'ipv4_ipv6';
+    let currentSortField = '';
+    let currentSortDirection = 'asc';
+    let activeFilters = {};
+    let popupTimeouts = new Map();
     
-    // Handle sorting
-    if (sortSelect) {
-      sortSelect.addEventListener('change', () => {
-        const [field, direction] = sortSelect.value.split('-');
-        sortInstances(field, direction === 'desc' ? 'desc' : 'asc');
+    // Handle column controls dropdown
+    if (columnControlsBtn && columnControls) {
+      columnControlsBtn.addEventListener('click', () => {
+        columnControls.classList.toggle('hidden');
+      });
+      
+      // Close dropdown when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!columnControlsBtn.contains(e.target as Node) && !columnControls.contains(e.target as Node)) {
+          columnControls.classList.add('hidden');
+        }
       });
     }
     
+    // Handle column visibility controls
+    const columnCheckboxes = document.querySelectorAll('#column-controls input[type="checkbox"]');
+    columnCheckboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', (e) => {
+        const target = e.target as HTMLInputElement;
+        const columnClass = target.id.replace('col-', 'col-');
+        const isVisible = target.checked;
+        
+        // Toggle column visibility
+        const columnElements = document.querySelectorAll(`.${columnClass}`);
+        columnElements.forEach(el => {
+          if (isVisible) {
+            el.classList.remove('hidden');
+          } else {
+            el.classList.add('hidden');
+          }
+        });
+      });
+    });
+    
+    // Handle sortable column headers
+    const sortableHeaders = document.querySelectorAll('th[data-sort]');
+    sortableHeaders.forEach(header => {
+      header.addEventListener('click', () => {
+        const field = header.getAttribute('data-sort');
+        if (!field) return;
+        
+        // Toggle sort direction if same field, otherwise default to asc
+        if (currentSortField === field) {
+          currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+          currentSortDirection = 'asc';
+        }
+        
+        currentSortField = field;
+        sortInstances(field, currentSortDirection);
+        updateSortIndicators();
+      });
+    });
+    
+    // Handle region popup hover with delays
+    function setupRegionPopups() {
+      document.querySelectorAll('.regions-more-trigger').forEach(trigger => {
+        const popup = trigger.querySelector('.all-regions-popup');
+        if (!popup) return;
+        
+        let showTimeout, hideTimeout;
+        
+        trigger.addEventListener('mouseenter', () => {
+          clearTimeout(hideTimeout);
+          showTimeout = setTimeout(() => {
+            popup.classList.remove('invisible');
+          }, 200);
+        });
+        
+        trigger.addEventListener('mouseleave', () => {
+          clearTimeout(showTimeout);
+          hideTimeout = setTimeout(() => {
+            popup.classList.add('invisible');
+          }, 300);
+        });
+        
+        popup.addEventListener('mouseenter', () => {
+          clearTimeout(hideTimeout);
+        });
+        
+        popup.addEventListener('mouseleave', () => {
+          hideTimeout = setTimeout(() => {
+            popup.classList.add('invisible');
+          }, 300);
+        });
+      });
+    }
+    
+    // Setup popups on initial load
+    setupRegionPopups();
+
     // Handle filtering
     document.addEventListener('filtersChanged', (event: Event) => {
       const customEvent = event as CustomEvent;
       const filters = customEvent.detail;
+      activeFilters = filters;
       
       // Update pricing mode based on network options filter
       if (filters.networkOptions?.length === 1) {
@@ -308,18 +554,73 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'EU
       }
       
       filterAndRenderInstances(filters);
+      
+      // Update region display priority based on region filter
+      if (filters.regions?.length) {
+        updateRegionDisplayPriority(filters.regions);
+      }
     });
+    
+    function updateSortIndicators() {
+      // Reset all sort indicators
+      const allSortIcons = document.querySelectorAll('.sort-icon');
+      allSortIcons.forEach(icon => {
+        icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>';
+        icon.classList.remove('text-primary-600');
+        icon.classList.add('text-gray-400');
+      });
+      
+      // Update the active sort indicator
+      if (currentSortField) {
+        const activeHeader = document.querySelector(`th[data-sort="${currentSortField}"] .sort-icon`);
+        if (activeHeader) {
+          activeHeader.classList.remove('text-gray-400');
+          activeHeader.classList.add('text-primary-600');
+          
+          if (currentSortDirection === 'asc') {
+            activeHeader.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4l6 6 6-6"></path>';
+          } else {
+            activeHeader.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 16l-6-6-6 6"></path>';
+          }
+        }
+      }
+    }
     
     function sortInstances(field: string, direction: 'asc' | 'desc') {
       const visibleRows = Array.from(document.querySelectorAll('.instance-row:not(.hidden)'));
       const instances = visibleRows.map(row => JSON.parse((row as HTMLElement).dataset.instance || '{}'));
       
       instances.sort((a, b) => {
-        const aVal = a[field];
-        const bVal = b[field];
+        let aVal = a[field];
+        let bVal = b[field];
         
-        if (aVal === bVal) return 0;
-        const comparison = aVal < bVal ? -1 : 1;
+        // Handle nested fields (e.g., hetzner_metadata.cpu_benchmark)
+        if (field.includes('.')) {
+          const keys = field.split('.');
+          aVal = keys.reduce((obj, key) => obj?.[key], a);
+          bVal = keys.reduce((obj, key) => obj?.[key], b);
+        }
+        
+        // Handle null/undefined values
+        if (aVal == null && bVal == null) return 0;
+        if (aVal == null) return direction === 'asc' ? 1 : -1;
+        if (bVal == null) return direction === 'asc' ? -1 : 1;
+        
+        // Type-aware comparison
+        if (typeof aVal === 'string' && typeof bVal === 'string') {
+          const comparison = aVal.localeCompare(bVal);
+          return direction === 'asc' ? comparison : -comparison;
+        }
+        
+        // Numeric comparison
+        const aNum = Number(aVal);
+        const bNum = Number(bVal);
+        if (!isNaN(aNum) && !isNaN(bNum)) {
+          return direction === 'asc' ? aNum - bNum : bNum - aNum;
+        }
+        
+        // Fallback string comparison
+        const comparison = String(aVal).localeCompare(String(bVal));
         return direction === 'asc' ? comparison : -comparison;
       });
       
@@ -327,28 +628,160 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'EU
       renderInstances(instances);
     }
     
+    function updateRegionDisplayPriority(filteredRegions: string[]) {
+      // Update each row's region display to prioritize filtered regions
+      const regionsContainers = document.querySelectorAll('.regions-container');
+      
+      regionsContainers.forEach(container => {
+        const regionsData = JSON.parse(container.getAttribute('data-regions') || '[]');
+        if (!regionsData.length) return;
+        
+        // Sort regions to prioritize filtered ones
+        const prioritizedRegions = [...regionsData].sort((a, b) => {
+          const aIsFiltered = filteredRegions.some(filterRegion => 
+            filterRegion === a.country || filterRegion === a.code || filterRegion === a.region
+          );
+          const bIsFiltered = filteredRegions.some(filterRegion => 
+            filterRegion === b.country || filterRegion === b.code || filterRegion === b.region
+          );
+          
+          if (aIsFiltered && !bIsFiltered) return -1;
+          if (!aIsFiltered && bIsFiltered) return 1;
+          return 0;
+        });
+        
+        // Update the display
+        updateRegionDisplay(container as HTMLElement, prioritizedRegions);
+      });
+      
+      // Re-setup popup handlers after updating displays
+      setupRegionPopups();
+    }
+    
+    function updateRegionDisplay(container: HTMLElement, regions: any[]) {
+      const maxVisible = 3;
+      
+      // Clear existing content
+      container.innerHTML = '';
+      
+      // Show up to 3 regions (prioritized)
+      const visibleRegions = regions.slice(0, maxVisible);
+      const hiddenCount = Math.max(0, regions.length - maxVisible);
+      
+      visibleRegions.forEach(location => {
+        const regionElement = document.createElement('div');
+        regionElement.className = 'relative group';
+        regionElement.innerHTML = `
+          <span class="inline-flex items-center space-x-1 cursor-pointer hover:bg-gray-100 px-1 py-0.5 rounded">
+            <img 
+              src="https://flagsapi.com/${location.countryCode}/flat/16.png"
+              alt="${location.country}"
+              class="w-4 h-3 rounded-sm"
+              loading="lazy"
+            />
+            <span class="text-xs">${location.code}</span>
+          </span>
+          <div class="absolute z-20 invisible group-hover:visible bg-gray-900 text-white text-xs px-2 py-1 rounded shadow-lg bottom-full left-1/2 transform -translate-x-1/2 mb-1 whitespace-nowrap">
+            <div class="font-medium">${location.city}, ${location.country}</div>
+            <div class="text-gray-300">${location.region}</div>
+            <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+          </div>
+        `;
+        container.appendChild(regionElement);
+      });
+      
+      // Add "show more" indicator if there are hidden regions
+      if (hiddenCount > 0) {
+        const moreElement = document.createElement('div');
+        moreElement.className = 'relative group cursor-pointer';
+        
+        const allRegionsHtml = regions.map(location => `
+          <div class="flex items-center space-x-2 py-1">
+            <img 
+              src="https://flagsapi.com/${location.countryCode}/flat/16.png"
+              alt="${location.country}"
+              class="w-4 h-3 rounded-sm flex-shrink-0"
+              loading="lazy"
+            />
+            <div class="flex-1 min-w-0">
+              <div class="text-xs font-medium text-gray-900 truncate">${location.city}, ${location.country}</div>
+              <div class="text-xs text-gray-500 truncate">${location.code} • ${location.region}</div>
+            </div>
+          </div>
+        `).join('');
+        
+        moreElement.innerHTML = `
+          <span class="text-xs text-gray-400 hover:text-gray-600">+${hiddenCount}</span>
+          <div class="all-regions-popup absolute z-30 invisible bg-white border border-gray-200 rounded-lg shadow-lg p-3 bottom-full right-0 mb-2 w-64">
+            <div class="text-xs font-medium text-gray-900 mb-2">All Available Regions:</div>
+            <div class="grid grid-cols-1 gap-1 max-h-40 overflow-y-auto">
+              ${allRegionsHtml}
+            </div>
+            <div class="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-200"></div>
+          </div>
+        `;
+        moreElement.className = 'relative regions-more-trigger cursor-pointer';
+        container.appendChild(moreElement);
+      }
+    }
+    
     function filterAndRenderInstances(filters: any) {
       const filtered = allInstances.filter(instance => {
+        
         // Provider filter
         if (filters.providers?.length && !filters.providers.includes(instance.provider)) {
           return false;
         }
         
-        // Region filter
+        // Region filter - enhanced to check both locationDetails AND regionalPricing availability
         if (filters.regions?.length) {
           let instanceHasSelectedRegion = false;
           
-          // Check locationDetails for country match
-          if (instance.locationDetails && Array.isArray(instance.locationDetails)) {
-            instanceHasSelectedRegion = instance.locationDetails.some(location => 
-              filters.regions.includes(location.country)
-            );
+          // For instances with regionalPricing, ONLY check if regional pricing exists for filtered region
+          if (instance.regionalPricing && Array.isArray(instance.regionalPricing)) {
+            // First, find matching locations in locationDetails based on filter criteria
+            const matchingLocations = [];
+            if (instance.locationDetails && Array.isArray(instance.locationDetails)) {
+              matchingLocations.push(...instance.locationDetails.filter(location => 
+                filters.regions.some(filterRegion => 
+                  filterRegion === location.country || 
+                  filterRegion === location.code || 
+                  filterRegion === location.region ||
+                  filterRegion === location.city ||
+                  filterRegion.toLowerCase() === location.country.toLowerCase() ||
+                  filterRegion.toLowerCase() === location.code.toLowerCase()
+                )
+              ));
+            }
+            
+            // CRITICAL: Only show instance if it has regional pricing for the matching location
+            instanceHasSelectedRegion = matchingLocations.length > 0 && 
+              matchingLocations.some(location =>
+                instance.regionalPricing.some(pricing => pricing.location === location.code)
+              );
           }
-          // Fallback to legacy regions field
-          else if (instance.regions && Array.isArray(instance.regions)) {
-            instanceHasSelectedRegion = instance.regions.some(region => 
-              filters.regions.includes(region)
-            );
+          // Fallback to legacy regions field only if no regionalPricing exists
+          else {
+            if (instance.locationDetails && Array.isArray(instance.locationDetails)) {
+              instanceHasSelectedRegion = instance.locationDetails.some(location => 
+                filters.regions.some(filterRegion => 
+                  filterRegion === location.country || 
+                  filterRegion === location.code || 
+                  filterRegion === location.region ||
+                  filterRegion === location.city ||
+                  filterRegion.toLowerCase() === location.country.toLowerCase() ||
+                  filterRegion.toLowerCase() === location.code.toLowerCase()
+                )
+              );
+            }
+            else if (instance.regions && Array.isArray(instance.regions)) {
+              instanceHasSelectedRegion = instance.regions.some(region => 
+                filters.regions.some(filterRegion =>
+                  filterRegion === region ||
+                  filterRegion.toLowerCase() === region.toLowerCase()
+                )
+              );
+            }
           }
           
           if (!instanceHasSelectedRegion) {
@@ -372,8 +805,23 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'EU
         // Network options filter (support both old and new formats)
         if (filters.networkOptions?.length) {
           const instanceNetworkOption = instance.networkType || instance.networkOptions;
-          if (instanceNetworkOption && !filters.networkOptions.includes(instanceNetworkOption)) {
-            return false;
+          
+          // Handle object format (new networkOptions structure)
+          if (instanceNetworkOption && typeof instanceNetworkOption === 'object') {
+            // Check if any of the filtered network options are available in the object
+            const hasMatchingNetworkOption = filters.networkOptions.some(filterOption => 
+              instanceNetworkOption[filterOption] && instanceNetworkOption[filterOption].available
+            );
+            
+            if (!hasMatchingNetworkOption) {
+              return false;
+            }
+          }
+          // Handle string format (legacy networkType)
+          else if (instanceNetworkOption && typeof instanceNetworkOption === 'string') {
+            if (!filters.networkOptions.includes(instanceNetworkOption)) {
+              return false;
+            }
           }
         }
         
@@ -387,23 +835,208 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'EU
           return false;
         }
         
-        // Price filter
-        if (instance.priceUSD_hourly > filters.maxPrice) {
+        // Price filter - use current pricing mode and region-specific pricing
+        let priceToCheck = 0;
+        
+        // Get region-specific pricing if regions are filtered
+        if (filters.regions?.length === 1 && instance.regionalPricing && instance.locationDetails) {
+          const selectedRegion = filters.regions[0];
+          
+          // Find matching location
+          const matchingLocation = instance.locationDetails.find(location => 
+            selectedRegion === location.country || 
+            selectedRegion === location.code || 
+            selectedRegion.toLowerCase() === location.country.toLowerCase() ||
+            selectedRegion.toLowerCase() === location.code.toLowerCase()
+          );
+          
+          // Find corresponding regional pricing
+          if (matchingLocation) {
+            const regionalPrice = instance.regionalPricing.find(pricing => 
+              pricing.location === matchingLocation.code
+            );
+            if (regionalPrice && regionalPrice.hourly_net) {
+              priceToCheck = regionalPrice.hourly_net;
+            }
+          }
+        }
+        
+        // Fallback to instance-level pricing
+        if (priceToCheck === 0) {
+          if (instance.networkOptions && typeof instance.networkOptions === 'object') {
+            const option = instance.networkOptions[currentPricingMode];
+            if (option && option.available && option.hourly !== null) {
+              priceToCheck = option.hourly;
+            }
+          }
+          
+          if (priceToCheck === 0) {
+            priceToCheck = instance.priceUSD_hourly || instance.priceEUR_hourly_net || 0;
+          }
+        }
+        
+        if (instance.type === 'cloud-server' && instance.instanceType === 'cx22') {
+          console.log('  Final price to check:', priceToCheck, 'vs max price:', filters.maxPrice);
+        }
+        
+        if (priceToCheck > filters.maxPrice) {
+          if (instance.type === 'cloud-server' && instance.instanceType === 'cx22') {
+            console.log('  FAILED price filter. Price:', priceToCheck, 'Max:', filters.maxPrice);
+          }
           return false;
+        }
+        
+        if (instance.type === 'cloud-server' && instance.instanceType === 'cx22') {
+          console.log('  PASSED ALL FILTERS! 🎉');
         }
         
         return true;
       });
       
+      console.log(`Filtered result: ${filtered.length} instances`);
+      console.log('Filtered examples:', filtered.slice(0, 5).map(i => ({instanceType: i.instanceType, type: i.type})));
+      
       renderInstances(filtered);
+      
+      // Update pricing display for region-specific pricing
+      if (filters.regions?.length === 1) {
+        updateRegionSpecificPricing(filters.regions[0]);
+      } else {
+        // Reset to default pricing when no single region is selected
+        resetToDefaultPricing();
+      }
       
       if (resultCount) {
         resultCount.textContent = `${filtered.length} instances`;
       }
     }
     
+    function updateRegionSpecificPricing(selectedRegion: string) {
+      document.querySelectorAll('.instance-row:not(.hidden)').forEach(row => {
+        const instance = JSON.parse((row as HTMLElement).dataset.instance || '{}');
+        
+        if (!instance.locationDetails || !instance.regionalPricing) return;
+        
+        // Find matching location for the selected region
+        const matchingLocation = instance.locationDetails.find(location => 
+          selectedRegion === location.country || 
+          selectedRegion === location.code || 
+          selectedRegion.toLowerCase() === location.country.toLowerCase() ||
+          selectedRegion.toLowerCase() === location.code.toLowerCase()
+        );
+        
+        if (matchingLocation) {
+          // Find corresponding regional pricing
+          const regionalPrice = instance.regionalPricing.find(pricing => 
+            pricing.location === matchingLocation.code
+          );
+          
+          if (regionalPrice) {
+            // Update hourly pricing
+            const hourlyCell = row.querySelector('.pricing-hourly .pricing-value');
+            if (hourlyCell && regionalPrice.hourly_net) {
+              hourlyCell.textContent = new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'EUR',
+                minimumFractionDigits: 4,
+              }).format(regionalPrice.hourly_net);
+            }
+            
+            // Update monthly pricing
+            const monthlyCell = row.querySelector('.pricing-monthly .pricing-value');
+            if (monthlyCell && regionalPrice.monthly_net) {
+              monthlyCell.textContent = new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'EUR',
+                minimumFractionDigits: 2,
+              }).format(regionalPrice.monthly_net);
+            }
+            
+            // Add region-specific indicator
+            const networkInfo = row.querySelector('[data-network-info="true"]');
+            if (networkInfo) {
+              const description = networkInfo.querySelector('.pricing-description');
+              if (description) {
+                description.textContent = `${matchingLocation.city} pricing`;
+                description.className = 'text-xs text-blue-600 pricing-description';
+              }
+            }
+            
+            // Show traffic info if available
+            if (regionalPrice.included_traffic || regionalPrice.traffic_price_per_tb) {
+              const trafficInfo = document.createElement('div');
+              trafficInfo.className = 'text-xs text-gray-500 mt-1';
+              let trafficText = '';
+              
+              if (regionalPrice.included_traffic) {
+                const trafficTB = (regionalPrice.included_traffic / (1024 * 1024 * 1024 * 1024)).toFixed(1);
+                trafficText += `${trafficTB}TB included`;
+              }
+              
+              if (regionalPrice.traffic_price_per_tb) {
+                if (trafficText) trafficText += ', ';
+                trafficText += `€${regionalPrice.traffic_price_per_tb}/TB overage`;
+              }
+              
+              if (trafficText) {
+                trafficInfo.textContent = trafficText;
+                const hourlyCell = row.querySelector('.pricing-hourly');
+                if (hourlyCell && !hourlyCell.querySelector('.traffic-info')) {
+                  trafficInfo.classList.add('traffic-info');
+                  hourlyCell.appendChild(trafficInfo);
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+    
+    function resetToDefaultPricing() {
+      document.querySelectorAll('.instance-row:not(.hidden)').forEach(row => {
+        const instance = JSON.parse((row as HTMLElement).dataset.instance || '{}');
+        
+        // Remove any traffic info
+        const trafficInfos = row.querySelectorAll('.traffic-info');
+        trafficInfos.forEach(info => info.remove());
+        
+        // Reset to default pricing
+        const hourlyCell = row.querySelector('.pricing-hourly .pricing-value');
+        if (hourlyCell) {
+          const price = instance.priceEUR_hourly_net || instance.priceUSD_hourly || 0;
+          const currency = instance.priceEUR_hourly_net ? 'EUR' : 'USD';
+          hourlyCell.textContent = new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: currency,
+            minimumFractionDigits: currency === 'EUR' ? 4 : 4,
+          }).format(price);
+        }
+        
+        const monthlyCell = row.querySelector('.pricing-monthly .pricing-value');
+        if (monthlyCell) {
+          const price = instance.priceEUR_monthly_net || instance.priceUSD_monthly || 0;
+          const currency = instance.priceEUR_monthly_net ? 'EUR' : 'USD';
+          monthlyCell.textContent = new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: currency,
+            minimumFractionDigits: currency === 'EUR' ? 2 : 2,
+          }).format(price);
+        }
+        
+        // Reset network description
+        const networkInfo = row.querySelector('[data-network-info="true"]');
+        if (networkInfo) {
+          const description = networkInfo.querySelector('.pricing-description');
+          if (description) {
+            description.textContent = 'Standard pricing';
+            description.className = 'text-xs text-gray-500 pricing-description';
+          }
+        }
+      });
+    }
+    
     function updatePricingDisplay() {
-      document.querySelectorAll('.instance-row').forEach(row => {
+      document.querySelectorAll('.instance-row:not([style*="display: none"])').forEach(row => {
         const instance = JSON.parse((row as HTMLElement).dataset.instance || '{}');
         
         // Update network info
@@ -529,6 +1162,9 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'EU
       
       // Update pricing display after rendering
       updatePricingDisplay();
+      
+      // Re-setup region popups after rendering
+      setupRegionPopups();
     }
   });
 </script>

@@ -60,7 +60,7 @@ const formatDate = (dateString: string) => {
     <div class="mt-4 pt-4 border-t border-gray-200">
       <div class="flex flex-wrap items-center gap-4 text-sm text-gray-600">
         <div>
-          <span class="font-medium">Last Updated:</span>
+          <span class="font-medium">Last Updated: </span>
           {formatDate(summary.lastUpdated)}
         </div>
         
@@ -73,6 +73,14 @@ const formatDate = (dateString: string) => {
             ))}
           </div>
         )}
+      </div>
+      
+      <div class="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+        <p class="text-xs text-blue-800">
+          <span class="font-medium">Note:</span> Pricing data is collected from provider APIs and is approximately correct. 
+          Prices may vary by region, billing period, and specific configurations. 
+          Please verify pricing directly with providers before making purchasing decisions.
+        </p>
       </div>
     </div>
   </div>

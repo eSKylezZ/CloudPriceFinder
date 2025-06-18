@@ -68,14 +68,29 @@ def validate_instance_data(instance: Dict[str, Any]) -> bool:
                 logger.error(f"Invalid memoryGiB: {instance['memoryGiB']}")
                 return False
         
-        if not isinstance(instance['priceUSD_hourly'], (int, float)) or instance['priceUSD_hourly'] < 0:
-            logger.error(f"Invalid priceUSD_hourly: {instance['priceUSD_hourly']}")
+        # Check for meaningful pricing data (either USD or EUR pricing)
+        has_usd_pricing = (isinstance(instance.get('priceUSD_hourly'), (int, float)) and 
+                          instance['priceUSD_hourly'] > 0)
+        has_eur_pricing = (isinstance(instance.get('priceEUR_hourly_net'), (int, float)) and 
+                          instance['priceEUR_hourly_net'] > 0)
+        
+        if not has_usd_pricing and not has_eur_pricing:
+            logger.error(f"No valid pricing data found for {instance.get('instanceType')}")
             return False
         
         # Validate string fields are not empty
         if not instance['instanceType'].strip():
             logger.error("instanceType cannot be empty")
             return False
+        
+        # For compute instances, require basic specs
+        if instance['type'] in ['cloud-server', 'dedicated-server', 'dedicated-auction']:
+            if not instance.get('vCPU') or instance.get('vCPU', 0) <= 0:
+                logger.error(f"Compute instance missing valid vCPU: {instance.get('instanceType')}")
+                return False
+            if not instance.get('memoryGiB') or instance.get('memoryGiB', 0) <= 0:
+                logger.error(f"Compute instance missing valid memory: {instance.get('instanceType')}")
+                return False
         
         return True
         
