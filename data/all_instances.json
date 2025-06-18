@@ -64,7 +64,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CPX 11",
-    "lastUpdated": "2025-06-18T12:13:46.792431",
+    "lastUpdated": "2025-06-18T12:25:19.877446",
     "priceEUR_hourly_net": 0.0063,
     "priceEUR_monthly_net": 3.85,
     "regionalPricing": [
@@ -142,14 +142,14 @@
       },
       "ipv6_only": {
         "available": true,
-        "hourly": 0.004652777777777778,
+        "hourly": 0.004586276764689776,
         "monthly": 3.35,
         "savings": 0.5,
         "description": "IPv6-only (saves €0.50/month)",
         "priceRange": {
           "hourly": {
-            "min": 0.0056055555555555555,
-            "max": 0.011205555555555557
+            "min": 0.0056154810798970485,
+            "max": 0.01121548107989705
           },
           "monthly": {
             "min": 3.35,
@@ -240,7 +240,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CPX 21",
-    "lastUpdated": "2025-06-18T12:13:46.792477",
+    "lastUpdated": "2025-06-18T12:25:19.877502",
     "priceEUR_hourly_net": 0.0112,
     "priceEUR_monthly_net": 7.05,
     "regionalPricing": [
@@ -318,14 +318,14 @@
       },
       "ipv6_only": {
         "available": true,
-        "hourly": 0.009097222222222222,
+        "hourly": 0.008967197853348666,
         "monthly": 6.55,
         "savings": 0.5,
         "description": "IPv6-only (saves €0.50/month)",
         "priceRange": {
           "hourly": {
-            "min": 0.010505555555555556,
-            "max": 0.021905555555555553
+            "min": 0.010515481079897047,
+            "max": 0.021915481079897048
           },
           "monthly": {
             "min": 6.55,
@@ -416,7 +416,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CPX 31",
-    "lastUpdated": "2025-06-18T12:13:46.792502",
+    "lastUpdated": "2025-06-18T12:25:19.877535",
     "priceEUR_hourly_net": 0.0211,
     "priceEUR_monthly_net": 13.1,
     "regionalPricing": [
@@ -494,14 +494,14 @@
       },
       "ipv6_only": {
         "available": true,
-        "hourly": 0.017499999999999998,
+        "hourly": 0.01724987678659438,
         "monthly": 12.6,
         "savings": 0.5,
         "description": "IPv6-only (saves €0.50/month)",
         "priceRange": {
           "hourly": {
-            "min": 0.020405555555555555,
-            "max": 0.03900555555555556
+            "min": 0.02041548107989705,
+            "max": 0.039015481079897045
           },
           "monthly": {
             "min": 12.6,
@@ -592,7 +592,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CPX 41",
-    "lastUpdated": "2025-06-18T12:13:46.792524",
+    "lastUpdated": "2025-06-18T12:25:19.877558",
     "priceEUR_hourly_net": 0.0409,
     "priceEUR_monthly_net": 24.7,
     "regionalPricing": [
@@ -670,14 +670,14 @@
       },
       "ipv6_only": {
         "available": true,
-        "hourly": 0.03361111111111111,
+        "hourly": 0.03313071573298285,
         "monthly": 24.2,
         "savings": 0.5,
         "description": "IPv6-only (saves €0.50/month)",
         "priceRange": {
           "hourly": {
-            "min": 0.04020555555555556,
-            "max": 0.06760555555555556
+            "min": 0.040215481079897045,
+            "max": 0.06761548107989705
           },
           "monthly": {
             "min": 24.2,
@@ -768,7 +768,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CPX 51",
-    "lastUpdated": "2025-06-18T12:13:46.792550",
+    "lastUpdated": "2025-06-18T12:25:19.877582",
     "priceEUR_hourly_net": 0.0872,
     "priceEUR_monthly_net": 54.4,
     "regionalPricing": [
@@ -846,14 +846,14 @@
       },
       "ipv6_only": {
         "available": true,
-        "hourly": 0.07486111111111111,
+        "hourly": 0.07379113958709818,
         "monthly": 53.9,
         "savings": 0.5,
         "description": "IPv6-only (saves €0.50/month)",
         "priceRange": {
           "hourly": {
-            "min": 0.08650555555555556,
-            "max": 0.12250555555555556
+            "min": 0.08651548107989705,
+            "max": 0.12251548107989706
           },
           "monthly": {
             "min": 53.9,
@@ -920,7 +920,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CAX11",
-    "lastUpdated": "2025-06-18T12:13:46.792568",
+    "lastUpdated": "2025-06-18T12:25:19.877604",
     "priceEUR_hourly_net": 0.0053,
     "priceEUR_monthly_net": 3.29,
     "regionalPricing": [
@@ -977,14 +977,14 @@
       },
       "ipv6_only": {
         "available": true,
-        "hourly": 0.003875,
+        "hourly": 0.00381961557417447,
         "monthly": 2.79,
         "savings": 0.5,
         "description": "IPv6-only (saves €0.50/month)",
         "priceRange": {
           "hourly": {
-            "min": 0.0046055555555555554,
-            "max": 0.0046055555555555554
+            "min": 0.0046154810798970484,
+            "max": 0.0046154810798970484
           },
           "monthly": {
             "min": 2.79,
@@ -1051,7 +1051,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CAX21",
-    "lastUpdated": "2025-06-18T12:13:46.792587",
+    "lastUpdated": "2025-06-18T12:25:19.877621",
     "priceEUR_hourly_net": 0.0096,
     "priceEUR_monthly_net": 5.99,
     "regionalPricing": [
@@ -1108,14 +1108,14 @@
       },
       "ipv6_only": {
         "available": true,
-        "hourly": 0.007625000000000001,
+        "hourly": 0.007516017742730409,
         "monthly": 5.49,
         "savings": 0.5,
         "description": "IPv6-only (saves €0.50/month)",
         "priceRange": {
           "hourly": {
-            "min": 0.008905555555555555,
-            "max": 0.008905555555555555
+            "min": 0.008915481079897047,
+            "max": 0.008915481079897047
           },
           "monthly": {
             "min": 5.49,
@@ -1182,7 +1182,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CAX31",
-    "lastUpdated": "2025-06-18T12:13:46.792605",
+    "lastUpdated": "2025-06-18T12:25:19.877642",
     "priceEUR_hourly_net": 0.0192,
     "priceEUR_monthly_net": 11.99,
     "regionalPricing": [
@@ -1239,14 +1239,14 @@
       },
       "ipv6_only": {
         "available": true,
-        "hourly": 0.015958333333333335,
+        "hourly": 0.015730244783965827,
         "monthly": 11.49,
         "savings": 0.5,
         "description": "IPv6-only (saves €0.50/month)",
         "priceRange": {
           "hourly": {
-            "min": 0.018505555555555553,
-            "max": 0.018505555555555553
+            "min": 0.018515481079897048,
+            "max": 0.018515481079897048
           },
           "monthly": {
             "min": 11.49,
@@ -1313,7 +1313,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CAX41",
-    "lastUpdated": "2025-06-18T12:13:46.792620",
+    "lastUpdated": "2025-06-18T12:25:19.877662",
     "priceEUR_hourly_net": 0.0384,
     "priceEUR_monthly_net": 23.99,
     "regionalPricing": [
@@ -1370,14 +1370,14 @@
       },
       "ipv6_only": {
         "available": true,
-        "hourly": 0.032625,
+        "hourly": 0.032158698866436665,
         "monthly": 23.49,
         "savings": 0.5,
         "description": "IPv6-only (saves €0.50/month)",
         "priceRange": {
           "hourly": {
-            "min": 0.037705555555555555,
-            "max": 0.037705555555555555
+            "min": 0.03771548107989704,
+            "max": 0.03771548107989704
           },
           "monthly": {
             "min": 23.49,
@@ -1468,7 +1468,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX13 Dedicated CPU",
-    "lastUpdated": "2025-06-18T12:13:46.792643",
+    "lastUpdated": "2025-06-18T12:25:19.877687",
     "priceEUR_hourly_net": 0.0192,
     "priceEUR_monthly_net": 11.99,
     "regionalPricing": [
@@ -1546,14 +1546,14 @@
       },
       "ipv6_only": {
         "available": true,
-        "hourly": 0.015958333333333335,
+        "hourly": 0.015730244783965827,
         "monthly": 11.49,
         "savings": 0.5,
         "description": "IPv6-only (saves €0.50/month)",
         "priceRange": {
           "hourly": {
-            "min": 0.018505555555555553,
-            "max": 0.03300555555555556
+            "min": 0.018515481079897048,
+            "max": 0.03301548107989705
           },
           "monthly": {
             "min": 11.49,
@@ -1644,7 +1644,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX23 Dedicated CPU",
-    "lastUpdated": "2025-06-18T12:13:46.792665",
+    "lastUpdated": "2025-06-18T12:25:19.877715",
     "priceEUR_hourly_net": 0.0384,
     "priceEUR_monthly_net": 23.99,
     "regionalPricing": [
@@ -1722,14 +1722,14 @@
       },
       "ipv6_only": {
         "available": true,
-        "hourly": 0.032625,
+        "hourly": 0.032158698866436665,
         "monthly": 23.49,
         "savings": 0.5,
         "description": "IPv6-only (saves €0.50/month)",
         "priceRange": {
           "hourly": {
-            "min": 0.037705555555555555,
-            "max": 0.06240555555555556
+            "min": 0.03771548107989704,
+            "max": 0.06241548107989705
           },
           "monthly": {
             "min": 23.49,
@@ -1820,7 +1820,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX33 Dedicated CPU",
-    "lastUpdated": "2025-06-18T12:13:46.792686",
+    "lastUpdated": "2025-06-18T12:25:19.877739",
     "priceEUR_hourly_net": 0.0769,
     "priceEUR_monthly_net": 47.99,
     "regionalPricing": [
@@ -1898,14 +1898,14 @@
       },
       "ipv6_only": {
         "available": true,
-        "hourly": 0.06595833333333334,
+        "hourly": 0.06501560703137835,
         "monthly": 47.49,
         "savings": 0.5,
         "description": "IPv6-only (saves €0.50/month)",
         "priceRange": {
           "hourly": {
-            "min": 0.07620555555555555,
-            "max": 0.11850555555555556
+            "min": 0.07621548107989705,
+            "max": 0.11851548107989705
           },
           "monthly": {
             "min": 47.49,
@@ -1996,7 +1996,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX43 Dedicated CPU",
-    "lastUpdated": "2025-06-18T12:13:46.792725",
+    "lastUpdated": "2025-06-18T12:25:19.877784",
     "priceEUR_hourly_net": 0.1538,
     "priceEUR_monthly_net": 95.99,
     "regionalPricing": [
@@ -2074,14 +2074,14 @@
       },
       "ipv6_only": {
         "available": true,
-        "hourly": 0.132625,
+        "hourly": 0.1307294233612617,
         "monthly": 95.49,
         "savings": 0.5,
         "description": "IPv6-only (saves €0.50/month)",
         "priceRange": {
           "hourly": {
-            "min": 0.15310555555555555,
-            "max": 0.21890555555555555
+            "min": 0.15311548107989703,
+            "max": 0.21891548107989703
           },
           "monthly": {
             "min": 95.49,
@@ -2172,7 +2172,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX53 Dedicated CPU",
-    "lastUpdated": "2025-06-18T12:13:46.792748",
+    "lastUpdated": "2025-06-18T12:25:19.877808",
     "priceEUR_hourly_net": 0.3077,
     "priceEUR_monthly_net": 191.99,
     "regionalPricing": [
@@ -2250,14 +2250,14 @@
       },
       "ipv6_only": {
         "available": true,
-        "hourly": 0.26595833333333335,
+        "hourly": 0.2621570560210284,
         "monthly": 191.49,
         "savings": 0.5,
         "description": "IPv6-only (saves €0.50/month)",
         "priceRange": {
           "hourly": {
-            "min": 0.30700555555555553,
-            "max": 0.47050555555555557
+            "min": 0.307015481079897,
+            "max": 0.47051548107989705
           },
           "monthly": {
             "min": 191.49,
@@ -2348,7 +2348,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX63 Dedicated CPU",
-    "lastUpdated": "2025-06-18T12:13:46.792768",
+    "lastUpdated": "2025-06-18T12:25:19.877833",
     "priceEUR_hourly_net": 0.4615,
     "priceEUR_monthly_net": 287.99,
     "regionalPricing": [
@@ -2426,14 +2426,14 @@
       },
       "ipv6_only": {
         "available": true,
-        "hourly": 0.39929166666666666,
+        "hourly": 0.3935846886807951,
         "monthly": 287.49,
         "savings": 0.5,
         "description": "IPv6-only (saves €0.50/month)",
         "priceRange": {
           "hourly": {
-            "min": 0.4608055555555556,
-            "max": 0.7717055555555555
+            "min": 0.46081548107989706,
+            "max": 0.7717154810798971
           },
           "monthly": {
             "min": 287.49,
@@ -2500,7 +2500,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CX22",
-    "lastUpdated": "2025-06-18T12:13:46.792786",
+    "lastUpdated": "2025-06-18T12:25:19.877853",
     "priceEUR_hourly_net": 0.0052,
     "priceEUR_monthly_net": 3.29,
     "regionalPricing": [
@@ -2557,14 +2557,14 @@
       },
       "ipv6_only": {
         "available": true,
-        "hourly": 0.003875,
+        "hourly": 0.00381961557417447,
         "monthly": 2.79,
         "savings": 0.5,
         "description": "IPv6-only (saves €0.50/month)",
         "priceRange": {
           "hourly": {
-            "min": 0.004505555555555555,
-            "max": 0.004505555555555555
+            "min": 0.004515481079897048,
+            "max": 0.004515481079897048
           },
           "monthly": {
             "min": 2.79,
@@ -2631,7 +2631,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CX32",
-    "lastUpdated": "2025-06-18T12:13:46.792801",
+    "lastUpdated": "2025-06-18T12:25:19.877872",
     "priceEUR_hourly_net": 0.0105,
     "priceEUR_monthly_net": 6.3,
     "regionalPricing": [
@@ -2688,14 +2688,14 @@
       },
       "ipv6_only": {
         "available": true,
-        "hourly": 0.008055555555555555,
+        "hourly": 0.007940419473194238,
         "monthly": 5.8,
         "savings": 0.5,
         "description": "IPv6-only (saves €0.50/month)",
         "priceRange": {
           "hourly": {
-            "min": 0.009805555555555557,
-            "max": 0.009805555555555557
+            "min": 0.009815481079897048,
+            "max": 0.009815481079897048
           },
           "monthly": {
             "min": 5.8,
@@ -2762,7 +2762,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CX42",
-    "lastUpdated": "2025-06-18T12:13:46.792817",
+    "lastUpdated": "2025-06-18T12:25:19.877891",
     "priceEUR_hourly_net": 0.0265,
     "priceEUR_monthly_net": 15.9,
     "regionalPricing": [
@@ -2819,14 +2819,14 @@
       },
       "ipv6_only": {
         "available": true,
-        "hourly": 0.021388888888888888,
+        "hourly": 0.02108318273917091,
         "monthly": 15.4,
         "savings": 0.5,
         "description": "IPv6-only (saves €0.50/month)",
         "priceRange": {
           "hourly": {
-            "min": 0.025805555555555554,
-            "max": 0.025805555555555554
+            "min": 0.02581548107989705,
+            "max": 0.02581548107989705
           },
           "monthly": {
             "min": 15.4,
@@ -2893,7 +2893,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CX52",
-    "lastUpdated": "2025-06-18T12:13:46.792833",
+    "lastUpdated": "2025-06-18T12:25:19.877909",
     "priceEUR_hourly_net": 0.0532,
     "priceEUR_monthly_net": 31.9,
     "regionalPricing": [
@@ -2950,14 +2950,14 @@
       },
       "ipv6_only": {
         "available": true,
-        "hourly": 0.04361111111111111,
+        "hourly": 0.04298778818246536,
         "monthly": 31.4,
         "savings": 0.5,
         "description": "IPv6-only (saves €0.50/month)",
         "priceRange": {
           "hourly": {
-            "min": 0.052505555555555555,
-            "max": 0.052505555555555555
+            "min": 0.05251548107989704,
+            "max": 0.05251548107989704
           },
           "monthly": {
             "min": 31.4,
@@ -3001,10 +3001,54 @@
       "hil",
       "ash"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      },
+      {
+        "code": "sin",
+        "city": "Singapore",
+        "country": "Singapore",
+        "countryCode": "SG",
+        "region": "Singapore"
+      },
+      {
+        "code": "hil",
+        "city": "Hildesheim",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Lower Saxony"
+      },
+      {
+        "code": "ash",
+        "city": "Ashburn",
+        "country": "United States",
+        "countryCode": "US",
+        "region": "Virginia"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "LB11",
-    "lastUpdated": "2025-06-18T12:13:47.403649",
+    "lastUpdated": "2025-06-18T12:25:20.685213",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "hcloud_library",
@@ -3037,10 +3081,54 @@
       "hil",
       "ash"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      },
+      {
+        "code": "sin",
+        "city": "Singapore",
+        "country": "Singapore",
+        "countryCode": "SG",
+        "region": "Singapore"
+      },
+      {
+        "code": "hil",
+        "city": "Hildesheim",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Lower Saxony"
+      },
+      {
+        "code": "ash",
+        "city": "Ashburn",
+        "country": "United States",
+        "countryCode": "US",
+        "region": "Virginia"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "LB21",
-    "lastUpdated": "2025-06-18T12:13:47.403672",
+    "lastUpdated": "2025-06-18T12:25:20.685240",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "hcloud_library",
@@ -3073,10 +3161,54 @@
       "hil",
       "ash"
     ],
+    "locationDetails": [
+      {
+        "code": "fsn1",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Saxony"
+      },
+      {
+        "code": "nbg1",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Bavaria"
+      },
+      {
+        "code": "hel1",
+        "city": "Helsinki",
+        "country": "Finland",
+        "countryCode": "FI",
+        "region": "Uusimaa"
+      },
+      {
+        "code": "sin",
+        "city": "Singapore",
+        "country": "Singapore",
+        "countryCode": "SG",
+        "region": "Singapore"
+      },
+      {
+        "code": "hil",
+        "city": "Hildesheim",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Lower Saxony"
+      },
+      {
+        "code": "ash",
+        "city": "Ashburn",
+        "country": "United States",
+        "countryCode": "US",
+        "region": "Virginia"
+      }
+    ],
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "LB31",
-    "lastUpdated": "2025-06-18T12:13:47.403683",
+    "lastUpdated": "2025-06-18T12:25:20.685255",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "hcloud_library",
