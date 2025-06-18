@@ -11,7 +11,31 @@ const { instances } = Astro.props;
 const providers = getUniqueValues(instances, 'provider');
 const instanceTypes = getUniqueValues(instances, 'type');
 const ipTypes = getUniqueValues(instances, 'ipType').filter(Boolean);
-const networkOptions = getUniqueValues(instances, 'networkOptions').filter(Boolean);
+
+// Handle both old and new networkOptions structure
+const networkOptionsSet = new Set<string>();
+instances.forEach(instance => {
+  // New structure: networkOptions is an object with keys
+  if (instance.networkOptions && typeof instance.networkOptions === 'object') {
+    Object.keys(instance.networkOptions).forEach(key => {
+      if (instance.networkOptions![key as keyof typeof instance.networkOptions]?.available) {
+        networkOptionsSet.add(key);
+      }
+    });
+  }
+  // Legacy structure: networkOptions is a string
+  else if (instance.networkOptions && typeof instance.networkOptions === 'string') {
+    networkOptionsSet.add(instance.networkOptions);
+  }
+  // Fallback to networkType or defaultNetworkType
+  else if (instance.networkType) {
+    networkOptionsSet.add(instance.networkType);
+  }
+  else if (instance.defaultNetworkType) {
+    networkOptionsSet.add(instance.defaultNetworkType);
+  }
+});
+const networkOptions = Array.from(networkOptionsSet).filter(Boolean);
 
 // Calculate ranges for sliders
 const vCPURange = instances.length > 0 ? {
@@ -195,7 +219,7 @@ const priceRange = instances.length > 0 ? {
               class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
             />
             <span class="ml-2 text-sm text-gray-600 capitalize">
-              {option.replace('_', ' ')}
+              {String(option).replace('_', ' ').replace('ipv4 ipv6', 'IPv4 + IPv6').replace('ipv6 only', 'IPv6-only')}
             </span>
           </label>
         ))}

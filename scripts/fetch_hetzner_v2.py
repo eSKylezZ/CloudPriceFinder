@@ -88,11 +88,19 @@ class HetznerAPIClient:
                 )
                 
                 if response.status_code == 200:
-                    data = response.json()
-                    self._set_cache(cache_key, data)
-                    return data
+                    try:
+                        data = response.json()
+                        self._set_cache(cache_key, data)
+                        return data
+                    except ValueError as e:
+                        logger.error(f"Invalid JSON response from {url}: {e}")
+                        logger.debug(f"Response content: {response.text[:500]}...")
+                        return None
                 elif response.status_code == 401:
                     logger.error(f"Authentication failed for {url}")
+                    return None
+                elif response.status_code == 403:
+                    logger.error(f"Access forbidden for {url} - check API credentials")
                     return None
                 elif response.status_code == 429:
                     wait_time = 2 ** attempt
@@ -101,6 +109,7 @@ class HetznerAPIClient:
                     continue
                 else:
                     logger.warning(f"HTTP {response.status_code} for {url}")
+                    logger.debug(f"Response content: {response.text[:200]}...")
                     
             except requests.exceptions.RequestException as e:
                 logger.warning(f"Request failed (attempt {attempt + 1}): {e}")
@@ -128,11 +137,14 @@ class HetznerAPIClient:
     def robot_api_request(self, endpoint: str) -> Optional[Dict[str, Any]]:
         """Make request to Hetzner Robot API."""
         if not config.robot_user or not config.robot_password:
-            logger.warning("Robot API credentials not provided")
+            logger.info("Robot API credentials not provided - skipping dedicated servers")
             return None
         
         url = f"{config.robot_api_url}/{endpoint.lstrip('/')}"
-        headers = {'Content-Type': 'application/json'}
+        headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
         auth = (config.robot_user, config.robot_password)
         
         return self._make_request(url, headers, auth)
@@ -596,13 +608,17 @@ class HetznerDedicatedCollector:
         
         all_services = []
         
-        # Try Robot API first
+        # Try Robot API first if credentials are available
         if config.robot_user and config.robot_password:
             logger.info("Using Robot API for dedicated servers...")
-            robot_servers = self._collect_robot_api_servers()
-            all_services.extend(robot_servers)
+            try:
+                robot_servers = self._collect_robot_api_servers()
+                all_services.extend(robot_servers)
+            except Exception as e:
+                logger.error(f"Failed to collect Robot API data: {e}")
         else:
-            logger.info("Robot API credentials not provided - skipping Robot API")
+            logger.info("Robot API credentials not provided - skipping dedicated servers")
+            logger.info("To enable dedicated servers, set HETZNER_ROBOT_USER and HETZNER_ROBOT_PASSWORD")
         
         logger.info(f"Collected {len(all_services)} dedicated services")
         return all_services
