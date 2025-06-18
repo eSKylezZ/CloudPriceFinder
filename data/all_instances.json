@@ -64,7 +64,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CPX 11",
-    "lastUpdated": "2025-06-18T17:32:37.390425",
+    "lastUpdated": "2025-06-18T17:41:08.011906",
     "priceEUR_hourly_net": 0.0063,
     "priceEUR_monthly_net": 3.85,
     "regionalPricing": [
@@ -240,7 +240,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CPX 21",
-    "lastUpdated": "2025-06-18T17:32:37.390472",
+    "lastUpdated": "2025-06-18T17:41:08.011962",
     "priceEUR_hourly_net": 0.0112,
     "priceEUR_monthly_net": 7.05,
     "regionalPricing": [
@@ -416,7 +416,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CPX 31",
-    "lastUpdated": "2025-06-18T17:32:37.390500",
+    "lastUpdated": "2025-06-18T17:41:08.011992",
     "priceEUR_hourly_net": 0.0211,
     "priceEUR_monthly_net": 13.1,
     "regionalPricing": [
@@ -592,7 +592,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CPX 41",
-    "lastUpdated": "2025-06-18T17:32:37.390527",
+    "lastUpdated": "2025-06-18T17:41:08.012022",
     "priceEUR_hourly_net": 0.0409,
     "priceEUR_monthly_net": 24.7,
     "regionalPricing": [
@@ -768,7 +768,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CPX 51",
-    "lastUpdated": "2025-06-18T17:32:37.390551",
+    "lastUpdated": "2025-06-18T17:41:08.012047",
     "priceEUR_hourly_net": 0.0872,
     "priceEUR_monthly_net": 54.4,
     "regionalPricing": [
@@ -920,7 +920,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CAX11",
-    "lastUpdated": "2025-06-18T17:32:37.390573",
+    "lastUpdated": "2025-06-18T17:41:08.012071",
     "priceEUR_hourly_net": 0.0053,
     "priceEUR_monthly_net": 3.29,
     "regionalPricing": [
@@ -1051,7 +1051,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CAX21",
-    "lastUpdated": "2025-06-18T17:32:37.390590",
+    "lastUpdated": "2025-06-18T17:41:08.012089",
     "priceEUR_hourly_net": 0.0096,
     "priceEUR_monthly_net": 5.99,
     "regionalPricing": [
@@ -1182,7 +1182,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CAX31",
-    "lastUpdated": "2025-06-18T17:32:37.390614",
+    "lastUpdated": "2025-06-18T17:41:08.012108",
     "priceEUR_hourly_net": 0.0192,
     "priceEUR_monthly_net": 11.99,
     "regionalPricing": [
@@ -1313,7 +1313,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CAX41",
-    "lastUpdated": "2025-06-18T17:32:37.390634",
+    "lastUpdated": "2025-06-18T17:41:08.012126",
     "priceEUR_hourly_net": 0.0384,
     "priceEUR_monthly_net": 23.99,
     "regionalPricing": [
@@ -1468,7 +1468,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX13 Dedicated CPU",
-    "lastUpdated": "2025-06-18T17:32:37.390659",
+    "lastUpdated": "2025-06-18T17:41:08.012144",
     "priceEUR_hourly_net": 0.0192,
     "priceEUR_monthly_net": 11.99,
     "regionalPricing": [
@@ -1644,7 +1644,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX23 Dedicated CPU",
-    "lastUpdated": "2025-06-18T17:32:37.390686",
+    "lastUpdated": "2025-06-18T17:41:08.012165",
     "priceEUR_hourly_net": 0.0384,
     "priceEUR_monthly_net": 23.99,
     "regionalPricing": [
@@ -1820,7 +1820,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX33 Dedicated CPU",
-    "lastUpdated": "2025-06-18T17:32:37.390710",
+    "lastUpdated": "2025-06-18T17:41:08.012184",
     "priceEUR_hourly_net": 0.0769,
     "priceEUR_monthly_net": 47.99,
     "regionalPricing": [
@@ -1996,7 +1996,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX43 Dedicated CPU",
-    "lastUpdated": "2025-06-18T17:32:37.390759",
+    "lastUpdated": "2025-06-18T17:41:08.012213",
     "priceEUR_hourly_net": 0.1538,
     "priceEUR_monthly_net": 95.99,
     "regionalPricing": [
@@ -2172,7 +2172,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX53 Dedicated CPU",
-    "lastUpdated": "2025-06-18T17:32:37.390784",
+    "lastUpdated": "2025-06-18T17:41:08.012231",
     "priceEUR_hourly_net": 0.3077,
     "priceEUR_monthly_net": 191.99,
     "regionalPricing": [
@@ -2348,7 +2348,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX63 Dedicated CPU",
-    "lastUpdated": "2025-06-18T17:32:37.390810",
+    "lastUpdated": "2025-06-18T17:41:08.012253",
     "priceEUR_hourly_net": 0.4615,
     "priceEUR_monthly_net": 287.99,
     "regionalPricing": [
@@ -2500,7 +2500,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CX22",
-    "lastUpdated": "2025-06-18T17:32:37.390830",
+    "lastUpdated": "2025-06-18T17:41:08.012268",
     "priceEUR_hourly_net": 0.0052,
     "priceEUR_monthly_net": 3.29,
     "regionalPricing": [
@@ -2631,7 +2631,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CX32",
-    "lastUpdated": "2025-06-18T17:32:37.390847",
+    "lastUpdated": "2025-06-18T17:41:08.012282",
     "priceEUR_hourly_net": 0.0105,
     "priceEUR_monthly_net": 6.3,
     "regionalPricing": [
@@ -2762,7 +2762,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CX42",
-    "lastUpdated": "2025-06-18T17:32:37.390868",
+    "lastUpdated": "2025-06-18T17:41:08.012300",
     "priceEUR_hourly_net": 0.0265,
     "priceEUR_monthly_net": 15.9,
     "regionalPricing": [
@@ -2893,7 +2893,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CX52",
-    "lastUpdated": "2025-06-18T17:32:37.390886",
+    "lastUpdated": "2025-06-18T17:41:08.012314",
     "priceEUR_hourly_net": 0.0532,
     "priceEUR_monthly_net": 31.9,
     "regionalPricing": [
@@ -3048,7 +3048,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "LB11",
-    "lastUpdated": "2025-06-18T17:32:38.610189",
+    "lastUpdated": "2025-06-18T17:41:09.162839",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "hcloud_library",
@@ -3128,7 +3128,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "LB21",
-    "lastUpdated": "2025-06-18T17:32:38.610215",
+    "lastUpdated": "2025-06-18T17:41:09.162861",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "hcloud_library",
@@ -3208,7 +3208,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "LB31",
-    "lastUpdated": "2025-06-18T17:32:38.610230",
+    "lastUpdated": "2025-06-18T17:41:09.162873",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "hcloud_library",
@@ -3242,7 +3242,7 @@
       "Germany"
     ],
     "source": "hetzner_sample_data",
-    "lastUpdated": "2025-06-18T17:32:38.610748",
+    "lastUpdated": "2025-06-18T17:41:10.674432",
     "locationDetails": [
       {
         "code": "FSN1-DC14",
@@ -3286,7 +3286,7 @@
       "Germany"
     ],
     "source": "hetzner_sample_data",
-    "lastUpdated": "2025-06-18T17:32:38.610761",
+    "lastUpdated": "2025-06-18T17:41:10.674448",
     "locationDetails": [
       {
         "code": "FSN1-DC14",
@@ -3330,7 +3330,7 @@
       "Germany"
     ],
     "source": "hetzner_sample_data",
-    "lastUpdated": "2025-06-18T17:32:38.610771",
+    "lastUpdated": "2025-06-18T17:41:10.674454",
     "locationDetails": [
       {
         "code": "NBG1-DC3",
@@ -3374,7 +3374,7 @@
       "Germany"
     ],
     "source": "hetzner_sample_data",
-    "lastUpdated": "2025-06-18T17:32:38.610779",
+    "lastUpdated": "2025-06-18T17:41:10.674459",
     "locationDetails": [
       {
         "code": "FSN1-DC14",
