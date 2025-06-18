@@ -87,12 +87,33 @@ class HetznerCloudCollector:
         return all_services
     
     def _collect_server_types(self) -> List[Dict[str, Any]]:
-        """Collect server types with pricing using official library."""
+        """Collect server types with pricing using hybrid approach."""
         logger.info("Fetching server types...")
         
         try:
+            # Get server types from hcloud library
             server_types = self.client.server_types.get_all()
             locations = self.client.locations.get_all()
+            
+            # Get pricing data via direct API call (since hcloud doesn't include pricing by default)
+            import requests
+            headers = {
+                'Authorization': f'Bearer {config.cloud_api_token}',
+                'Content-Type': 'application/json'
+            }
+            
+            logger.info("Fetching pricing data via direct API...")
+            pricing_response = requests.get("https://api.hetzner.cloud/v1/pricing", headers=headers)
+            if pricing_response.status_code != 200:
+                logger.error(f"Failed to fetch pricing data: {pricing_response.status_code}")
+                return []
+            
+            pricing_data = pricing_response.json()
+            pricing_by_type = {}
+            
+            if 'pricing' in pricing_data:
+                for pricing_entry in pricing_data['pricing'].get('server_types', []):
+                    pricing_by_type[pricing_entry.get('name')] = pricing_entry
             
             # Create location mapping
             location_map = self._get_location_mapping(locations)
@@ -101,8 +122,10 @@ class HetznerCloudCollector:
             
             for server_type in server_types:
                 try:
-                    # Check if server type has pricing information
-                    if not hasattr(server_type, 'prices') or not server_type.prices:
+                    # Get pricing for this server type
+                    pricing_info = pricing_by_type.get(server_type.name, {})
+                    
+                    if 'prices' not in pricing_info:
                         logger.warning(f"No pricing found for server type: {server_type.name}")
                         continue
                     
@@ -110,17 +133,23 @@ class HetznerCloudCollector:
                     regional_pricing = []
                     locations_list = []
                     
-                    for price in server_type.prices:
-                        location_code = price.location.name
-                        locations_list.append(location_code)
-                        
-                        regional_pricing.append({
-                            'location': location_code,
-                            'hourly_net': float(price.price_hourly.net),
-                            'monthly_net': float(price.price_monthly.net),
-                            'included_traffic': getattr(price, 'included_traffic', 0),
-                            'traffic_price_per_tb': float(getattr(price, 'price_per_tb_traffic', {}).get('net', 0))
-                        })
+                    for price_entry in pricing_info['prices']:
+                        location_code = price_entry.get('location')
+                        if location_code:
+                            locations_list.append(location_code)
+                            
+                            hourly_net = float(price_entry.get('price_hourly', {}).get('net', 0))
+                            monthly_net = float(price_entry.get('price_monthly', {}).get('net', 0))
+                            included_traffic = price_entry.get('included_traffic', 0)
+                            traffic_price = float(price_entry.get('price_per_tb_traffic', {}).get('net', 0))
+                            
+                            regional_pricing.append({
+                                'location': location_code,
+                                'hourly_net': hourly_net,
+                                'monthly_net': monthly_net,
+                                'included_traffic': included_traffic,
+                                'traffic_price_per_tb': traffic_price
+                            })
                     
                     # Calculate price ranges
                     if regional_pricing:
@@ -250,29 +279,54 @@ class HetznerCloudCollector:
             return []
     
     def _collect_load_balancer_types(self) -> List[Dict[str, Any]]:
-        """Collect load balancer types with pricing."""
+        """Collect load balancer types with pricing using hybrid approach."""
         logger.info("Fetching load balancer types...")
         
         try:
+            # Get LB types from hcloud library
             lb_types = self.client.load_balancer_types.get_all()
+            
+            # Get pricing data via direct API call
+            import requests
+            headers = {
+                'Authorization': f'Bearer {config.cloud_api_token}',
+                'Content-Type': 'application/json'
+            }
+            
+            pricing_response = requests.get("https://api.hetzner.cloud/v1/pricing", headers=headers)
+            if pricing_response.status_code != 200:
+                logger.error(f"Failed to fetch pricing data: {pricing_response.status_code}")
+                return []
+            
+            pricing_data = pricing_response.json()
+            pricing_by_type = {}
+            
+            if 'pricing' in pricing_data:
+                for pricing_entry in pricing_data['pricing'].get('load_balancer_types', []):
+                    pricing_by_type[pricing_entry.get('name')] = pricing_entry
             
             processed_lbs = []
             
             for lb_type in lb_types:
                 try:
-                    # Check if LB type has pricing information
-                    if not hasattr(lb_type, 'prices') or not lb_type.prices:
+                    # Get pricing for this LB type
+                    pricing_info = pricing_by_type.get(lb_type.name, {})
+                    
+                    if 'prices' not in pricing_info:
                         logger.warning(f"No pricing found for load balancer type: {lb_type.name}")
                         continue
                     
                     # Process pricing (usually same across regions for LBs)
-                    if lb_type.prices:
-                        price = lb_type.prices[0]  # Take first price
-                        hourly_price = float(price.price_hourly.net)
-                        monthly_price = float(price.price_monthly.net)
+                    if pricing_info['prices']:
+                        price = pricing_info['prices'][0]  # Take first price
+                        hourly_price = float(price.get('price_hourly', {}).get('net', 0))
+                        monthly_price = float(price.get('price_monthly', {}).get('net', 0))
                         
                         # Get all locations
-                        locations = [p.location.name for p in lb_type.prices]
+                        locations = [p.get('location') for p in pricing_info['prices'] if p.get('location')]
+                        
+                        if hourly_price == 0 and monthly_price == 0:
+                            continue
                     else:
                         continue
                     
