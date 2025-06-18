@@ -483,10 +483,33 @@ class HetznerDedicatedCollector:
             if response.status_code == 200:
                 data = response.json()
                 
+                # Debug: Log the actual API response structure
+                logger.info(f"Server market API response structure: {type(data)}")
+                if isinstance(data, dict):
+                    logger.info(f"Response keys: {list(data.keys())}")
+                    if len(str(data)) < 1000:  # Only log if response is small
+                        logger.info(f"Sample response: {data}")
+                elif isinstance(data, list) and data:
+                    logger.info(f"Response is list with {len(data)} items")
+                    if data:
+                        logger.info(f"Sample item keys: {list(data[0].keys()) if isinstance(data[0], dict) else 'Not a dict'}")
+                
                 # Parse the server market response
                 if isinstance(data, dict) and 'server_market' in data:
                     for product in data['server_market']:
                         servers.append(self._parse_server_market_product(product))
+                elif isinstance(data, dict):
+                    # Try other possible root keys
+                    for key in ['products', 'servers', 'data', 'items']:
+                        if key in data and isinstance(data[key], list):
+                            logger.info(f"Found data under key '{key}'")
+                            for product in data[key]:
+                                servers.append(self._parse_server_market_product(product))
+                            break
+                    else:
+                        # If no known key found, try the direct dict as a product
+                        logger.info("Treating response dict as single product")
+                        servers.append(self._parse_server_market_product(data))
                 elif isinstance(data, list):
                     for product in data:
                         servers.append(self._parse_server_market_product(product))
@@ -522,10 +545,33 @@ class HetznerDedicatedCollector:
             if response.status_code == 200:
                 data = response.json()
                 
+                # Debug: Log the actual API response structure
+                logger.info(f"Server products API response structure: {type(data)}")
+                if isinstance(data, dict):
+                    logger.info(f"Response keys: {list(data.keys())}")
+                    if len(str(data)) < 1000:  # Only log if response is small
+                        logger.info(f"Sample response: {data}")
+                elif isinstance(data, list) and data:
+                    logger.info(f"Response is list with {len(data)} items")
+                    if data:
+                        logger.info(f"Sample item keys: {list(data[0].keys()) if isinstance(data[0], dict) else 'Not a dict'}")
+                
                 # Parse the server products response
                 if isinstance(data, dict) and 'products' in data:
                     for product in data['products']:
                         servers.append(self._parse_server_product(product))
+                elif isinstance(data, dict):
+                    # Try other possible root keys
+                    for key in ['server', 'servers', 'data', 'items', 'product']:
+                        if key in data and isinstance(data[key], list):
+                            logger.info(f"Found data under key '{key}'")
+                            for product in data[key]:
+                                servers.append(self._parse_server_product(product))
+                            break
+                    else:
+                        # If no known key found, try the direct dict as a product
+                        logger.info("Treating response dict as single product")
+                        servers.append(self._parse_server_product(data))
                 elif isinstance(data, list):
                     for product in data:
                         servers.append(self._parse_server_product(product))
@@ -543,16 +589,55 @@ class HetznerDedicatedCollector:
     def _parse_server_market_product(self, product: Dict[str, Any]) -> Dict[str, Any]:
         """Parse a server market product into our standard format."""
         try:
-            # Extract basic info
-            name = product.get('name', 'Unknown')
-            price_monthly = float(product.get('price', 0))
-            description = product.get('description', '')
+            # Debug: Log available fields
+            logger.debug(f"Parsing market product with keys: {list(product.keys())}")
+            if len(str(product)) < 500:
+                logger.debug(f"Product data: {product}")
+            
+            # Extract basic info - try multiple possible field names
+            name = (product.get('name') or 
+                   product.get('product_name') or 
+                   product.get('server_name') or 
+                   product.get('id') or 
+                   'Unknown')
+            
+            # Try multiple price field names
+            price_monthly = 0
+            for price_field in ['price', 'price_monthly', 'monthly_price', 'cost', 'price_excl_vat']:
+                if product.get(price_field):
+                    try:
+                        price_monthly = float(product[price_field])
+                        break
+                    except (ValueError, TypeError):
+                        continue
+            
+            # Try multiple description fields
+            description = (product.get('description') or 
+                         product.get('desc') or 
+                         product.get('product_description') or 
+                         '')
             
             # Parse hardware specs from description or dedicated fields
-            cpu_info = product.get('cpu', '')
-            ram_info = product.get('ram', '')
-            hdd_info = product.get('hdd', '')
+            cpu_info = (product.get('cpu') or 
+                       product.get('processor') or 
+                       product.get('cpu_description') or 
+                       '')
+            
+            ram_info = (product.get('ram') or 
+                       product.get('memory') or 
+                       product.get('ram_description') or 
+                       '')
+            
+            hdd_info = (product.get('hdd') or 
+                       product.get('storage') or 
+                       product.get('disk') or 
+                       product.get('hdd_description') or 
+                       '')
+            
+            # Handle datacenter info
             datacenter_info = product.get('datacenter', {})
+            if isinstance(datacenter_info, str):
+                datacenter_info = {'name': datacenter_info}
             
             # Extract CPU cores (try to parse from cpu string)
             cores = self._extract_cpu_cores(cpu_info)
@@ -608,15 +693,50 @@ class HetznerDedicatedCollector:
     def _parse_server_product(self, product: Dict[str, Any]) -> Dict[str, Any]:
         """Parse a regular server product into our standard format."""
         try:
-            # Extract basic info
-            name = product.get('name', 'Unknown')
-            price_monthly = float(product.get('price', 0))
-            description = product.get('description', '')
+            # Debug: Log available fields
+            logger.debug(f"Parsing server product with keys: {list(product.keys())}")
+            if len(str(product)) < 500:
+                logger.debug(f"Product data: {product}")
             
-            # Parse hardware specs
-            cpu_info = product.get('cpu', '')
-            ram_info = product.get('ram', '')
-            hdd_info = product.get('hdd', '')
+            # Extract basic info - try multiple possible field names
+            name = (product.get('name') or 
+                   product.get('product_name') or 
+                   product.get('server_name') or 
+                   product.get('id') or 
+                   'Unknown')
+            
+            # Try multiple price field names
+            price_monthly = 0
+            for price_field in ['price', 'price_monthly', 'monthly_price', 'cost', 'price_excl_vat']:
+                if product.get(price_field):
+                    try:
+                        price_monthly = float(product[price_field])
+                        break
+                    except (ValueError, TypeError):
+                        continue
+            
+            # Try multiple description fields
+            description = (product.get('description') or 
+                         product.get('desc') or 
+                         product.get('product_description') or 
+                         '')
+            
+            # Parse hardware specs - try multiple field names
+            cpu_info = (product.get('cpu') or 
+                       product.get('processor') or 
+                       product.get('cpu_description') or 
+                       '')
+            
+            ram_info = (product.get('ram') or 
+                       product.get('memory') or 
+                       product.get('ram_description') or 
+                       '')
+            
+            hdd_info = (product.get('hdd') or 
+                       product.get('storage') or 
+                       product.get('disk') or 
+                       product.get('hdd_description') or 
+                       '')
             
             # Extract specs
             cores = self._extract_cpu_cores(cpu_info)
