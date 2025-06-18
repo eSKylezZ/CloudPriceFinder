@@ -1,3 +1,11 @@
+export interface LocationDetail {
+  code: string;
+  city: string;
+  country: string;
+  countryCode: string;
+  region: string;
+}
+
 export interface CloudInstance {
   // Core identification
   provider: CloudProvider;
@@ -31,8 +39,24 @@ export interface CloudInstance {
   bandwidth?: number;
   trafficIncludedTB?: number;
   
+  // Network Options & IP Configuration
+  networkType?: 'ipv4_ipv6' | 'ipv6_only';
+  ipConfiguration?: string;
+  includesPublicIPv4?: boolean;
+  includesPublicIPv6?: boolean;
+  ipv4_savings?: number;
+  
+  // Legacy network options (keep for compatibility)
+  networkOptions?: 'ipv4_ipv6' | 'ipv6_only';
+  ipType?: 'ipv4' | 'ipv6' | 'ipv4_ipv6';
+  ipv6OnlyAvailable?: boolean;
+  ipv6OnlyDiscount?: number;
+  priceEUR_monthly_ipv6only?: number;
+  priceEUR_hourly_ipv6only?: number;
+  
   // Location & Availability
   regions: string[];
+  locationDetails?: LocationDetail[];
   locations?: string[];
   
   // Service-specific properties
@@ -91,6 +115,9 @@ export interface FilterOptions {
   maxPrice: number;
   regions: string[];
   instanceTypes: InstanceType[];
+  ipTypes?: string[];
+  networkOptions?: string[];
+  ipv6OnlyMode?: boolean;
 }
 
 export interface SortOption {

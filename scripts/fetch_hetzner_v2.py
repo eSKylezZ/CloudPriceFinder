@@ -209,7 +209,22 @@ class HetznerCloudCollector:
                         if monthly_price is None and 'price_monthly' in price_entry:
                             monthly_price = float(price_entry['price_monthly'].get('net', 0))
                 
-                # Create base server data
+                # Get IPv4 Primary IP pricing for accurate IPv6-only calculations
+                ipv4_primary_ip_cost = self._get_ipv4_primary_ip_cost(locations)
+                
+                # Process location information with country mapping
+                location_details = []
+                for location in locations:
+                    location_info = self._get_location_info(location)
+                    location_details.append({
+                        'code': location,
+                        'city': location_info['city'],
+                        'country': location_info['country'],
+                        'countryCode': location_info['countryCode'],
+                        'region': location_info['region']
+                    })
+                
+                # Create two separate entries: IPv4+IPv6 and IPv6-only
                 base_server_data = {
                     'platform': 'cloud',
                     'type': 'cloud-server',
@@ -218,11 +233,10 @@ class HetznerCloudCollector:
                     'memoryGiB': server_type.get('memory'),
                     'diskType': server_type.get('storage_type'),
                     'diskSizeGB': server_type.get('disk'),
-                    'priceEUR_hourly_net': hourly_price,
-                    'priceEUR_monthly_net': monthly_price,
                     'cpuType': server_type.get('cpu_type'),
                     'architecture': server_type.get('architecture'),
                     'regions': locations,
+                    'locationDetails': location_details,
                     'deprecated': server_type.get('deprecated', False),
                     'source': 'hetzner_cloud_api',
                     'description': server_type.get('description', ''),
@@ -235,35 +249,83 @@ class HetznerCloudCollector:
                     'raw': server_type
                 }
                 
-                # Standard server with IPv4 + IPv6 (default configuration)
-                server_data = base_server_data.copy()
-                server_data['networkOptions'] = 'ipv4_ipv6'
-                server_data['ipType'] = 'ipv4_ipv6'
-                server_data['description'] = f"{server_data['description']} (IPv4 + IPv6)"
-                processed_servers.append(server_data)
+                # IPv4 + IPv6 configuration (standard pricing)
+                ipv4_ipv6_server = base_server_data.copy()
+                ipv4_ipv6_server.update({
+                    'instanceType': f"{name}",
+                    'networkType': 'ipv4_ipv6',
+                    'ipConfiguration': 'IPv4 + IPv6',
+                    'priceEUR_hourly_net': hourly_price,
+                    'priceEUR_monthly_net': monthly_price,
+                    'includesPublicIPv4': True,
+                    'includesPublicIPv6': True
+                })
+                processed_servers.append(ipv4_ipv6_server)
                 
-                # IPv6-only server option (discounted pricing according to Hetzner website)
-                # Based on website: "save 0.50 0.60" for IPv6 only servers
-                if monthly_price and monthly_price > 0:
-                    ipv6_server_data = base_server_data.copy()
-                    ipv6_server_data['networkOptions'] = 'ipv6_only'
-                    ipv6_server_data['ipType'] = 'ipv6'
+                # IPv6-only configuration (with savings from no IPv4 Primary IP)
+                if monthly_price and monthly_price > 0 and ipv4_primary_ip_cost > 0:
+                    ipv6_only_server = base_server_data.copy()
+                    ipv6_only_monthly = max(0, monthly_price - ipv4_primary_ip_cost)
+                    ipv6_only_hourly = ipv6_only_monthly / (24 * 30) if ipv6_only_monthly > 0 else 0
                     
-                    # Apply IPv6-only discount (€0.50 monthly savings)
-                    ipv6_discount = 0.50
-                    ipv6_server_data['priceEUR_monthly_net'] = max(0, monthly_price - ipv6_discount)
-                    ipv6_server_data['priceEUR_hourly_net'] = ipv6_server_data['priceEUR_monthly_net'] / (24 * 30) if ipv6_server_data['priceEUR_monthly_net'] > 0 else 0
-                    
-                    ipv6_server_data['description'] = f"{base_server_data['description']} (IPv6 only, €{ipv6_discount} discount)"
-                    ipv6_server_data['hetzner_metadata']['networkType'] = 'ipv6_only'
-                    ipv6_server_data['hetzner_metadata']['discountApplied'] = ipv6_discount
-                    
-                    processed_servers.append(ipv6_server_data)
+                    ipv6_only_server.update({
+                        'instanceType': f"{name} (IPv6-only)",
+                        'networkType': 'ipv6_only',
+                        'ipConfiguration': 'IPv6-only',
+                        'priceEUR_hourly_net': ipv6_only_hourly,
+                        'priceEUR_monthly_net': ipv6_only_monthly,
+                        'includesPublicIPv4': False,
+                        'includesPublicIPv6': True,
+                        'ipv4_savings': ipv4_primary_ip_cost,
+                        'description': f"{server_type.get('description', '')} - IPv6-only configuration saves €{ipv4_primary_ip_cost:.2f}/month"
+                    })
+                    processed_servers.append(ipv6_only_server)
                 
             except Exception as e:
                 logger.error(f"Error processing server type {server_type.get('name')}: {e}")
         
         return processed_servers
+    
+    def _get_ipv4_primary_ip_cost(self, locations: List[str]) -> float:
+        """Get IPv4 Primary IP cost from pricing data."""
+        try:
+            pricing_data = self.api.cloud_api_request('pricing')
+            if not pricing_data or 'pricing' not in pricing_data:
+                return 0.50  # Fallback to known IPv4 Primary IP cost
+            
+            # Look for IPv4 Primary IP pricing
+            primary_ip_pricing = pricing_data['pricing'].get('primary_ip', [])
+            for price_entry in primary_ip_pricing:
+                if price_entry.get('type') == 'ipv4':
+                    # Use the first location's pricing or any available pricing
+                    if not locations or price_entry.get('location') in locations:
+                        return float(price_entry.get('price_monthly', {}).get('net', 0.50))
+            
+            # Fallback to known IPv4 Primary IP cost if not found in API
+            return 0.50
+            
+        except Exception as e:
+            logger.warning(f"Could not fetch IPv4 Primary IP cost: {e}")
+            return 0.50  # Fallback to known cost
+    
+    def _get_location_info(self, location_code: str) -> Dict[str, str]:
+        """Get location information including country and flag code."""
+        # Hetzner Cloud location mapping
+        location_map = {
+            'ash': {'country': 'United States', 'countryCode': 'US', 'city': 'Ashburn', 'region': 'Virginia'},
+            'fsn1': {'country': 'Germany', 'countryCode': 'DE', 'city': 'Falkenstein', 'region': 'Saxony'},
+            'hel1': {'country': 'Finland', 'countryCode': 'FI', 'city': 'Helsinki', 'region': 'Uusimaa'},
+            'hil': {'country': 'Germany', 'countryCode': 'DE', 'city': 'Hildesheim', 'region': 'Lower Saxony'},
+            'nbg1': {'country': 'Germany', 'countryCode': 'DE', 'city': 'Nuremberg', 'region': 'Bavaria'},
+            'sin': {'country': 'Singapore', 'countryCode': 'SG', 'city': 'Singapore', 'region': 'Singapore'},
+        }
+        
+        return location_map.get(location_code, {
+            'country': 'Unknown',
+            'countryCode': 'XX',
+            'city': location_code,
+            'region': 'Unknown'
+        })
     
     def _process_load_balancer_types(self, data: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Process load balancer types with pricing."""

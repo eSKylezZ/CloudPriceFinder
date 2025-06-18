@@ -11,12 +11,12 @@ on:
       enable_dedicated:
         description: 'Enable Hetzner dedicated server collection'
         required: true
-        default: 'false'
+        default: 'true'
         type: boolean
       enable_auction:
         description: 'Enable Hetzner auction server collection'
         required: true
-        default: 'false'
+        default: 'true'
         type: boolean
 
   # Run on pushes to main (for testing)
@@ -29,8 +29,8 @@ on:
 env:
   # Hetzner configuration
   HETZNER_ENABLE_CLOUD: true
-  HETZNER_ENABLE_DEDICATED: ${{ github.event.inputs.enable_dedicated || 'false' }}
-  HETZNER_ENABLE_AUCTION: ${{ github.event.inputs.enable_auction || 'false' }}
+  HETZNER_ENABLE_DEDICATED: ${{ github.event.inputs.enable_dedicated || 'true' }}
+  HETZNER_ENABLE_AUCTION: ${{ github.event.inputs.enable_auction || 'true' }}
 
 jobs:
   collect-data:

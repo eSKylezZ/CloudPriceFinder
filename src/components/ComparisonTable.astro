@@ -141,14 +141,23 @@ const formatTypeDisplay = (type: string) => {
             </td>
             <td class="px-3 py-3 whitespace-nowrap">
               <div class="flex flex-col space-y-1">
-                {instance.ipType && (
-                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-cyan-100 text-cyan-800">
-                    {instance.ipType.replace('_', '+').toUpperCase()}
+                {instance.networkType && (
+                  <span class={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                    instance.networkType === 'ipv6_only' 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-cyan-100 text-cyan-800'
+                  }`}>
+                    {instance.ipConfiguration || instance.networkType?.replace('_', '+').toUpperCase()}
                   </span>
                 )}
-                {instance.networkOptions && (
-                  <span class="text-xs text-gray-500">
-                    {instance.networkOptions.replace('_', ' ')}
+                {instance.ipv4_savings && (
+                  <span class="text-xs text-green-600">
+                    Saves €{instance.ipv4_savings}/mo
+                  </span>
+                )}
+                {!instance.networkType && instance.ipType && (
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-cyan-100 text-cyan-800">
+                    {instance.ipType.replace('_', '+').toUpperCase()}
                   </span>
                 )}
               </div>
@@ -160,9 +169,35 @@ const formatTypeDisplay = (type: string) => {
               {formatPrice(instance.priceUSD_monthly)}
             </td>
             <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
-              <div class="max-w-24 truncate">
-                {instance.regions?.slice(0, 2).join(', ')}
-                {instance.regions && instance.regions.length > 2 && '...'}
+              <div class="flex flex-wrap gap-1 max-w-32">
+                {instance.locationDetails ? (
+                  instance.locationDetails.slice(0, 3).map((location, index) => (
+                    <div class="relative group">
+                      <span class="inline-flex items-center space-x-1 cursor-pointer hover:bg-gray-100 px-1 py-0.5 rounded">
+                        <img 
+                          src={`https://flagsapi.com/${location.countryCode}/flat/16.png`}
+                          alt={location.country}
+                          class="w-4 h-3 rounded-sm"
+                          loading="lazy"
+                        />
+                        <span class="text-xs">{location.code}</span>
+                      </span>
+                      <div class="absolute z-10 invisible group-hover:visible bg-gray-900 text-white text-xs px-2 py-1 rounded shadow-lg bottom-full left-1/2 transform -translate-x-1/2 mb-1 whitespace-nowrap">
+                        <div class="font-medium">{location.city}, {location.country}</div>
+                        <div class="text-gray-300">{location.region}</div>
+                        <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div class="max-w-24 truncate">
+                    {instance.regions?.slice(0, 2).join(', ')}
+                    {instance.regions && instance.regions.length > 2 && '...'}
+                  </div>
+                )}
+                {instance.locationDetails && instance.locationDetails.length > 3 && (
+                  <span class="text-xs text-gray-400">+{instance.locationDetails.length - 3}</span>
+                )}
               </div>
             </td>
           </tr>
@@ -237,14 +272,20 @@ const formatTypeDisplay = (type: string) => {
           return false;
         }
         
-        // IP type filter
-        if (filters.ipTypes?.length && instance.ipType && !filters.ipTypes.includes(instance.ipType)) {
-          return false;
+        // IP type filter (support both old and new formats)
+        if (filters.ipTypes?.length) {
+          const instanceNetworkType = instance.networkType || instance.ipType;
+          if (instanceNetworkType && !filters.ipTypes.includes(instanceNetworkType)) {
+            return false;
+          }
         }
         
-        // Network options filter
-        if (filters.networkOptions?.length && instance.networkOptions && !filters.networkOptions.includes(instance.networkOptions)) {
-          return false;
+        // Network options filter (support both old and new formats)
+        if (filters.networkOptions?.length) {
+          const instanceNetworkOption = instance.networkType || instance.networkOptions;
+          if (instanceNetworkOption && !filters.networkOptions.includes(instanceNetworkOption)) {
+            return false;
+          }
         }
         
         // vCPU filter
