@@ -1,10 +1,10 @@
 {
   "totalInstances": 1307,
   "providersCount": 1,
-  "lastUpdated": "2025-06-18T17:52:59.776503",
+  "lastUpdated": "2025-06-18T17:56:30.792841",
   "priceRange": {
     "min": 0.00572,
-    "max": 0.50765
+    "max": 0.86383
   },
   "byProvider": {
     "hetzner": 1307
