@@ -17,13 +17,18 @@ from typing import Dict, List, Any, Optional
 
 # Import individual fetchers
 try:
-    # Try to import enhanced Hetzner v2 script first
-    from fetch_hetzner_v2 import fetch_hetzner_cloud
-    HETZNER_VERSION = "v2.0"
+    # Try to import official libraries version first
+    from fetch_hetzner_v3 import fetch_hetzner_cloud
+    HETZNER_VERSION = "v3.0 (Official Libraries)"
 except ImportError:
-    # Fallback to original script
-    from fetch_hetzner import fetch_hetzner_cloud
-    HETZNER_VERSION = "v1.0"
+    try:
+        # Fallback to enhanced Hetzner v2 script
+        from fetch_hetzner_v2 import fetch_hetzner_cloud
+        HETZNER_VERSION = "v2.0 (Manual API)"
+    except ImportError:
+        # Final fallback to original script
+        from fetch_hetzner import fetch_hetzner_cloud
+        HETZNER_VERSION = "v1.0 (Legacy)"
 from utils.currency_converter import convert_currency
 from utils.data_validator import validate_instance_data
 from utils.data_normalizer import normalize_instance_data
