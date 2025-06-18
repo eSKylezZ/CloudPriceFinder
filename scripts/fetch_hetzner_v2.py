@@ -192,9 +192,8 @@ class HetznerCloudCollector:
                 name = server_type.get('name')
                 pricing_info = pricing_by_type.get(name, {})
                 
-                # Extract pricing
-                hourly_price = None
-                monthly_price = None
+                # Extract pricing for all regions
+                regional_pricing = []
                 locations = []
                 
                 if 'prices' in pricing_info:
@@ -202,12 +201,36 @@ class HetznerCloudCollector:
                         location = price_entry.get('location')
                         if location:
                             locations.append(location)
-                        
-                        if hourly_price is None and 'price_hourly' in price_entry:
-                            hourly_price = float(price_entry['price_hourly'].get('net', 0))
-                        
-                        if monthly_price is None and 'price_monthly' in price_entry:
-                            monthly_price = float(price_entry['price_monthly'].get('net', 0))
+                            
+                            hourly_net = float(price_entry.get('price_hourly', {}).get('net', 0))
+                            monthly_net = float(price_entry.get('price_monthly', {}).get('net', 0))
+                            
+                            regional_pricing.append({
+                                'location': location,
+                                'hourly_net': hourly_net,
+                                'monthly_net': monthly_net,
+                                'included_traffic': price_entry.get('included_traffic', 0),
+                                'traffic_price_per_tb': price_entry.get('price_per_tb_traffic', {}).get('net', 0)
+                            })
+                
+                # Calculate price ranges
+                if regional_pricing:
+                    hourly_prices = [p['hourly_net'] for p in regional_pricing]
+                    monthly_prices = [p['monthly_net'] for p in regional_pricing]
+                    
+                    min_hourly = min(hourly_prices)
+                    max_hourly = max(hourly_prices)
+                    min_monthly = min(monthly_prices)
+                    max_monthly = max(monthly_prices)
+                    
+                    # Use minimum pricing for default display
+                    hourly_price = min_hourly
+                    monthly_price = min_monthly
+                else:
+                    hourly_price = None
+                    monthly_price = None
+                    min_hourly = max_hourly = None
+                    min_monthly = max_monthly = None
                 
                 # Get IPv4 Primary IP pricing for accurate IPv6-only calculations
                 ipv4_primary_ip_cost = self._get_ipv4_primary_ip_cost(locations)
@@ -224,8 +247,12 @@ class HetznerCloudCollector:
                         'region': location_info['region']
                     })
                 
-                # Create two separate entries: IPv4+IPv6 and IPv6-only
-                base_server_data = {
+                # Calculate IPv6-only pricing
+                ipv6_only_monthly = max(0, monthly_price - ipv4_primary_ip_cost) if monthly_price and ipv4_primary_ip_cost > 0 else None
+                ipv6_only_hourly = ipv6_only_monthly / (24 * 30) if ipv6_only_monthly and ipv6_only_monthly > 0 else None
+                
+                # Create single server entry with both pricing options
+                server_data = {
                     'platform': 'cloud',
                     'type': 'cloud-server',
                     'instanceType': name,
@@ -241,45 +268,71 @@ class HetznerCloudCollector:
                     'source': 'hetzner_cloud_api',
                     'description': server_type.get('description', ''),
                     'lastUpdated': datetime.now().isoformat(),
+                    
+                    # Pricing display (minimum pricing for sorting/filtering)
+                    'priceEUR_hourly_net': hourly_price,
+                    'priceEUR_monthly_net': monthly_price,
+                    
+                    # Regional pricing information
+                    'regionalPricing': regional_pricing,
+                    'priceRange': {
+                        'hourly': {
+                            'min': min_hourly,
+                            'max': max_hourly,
+                            'hasVariation': min_hourly != max_hourly if min_hourly and max_hourly else False
+                        },
+                        'monthly': {
+                            'min': min_monthly,
+                            'max': max_monthly,
+                            'hasVariation': min_monthly != max_monthly if min_monthly and max_monthly else False
+                        }
+                    },
+                    
+                    # Network configuration options
+                    'networkOptions': {
+                        'ipv4_ipv6': {
+                            'available': True,
+                            'hourly': hourly_price,
+                            'monthly': monthly_price,
+                            'description': 'IPv4 + IPv6 included',
+                            'priceRange': {
+                                'hourly': {'min': min_hourly, 'max': max_hourly},
+                                'monthly': {'min': min_monthly, 'max': max_monthly}
+                            }
+                        },
+                        'ipv6_only': {
+                            'available': ipv6_only_monthly is not None,
+                            'hourly': ipv6_only_hourly,
+                            'monthly': ipv6_only_monthly,
+                            'savings': ipv4_primary_ip_cost if ipv4_primary_ip_cost > 0 else None,
+                            'description': f'IPv6-only (saves €{ipv4_primary_ip_cost:.2f}/month)' if ipv4_primary_ip_cost > 0 else 'IPv6-only',
+                            'priceRange': {
+                                'hourly': {
+                                    'min': max(0, min_hourly - ipv4_primary_ip_cost / (24 * 30)) if min_hourly and ipv4_primary_ip_cost else None,
+                                    'max': max(0, max_hourly - ipv4_primary_ip_cost / (24 * 30)) if max_hourly and ipv4_primary_ip_cost else None
+                                },
+                                'monthly': {
+                                    'min': max(0, min_monthly - ipv4_primary_ip_cost) if min_monthly and ipv4_primary_ip_cost else None,
+                                    'max': max(0, max_monthly - ipv4_primary_ip_cost) if max_monthly and ipv4_primary_ip_cost else None
+                                }
+                            }
+                        }
+                    },
+                    
+                    # Default network type for filtering
+                    'defaultNetworkType': 'ipv4_ipv6',
+                    'supportsIPv6Only': ipv6_only_monthly is not None,
+                    
                     'hetzner_metadata': {
                         'platform': 'cloud',
                         'apiSource': 'cloud_api',
-                        'serviceCategory': 'compute'
+                        'serviceCategory': 'compute',
+                        'ipv4_primary_ip_cost': ipv4_primary_ip_cost
                     },
                     'raw': server_type
                 }
                 
-                # IPv4 + IPv6 configuration (standard pricing)
-                ipv4_ipv6_server = base_server_data.copy()
-                ipv4_ipv6_server.update({
-                    'instanceType': f"{name}",
-                    'networkType': 'ipv4_ipv6',
-                    'ipConfiguration': 'IPv4 + IPv6',
-                    'priceEUR_hourly_net': hourly_price,
-                    'priceEUR_monthly_net': monthly_price,
-                    'includesPublicIPv4': True,
-                    'includesPublicIPv6': True
-                })
-                processed_servers.append(ipv4_ipv6_server)
-                
-                # IPv6-only configuration (with savings from no IPv4 Primary IP)
-                if monthly_price and monthly_price > 0 and ipv4_primary_ip_cost > 0:
-                    ipv6_only_server = base_server_data.copy()
-                    ipv6_only_monthly = max(0, monthly_price - ipv4_primary_ip_cost)
-                    ipv6_only_hourly = ipv6_only_monthly / (24 * 30) if ipv6_only_monthly > 0 else 0
-                    
-                    ipv6_only_server.update({
-                        'instanceType': f"{name} (IPv6-only)",
-                        'networkType': 'ipv6_only',
-                        'ipConfiguration': 'IPv6-only',
-                        'priceEUR_hourly_net': ipv6_only_hourly,
-                        'priceEUR_monthly_net': ipv6_only_monthly,
-                        'includesPublicIPv4': False,
-                        'includesPublicIPv6': True,
-                        'ipv4_savings': ipv4_primary_ip_cost,
-                        'description': f"{server_type.get('description', '')} - IPv6-only configuration saves €{ipv4_primary_ip_cost:.2f}/month"
-                    })
-                    processed_servers.append(ipv6_only_server)
+                processed_servers.append(server_data)
                 
             except Exception as e:
                 logger.error(f"Error processing server type {server_type.get('name')}: {e}")

@@ -47,6 +47,55 @@ const getTypeBadgeColor = (type: string) => {
 const formatTypeDisplay = (type: string) => {
   return type.replace('cloud-', '').replace('dedicated-', '').replace('-', ' ');
 };
+
+const getCurrentPrice = (instance: any, mode: string = 'ipv4_ipv6') => {
+  // Check for new network options structure
+  if (instance.networkOptions && typeof instance.networkOptions === 'object') {
+    const option = instance.networkOptions[mode];
+    if (option && option.available) {
+      return {
+        hourly: option.hourly || 0,
+        monthly: option.monthly || 0,
+        savings: option.savings || 0,
+        description: option.description || '',
+        priceRange: option.priceRange
+      };
+    }
+  }
+  
+  // Fallback to standard pricing
+  return {
+    hourly: instance.priceUSD_hourly || instance.priceEUR_hourly_net || 0,
+    monthly: instance.priceUSD_monthly || instance.priceEUR_monthly_net || 0,
+    savings: 0,
+    description: '',
+    priceRange: instance.priceRange
+  };
+};
+
+const formatPriceRange = (priceRange: any, value: number, currency: string = 'EUR') => {
+  if (!priceRange || !priceRange.hasVariation) {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: currency === 'EUR' ? 2 : 4,
+    }).format(value);
+  }
+  
+  const minFormatted = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency,
+    minimumFractionDigits: currency === 'EUR' ? 2 : 4,
+  }).format(priceRange.min);
+  
+  const maxFormatted = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency,
+    minimumFractionDigits: currency === 'EUR' ? 2 : 4,
+  }).format(priceRange.max);
+  
+  return `${minFormatted} - ${maxFormatted}`;
+};
 ---
 
 <div class="bg-white rounded-lg shadow-sm border">
@@ -56,6 +105,14 @@ const formatTypeDisplay = (type: string) => {
         Instance Comparison
       </h2>
       <div class="flex items-center space-x-4">
+        <select
+          id="pricing-mode-select"
+          class="rounded border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500"
+        >
+          <option value="ipv4_ipv6">IPv4 + IPv6 Pricing</option>
+          <option value="ipv6_only">IPv6-only Pricing</option>
+          <option value="all">Show All Options</option>
+        </select>
         <select
           id="sort-select"
           class="rounded border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500"
@@ -140,33 +197,42 @@ const formatTypeDisplay = (type: string) => {
               {instance.memoryGiB ? `${instance.memoryGiB} GiB` : '-'}
             </td>
             <td class="px-3 py-3 whitespace-nowrap">
-              <div class="flex flex-col space-y-1">
-                {instance.networkType && (
-                  <span class={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                    instance.networkType === 'ipv6_only' 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-cyan-100 text-cyan-800'
-                  }`}>
-                    {instance.ipConfiguration || instance.networkType?.replace('_', '+').toUpperCase()}
-                  </span>
-                )}
-                {instance.ipv4_savings && (
-                  <span class="text-xs text-green-600">
-                    Saves €{instance.ipv4_savings}/mo
-                  </span>
-                )}
-                {!instance.networkType && instance.ipType && (
-                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-cyan-100 text-cyan-800">
-                    {instance.ipType.replace('_', '+').toUpperCase()}
-                  </span>
+              <div class="flex flex-col space-y-1" data-network-info="true">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-cyan-100 text-cyan-800 pricing-mode-indicator">
+                  IPv4 + IPv6
+                </span>
+                <span class="text-xs text-gray-500 pricing-description">
+                  Standard pricing
+                </span>
+              </div>
+            </td>
+            <td class="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900 pricing-hourly">
+              <div class="flex flex-col">
+                <span class="pricing-value">
+                  {formatPriceRange(
+                    instance.priceRange?.hourly, 
+                    instance.priceUSD_hourly || instance.priceEUR_hourly_net || 0,
+                    instance.priceEUR_hourly_net ? 'EUR' : 'USD'
+                  )}
+                </span>
+                {instance.priceRange?.hourly?.hasVariation && (
+                  <span class="text-xs text-orange-600">varies by region</span>
                 )}
               </div>
             </td>
-            <td class="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
-              {formatPrice(instance.priceUSD_hourly)}
-            </td>
-            <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-900">
-              {formatPrice(instance.priceUSD_monthly)}
+            <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-900 pricing-monthly">
+              <div class="flex flex-col">
+                <span class="pricing-value">
+                  {formatPriceRange(
+                    instance.priceRange?.monthly, 
+                    instance.priceUSD_monthly || instance.priceEUR_monthly_net || 0,
+                    instance.priceEUR_monthly_net ? 'EUR' : 'USD'
+                  )}
+                </span>
+                {instance.priceRange?.monthly?.hasVariation && (
+                  <span class="text-xs text-orange-600">varies by region</span>
+                )}
+              </div>
             </td>
             <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
               <div class="flex flex-wrap gap-1 max-w-32">
@@ -222,17 +288,27 @@ const formatTypeDisplay = (type: string) => {
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const sortSelect = document.getElementById('sort-select') as HTMLSelectElement;
+    const pricingModeSelect = document.getElementById('pricing-mode-select') as HTMLSelectElement;
     const tableBody = document.getElementById('table-body');
     const resultCount = document.getElementById('result-count');
     
     let allInstances = Array.from(document.querySelectorAll('.instance-row'))
       .map(row => JSON.parse((row as HTMLElement).dataset.instance || '{}'));
+    let currentPricingMode = 'ipv4_ipv6';
     
     // Handle sorting
     if (sortSelect) {
       sortSelect.addEventListener('change', () => {
         const [field, direction] = sortSelect.value.split('-');
         sortInstances(field, direction === 'desc' ? 'desc' : 'asc');
+      });
+    }
+    
+    // Handle pricing mode changes
+    if (pricingModeSelect) {
+      pricingModeSelect.addEventListener('change', () => {
+        currentPricingMode = pricingModeSelect.value;
+        updatePricingDisplay();
       });
     }
     
@@ -313,6 +389,107 @@ const formatTypeDisplay = (type: string) => {
       }
     }
     
+    function updatePricingDisplay() {
+      document.querySelectorAll('.instance-row').forEach(row => {
+        const instance = JSON.parse((row as HTMLElement).dataset.instance || '{}');
+        
+        // Update network info
+        const networkInfo = row.querySelector('[data-network-info="true"]');
+        const indicator = row.querySelector('.pricing-mode-indicator');
+        const description = row.querySelector('.pricing-description');
+        
+        // Update pricing cells
+        const hourlyCell = row.querySelector('.pricing-hourly');
+        const monthlyCell = row.querySelector('.pricing-monthly');
+        
+        if (instance.networkOptions && typeof instance.networkOptions === 'object') {
+          const option = instance.networkOptions[currentPricingMode];
+          
+          if (option && option.available) {
+            // Update network indicator
+            if (indicator) {
+              indicator.textContent = currentPricingMode === 'ipv6_only' ? 'IPv6-only' : 'IPv4 + IPv6';
+              indicator.className = `inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium pricing-mode-indicator ${
+                currentPricingMode === 'ipv6_only' ? 'bg-green-100 text-green-800' : 'bg-cyan-100 text-cyan-800'
+              }`;
+            }
+            
+            // Update description
+            if (description) {
+              if (currentPricingMode === 'ipv6_only' && option.savings) {
+                description.textContent = `Saves €${option.savings.toFixed(2)}/month`;
+                description.className = 'text-xs text-green-600 pricing-description';
+              } else {
+                description.textContent = option.description || 'Standard pricing';
+                description.className = 'text-xs text-gray-500 pricing-description';
+              }
+            }
+            
+            // Update pricing with range support
+            if (hourlyCell && option.hourly !== null) {
+              const pricingValue = hourlyCell.querySelector('.pricing-value');
+              const variationWarning = hourlyCell.querySelector('.text-xs.text-orange-600');
+              
+              if (pricingValue) {
+                const priceRange = option.priceRange?.hourly;
+                if (priceRange && priceRange.hasVariation) {
+                  const minFormatted = new Intl.NumberFormat('en-US', {
+                    style: 'currency', currency: 'EUR', minimumFractionDigits: 4,
+                  }).format(priceRange.min);
+                  const maxFormatted = new Intl.NumberFormat('en-US', {
+                    style: 'currency', currency: 'EUR', minimumFractionDigits: 4,
+                  }).format(priceRange.max);
+                  pricingValue.textContent = `${minFormatted} - ${maxFormatted}`;
+                  
+                  if (variationWarning) variationWarning.style.display = '';
+                } else {
+                  pricingValue.textContent = new Intl.NumberFormat('en-US', {
+                    style: 'currency', currency: 'EUR', minimumFractionDigits: 4,
+                  }).format(option.hourly);
+                  
+                  if (variationWarning) variationWarning.style.display = 'none';
+                }
+              }
+            }
+            
+            if (monthlyCell && option.monthly !== null) {
+              const pricingValue = monthlyCell.querySelector('.pricing-value');
+              const variationWarning = monthlyCell.querySelector('.text-xs.text-orange-600');
+              
+              if (pricingValue) {
+                const priceRange = option.priceRange?.monthly;
+                if (priceRange && priceRange.hasVariation) {
+                  const minFormatted = new Intl.NumberFormat('en-US', {
+                    style: 'currency', currency: 'EUR', minimumFractionDigits: 2,
+                  }).format(priceRange.min);
+                  const maxFormatted = new Intl.NumberFormat('en-US', {
+                    style: 'currency', currency: 'EUR', minimumFractionDigits: 2,
+                  }).format(priceRange.max);
+                  pricingValue.textContent = `${minFormatted} - ${maxFormatted}`;
+                  
+                  if (variationWarning) variationWarning.style.display = '';
+                } else {
+                  pricingValue.textContent = new Intl.NumberFormat('en-US', {
+                    style: 'currency', currency: 'EUR', minimumFractionDigits: 2,
+                  }).format(option.monthly);
+                  
+                  if (variationWarning) variationWarning.style.display = 'none';
+                }
+              }
+            }
+            
+            // Show row if pricing is available
+            (row as HTMLElement).style.display = '';
+          } else {
+            // Hide row if pricing mode not available
+            if (currentPricingMode !== 'all' && currentPricingMode !== 'ipv4_ipv6') {
+              (row as HTMLElement).style.display = 'none';
+            }
+          }
+        }
+      });
+    }
+    
     function renderInstances(instances: any[]) {
       if (!tableBody) return;
       
@@ -336,6 +513,9 @@ const formatTypeDisplay = (type: string) => {
           tableBody.appendChild(matchingRow);
         }
       });
+      
+      // Update pricing display after rendering
+      updatePricingDisplay();
     }
   });
 </script>

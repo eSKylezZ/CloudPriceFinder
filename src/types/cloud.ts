@@ -6,6 +6,32 @@ export interface LocationDetail {
   region: string;
 }
 
+export interface PriceRange {
+  min: number | null;
+  max: number | null;
+  hasVariation?: boolean;
+}
+
+export interface RegionalPricing {
+  location: string;
+  hourly_net: number;
+  monthly_net: number;
+  included_traffic: number;
+  traffic_price_per_tb: number;
+}
+
+export interface NetworkPricingOption {
+  available: boolean;
+  hourly: number | null;
+  monthly: number | null;
+  savings?: number | null;
+  description: string;
+  priceRange?: {
+    hourly: PriceRange;
+    monthly: PriceRange;
+  };
+}
+
 export interface CloudInstance {
   // Core identification
   provider: CloudProvider;
@@ -39,15 +65,20 @@ export interface CloudInstance {
   bandwidth?: number;
   trafficIncludedTB?: number;
   
-  // Network Options & IP Configuration
+  // Network Options & IP Configuration (new structure)
+  networkOptions?: {
+    ipv4_ipv6?: NetworkPricingOption;
+    ipv6_only?: NetworkPricingOption;
+  };
+  defaultNetworkType?: 'ipv4_ipv6' | 'ipv6_only';
+  supportsIPv6Only?: boolean;
+  
+  // Legacy network options (keep for compatibility)
   networkType?: 'ipv4_ipv6' | 'ipv6_only';
   ipConfiguration?: string;
   includesPublicIPv4?: boolean;
   includesPublicIPv6?: boolean;
   ipv4_savings?: number;
-  
-  // Legacy network options (keep for compatibility)
-  networkOptions?: 'ipv4_ipv6' | 'ipv6_only';
   ipType?: 'ipv4' | 'ipv6' | 'ipv4_ipv6';
   ipv6OnlyAvailable?: boolean;
   ipv6OnlyDiscount?: number;
@@ -58,6 +89,13 @@ export interface CloudInstance {
   regions: string[];
   locationDetails?: LocationDetail[];
   locations?: string[];
+  
+  // Regional Pricing Information
+  regionalPricing?: RegionalPricing[];
+  priceRange?: {
+    hourly: PriceRange;
+    monthly: PriceRange;
+  };
   
   // Service-specific properties
   max_connections?: number;        // Load balancers
@@ -118,6 +156,7 @@ export interface FilterOptions {
   ipTypes?: string[];
   networkOptions?: string[];
   ipv6OnlyMode?: boolean;
+  pricingMode?: 'ipv4_ipv6' | 'ipv6_only' | 'all';
 }
 
 export interface SortOption {
