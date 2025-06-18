@@ -1,17 +1,16 @@
 {
-  "totalInstances": 22,
+  "totalInstances": 19,
   "providersCount": 1,
-  "lastUpdated": "2025-06-18T11:50:55.136812",
+  "lastUpdated": "2025-06-18T12:11:02.912157",
   "priceRange": {
     "min": 0.00572,
     "max": 0.50765
   },
   "byProvider": {
-    "hetzner": 22
+    "hetzner": 19
   },
   "byType": {
-    "cloud-server": 19,
-    "cloud-loadbalancer": 3
+    "cloud-server": 19
   },
   "errors": {}
 }
