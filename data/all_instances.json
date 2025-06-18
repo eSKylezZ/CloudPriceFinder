@@ -64,7 +64,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CPX 11",
-    "lastUpdated": "2025-06-18T12:25:19.877446",
+    "lastUpdated": "2025-06-18T17:32:37.390425",
     "priceEUR_hourly_net": 0.0063,
     "priceEUR_monthly_net": 3.85,
     "regionalPricing": [
@@ -240,7 +240,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CPX 21",
-    "lastUpdated": "2025-06-18T12:25:19.877502",
+    "lastUpdated": "2025-06-18T17:32:37.390472",
     "priceEUR_hourly_net": 0.0112,
     "priceEUR_monthly_net": 7.05,
     "regionalPricing": [
@@ -416,7 +416,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CPX 31",
-    "lastUpdated": "2025-06-18T12:25:19.877535",
+    "lastUpdated": "2025-06-18T17:32:37.390500",
     "priceEUR_hourly_net": 0.0211,
     "priceEUR_monthly_net": 13.1,
     "regionalPricing": [
@@ -592,7 +592,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CPX 41",
-    "lastUpdated": "2025-06-18T12:25:19.877558",
+    "lastUpdated": "2025-06-18T17:32:37.390527",
     "priceEUR_hourly_net": 0.0409,
     "priceEUR_monthly_net": 24.7,
     "regionalPricing": [
@@ -768,7 +768,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CPX 51",
-    "lastUpdated": "2025-06-18T12:25:19.877582",
+    "lastUpdated": "2025-06-18T17:32:37.390551",
     "priceEUR_hourly_net": 0.0872,
     "priceEUR_monthly_net": 54.4,
     "regionalPricing": [
@@ -920,7 +920,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CAX11",
-    "lastUpdated": "2025-06-18T12:25:19.877604",
+    "lastUpdated": "2025-06-18T17:32:37.390573",
     "priceEUR_hourly_net": 0.0053,
     "priceEUR_monthly_net": 3.29,
     "regionalPricing": [
@@ -1051,7 +1051,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CAX21",
-    "lastUpdated": "2025-06-18T12:25:19.877621",
+    "lastUpdated": "2025-06-18T17:32:37.390590",
     "priceEUR_hourly_net": 0.0096,
     "priceEUR_monthly_net": 5.99,
     "regionalPricing": [
@@ -1182,7 +1182,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CAX31",
-    "lastUpdated": "2025-06-18T12:25:19.877642",
+    "lastUpdated": "2025-06-18T17:32:37.390614",
     "priceEUR_hourly_net": 0.0192,
     "priceEUR_monthly_net": 11.99,
     "regionalPricing": [
@@ -1313,7 +1313,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CAX41",
-    "lastUpdated": "2025-06-18T12:25:19.877662",
+    "lastUpdated": "2025-06-18T17:32:37.390634",
     "priceEUR_hourly_net": 0.0384,
     "priceEUR_monthly_net": 23.99,
     "regionalPricing": [
@@ -1468,7 +1468,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX13 Dedicated CPU",
-    "lastUpdated": "2025-06-18T12:25:19.877687",
+    "lastUpdated": "2025-06-18T17:32:37.390659",
     "priceEUR_hourly_net": 0.0192,
     "priceEUR_monthly_net": 11.99,
     "regionalPricing": [
@@ -1644,7 +1644,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX23 Dedicated CPU",
-    "lastUpdated": "2025-06-18T12:25:19.877715",
+    "lastUpdated": "2025-06-18T17:32:37.390686",
     "priceEUR_hourly_net": 0.0384,
     "priceEUR_monthly_net": 23.99,
     "regionalPricing": [
@@ -1820,7 +1820,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX33 Dedicated CPU",
-    "lastUpdated": "2025-06-18T12:25:19.877739",
+    "lastUpdated": "2025-06-18T17:32:37.390710",
     "priceEUR_hourly_net": 0.0769,
     "priceEUR_monthly_net": 47.99,
     "regionalPricing": [
@@ -1996,7 +1996,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX43 Dedicated CPU",
-    "lastUpdated": "2025-06-18T12:25:19.877784",
+    "lastUpdated": "2025-06-18T17:32:37.390759",
     "priceEUR_hourly_net": 0.1538,
     "priceEUR_monthly_net": 95.99,
     "regionalPricing": [
@@ -2172,7 +2172,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX53 Dedicated CPU",
-    "lastUpdated": "2025-06-18T12:25:19.877808",
+    "lastUpdated": "2025-06-18T17:32:37.390784",
     "priceEUR_hourly_net": 0.3077,
     "priceEUR_monthly_net": 191.99,
     "regionalPricing": [
@@ -2348,7 +2348,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX63 Dedicated CPU",
-    "lastUpdated": "2025-06-18T12:25:19.877833",
+    "lastUpdated": "2025-06-18T17:32:37.390810",
     "priceEUR_hourly_net": 0.4615,
     "priceEUR_monthly_net": 287.99,
     "regionalPricing": [
@@ -2500,7 +2500,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CX22",
-    "lastUpdated": "2025-06-18T12:25:19.877853",
+    "lastUpdated": "2025-06-18T17:32:37.390830",
     "priceEUR_hourly_net": 0.0052,
     "priceEUR_monthly_net": 3.29,
     "regionalPricing": [
@@ -2631,7 +2631,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CX32",
-    "lastUpdated": "2025-06-18T12:25:19.877872",
+    "lastUpdated": "2025-06-18T17:32:37.390847",
     "priceEUR_hourly_net": 0.0105,
     "priceEUR_monthly_net": 6.3,
     "regionalPricing": [
@@ -2762,7 +2762,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CX42",
-    "lastUpdated": "2025-06-18T12:25:19.877891",
+    "lastUpdated": "2025-06-18T17:32:37.390868",
     "priceEUR_hourly_net": 0.0265,
     "priceEUR_monthly_net": 15.9,
     "regionalPricing": [
@@ -2893,7 +2893,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CX52",
-    "lastUpdated": "2025-06-18T12:25:19.877909",
+    "lastUpdated": "2025-06-18T17:32:37.390886",
     "priceEUR_hourly_net": 0.0532,
     "priceEUR_monthly_net": 31.9,
     "regionalPricing": [
@@ -3048,7 +3048,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "LB11",
-    "lastUpdated": "2025-06-18T12:25:20.685213",
+    "lastUpdated": "2025-06-18T17:32:38.610189",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "hcloud_library",
@@ -3128,7 +3128,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "LB21",
-    "lastUpdated": "2025-06-18T12:25:20.685240",
+    "lastUpdated": "2025-06-18T17:32:38.610215",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "hcloud_library",
@@ -3208,7 +3208,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "LB31",
-    "lastUpdated": "2025-06-18T12:25:20.685255",
+    "lastUpdated": "2025-06-18T17:32:38.610230",
     "hetzner_metadata": {
       "platform": "cloud",
       "apiSource": "hcloud_library",
@@ -3220,6 +3220,182 @@
     "originalPrice": {
       "hourly": 0.0495,
       "monthly": 32.9,
+      "currency": "EUR"
+    }
+  },
+  {
+    "platform": "dedicated",
+    "type": "dedicated-server",
+    "instanceType": "AX41-NVMe",
+    "description": "Dedicated server AX41-NVMe - AMD Ryzen 5 3600",
+    "vCPU": 6,
+    "memoryGiB": 64,
+    "diskType": "NVMe SSD",
+    "diskSizeGB": 1024,
+    "priceEUR_monthly_net": 39.0,
+    "priceEUR_hourly_net": 0.053392475768030224,
+    "cpu_description": "AMD Ryzen 5 3600",
+    "ram_description": "64 GB DDR4",
+    "storage_description": "2x 512 GB NVMe SSD",
+    "datacenter": "FSN1-DC14",
+    "regions": [
+      "Germany"
+    ],
+    "source": "hetzner_sample_data",
+    "lastUpdated": "2025-06-18T17:32:38.610748",
+    "locationDetails": [
+      {
+        "code": "FSN1-DC14",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Germany"
+      }
+    ],
+    "hetzner_metadata": {
+      "platform": "dedicated",
+      "apiSource": "sample_data",
+      "serviceCategory": "dedicated_server",
+      "datacenter": "FSN1-DC14"
+    },
+    "provider": "hetzner",
+    "priceUSD_hourly": 0.058732,
+    "priceUSD_monthly": 42.9,
+    "originalPrice": {
+      "hourly": 0.053392475768030224,
+      "monthly": 39.0,
+      "currency": "EUR"
+    }
+  },
+  {
+    "platform": "dedicated",
+    "type": "dedicated-server",
+    "instanceType": "AX51-NVMe",
+    "description": "Dedicated server AX51-NVMe - AMD Ryzen 7 3700X",
+    "vCPU": 8,
+    "memoryGiB": 64,
+    "diskType": "NVMe SSD",
+    "diskSizeGB": 1024,
+    "priceEUR_monthly_net": 49.0,
+    "priceEUR_hourly_net": 0.06708285417008926,
+    "cpu_description": "AMD Ryzen 7 3700X",
+    "ram_description": "64 GB DDR4",
+    "storage_description": "2x 512 GB NVMe SSD",
+    "datacenter": "FSN1-DC14",
+    "regions": [
+      "Germany"
+    ],
+    "source": "hetzner_sample_data",
+    "lastUpdated": "2025-06-18T17:32:38.610761",
+    "locationDetails": [
+      {
+        "code": "FSN1-DC14",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Germany"
+      }
+    ],
+    "hetzner_metadata": {
+      "platform": "dedicated",
+      "apiSource": "sample_data",
+      "serviceCategory": "dedicated_server",
+      "datacenter": "FSN1-DC14"
+    },
+    "provider": "hetzner",
+    "priceUSD_hourly": 0.073791,
+    "priceUSD_monthly": 53.9,
+    "originalPrice": {
+      "hourly": 0.06708285417008926,
+      "monthly": 49.0,
+      "currency": "EUR"
+    }
+  },
+  {
+    "platform": "dedicated",
+    "type": "dedicated-server",
+    "instanceType": "AX61-NVMe",
+    "description": "Dedicated server AX61-NVMe - AMD Ryzen 7 3700X",
+    "vCPU": 8,
+    "memoryGiB": 64,
+    "diskType": "NVMe SSD",
+    "diskSizeGB": 2048,
+    "priceEUR_monthly_net": 59.0,
+    "priceEUR_hourly_net": 0.08077323257214829,
+    "cpu_description": "AMD Ryzen 7 3700X",
+    "ram_description": "64 GB DDR4",
+    "storage_description": "2x 1 TB NVMe SSD",
+    "datacenter": "NBG1-DC3",
+    "regions": [
+      "Germany"
+    ],
+    "source": "hetzner_sample_data",
+    "lastUpdated": "2025-06-18T17:32:38.610771",
+    "locationDetails": [
+      {
+        "code": "NBG1-DC3",
+        "city": "Nuremberg",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Germany"
+      }
+    ],
+    "hetzner_metadata": {
+      "platform": "dedicated",
+      "apiSource": "sample_data",
+      "serviceCategory": "dedicated_server",
+      "datacenter": "NBG1-DC3"
+    },
+    "provider": "hetzner",
+    "priceUSD_hourly": 0.088851,
+    "priceUSD_monthly": 64.9,
+    "originalPrice": {
+      "hourly": 0.08077323257214829,
+      "monthly": 59.0,
+      "currency": "EUR"
+    }
+  },
+  {
+    "platform": "dedicated",
+    "type": "dedicated-server",
+    "instanceType": "AX101",
+    "description": "Dedicated server AX101 - AMD Ryzen 9 5950X",
+    "vCPU": 16,
+    "memoryGiB": 128,
+    "diskType": "NVMe SSD",
+    "diskSizeGB": 7680,
+    "priceEUR_monthly_net": 129.0,
+    "priceEUR_hourly_net": 0.17660588138656153,
+    "cpu_description": "AMD Ryzen 9 5950X",
+    "ram_description": "128 GB DDR4",
+    "storage_description": "2x 3.84 TB NVMe SSD",
+    "datacenter": "FSN1-DC14",
+    "regions": [
+      "Germany"
+    ],
+    "source": "hetzner_sample_data",
+    "lastUpdated": "2025-06-18T17:32:38.610779",
+    "locationDetails": [
+      {
+        "code": "FSN1-DC14",
+        "city": "Falkenstein",
+        "country": "Germany",
+        "countryCode": "DE",
+        "region": "Germany"
+      }
+    ],
+    "hetzner_metadata": {
+      "platform": "dedicated",
+      "apiSource": "sample_data",
+      "serviceCategory": "dedicated_server",
+      "datacenter": "FSN1-DC14"
+    },
+    "provider": "hetzner",
+    "priceUSD_hourly": 0.194266,
+    "priceUSD_monthly": 141.9,
+    "originalPrice": {
+      "hourly": 0.17660588138656153,
+      "monthly": 129.0,
       "currency": "EUR"
     }
   }
