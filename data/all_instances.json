@@ -64,7 +64,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CPX 11",
-    "lastUpdated": "2025-06-18T12:11:01.375229",
+    "lastUpdated": "2025-06-18T12:13:46.792431",
     "priceEUR_hourly_net": 0.0063,
     "priceEUR_monthly_net": 3.85,
     "regionalPricing": [
@@ -240,7 +240,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CPX 21",
-    "lastUpdated": "2025-06-18T12:11:01.375272",
+    "lastUpdated": "2025-06-18T12:13:46.792477",
     "priceEUR_hourly_net": 0.0112,
     "priceEUR_monthly_net": 7.05,
     "regionalPricing": [
@@ -416,7 +416,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CPX 31",
-    "lastUpdated": "2025-06-18T12:11:01.375295",
+    "lastUpdated": "2025-06-18T12:13:46.792502",
     "priceEUR_hourly_net": 0.0211,
     "priceEUR_monthly_net": 13.1,
     "regionalPricing": [
@@ -592,7 +592,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CPX 41",
-    "lastUpdated": "2025-06-18T12:11:01.375315",
+    "lastUpdated": "2025-06-18T12:13:46.792524",
     "priceEUR_hourly_net": 0.0409,
     "priceEUR_monthly_net": 24.7,
     "regionalPricing": [
@@ -768,7 +768,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CPX 51",
-    "lastUpdated": "2025-06-18T12:11:01.375335",
+    "lastUpdated": "2025-06-18T12:13:46.792550",
     "priceEUR_hourly_net": 0.0872,
     "priceEUR_monthly_net": 54.4,
     "regionalPricing": [
@@ -920,7 +920,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CAX11",
-    "lastUpdated": "2025-06-18T12:11:01.375353",
+    "lastUpdated": "2025-06-18T12:13:46.792568",
     "priceEUR_hourly_net": 0.0053,
     "priceEUR_monthly_net": 3.29,
     "regionalPricing": [
@@ -1051,7 +1051,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CAX21",
-    "lastUpdated": "2025-06-18T12:11:01.375366",
+    "lastUpdated": "2025-06-18T12:13:46.792587",
     "priceEUR_hourly_net": 0.0096,
     "priceEUR_monthly_net": 5.99,
     "regionalPricing": [
@@ -1182,7 +1182,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CAX31",
-    "lastUpdated": "2025-06-18T12:11:01.375396",
+    "lastUpdated": "2025-06-18T12:13:46.792605",
     "priceEUR_hourly_net": 0.0192,
     "priceEUR_monthly_net": 11.99,
     "regionalPricing": [
@@ -1313,7 +1313,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CAX41",
-    "lastUpdated": "2025-06-18T12:11:01.375411",
+    "lastUpdated": "2025-06-18T12:13:46.792620",
     "priceEUR_hourly_net": 0.0384,
     "priceEUR_monthly_net": 23.99,
     "regionalPricing": [
@@ -1468,7 +1468,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX13 Dedicated CPU",
-    "lastUpdated": "2025-06-18T12:11:01.375431",
+    "lastUpdated": "2025-06-18T12:13:46.792643",
     "priceEUR_hourly_net": 0.0192,
     "priceEUR_monthly_net": 11.99,
     "regionalPricing": [
@@ -1644,7 +1644,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX23 Dedicated CPU",
-    "lastUpdated": "2025-06-18T12:11:01.375454",
+    "lastUpdated": "2025-06-18T12:13:46.792665",
     "priceEUR_hourly_net": 0.0384,
     "priceEUR_monthly_net": 23.99,
     "regionalPricing": [
@@ -1820,7 +1820,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX33 Dedicated CPU",
-    "lastUpdated": "2025-06-18T12:11:01.375474",
+    "lastUpdated": "2025-06-18T12:13:46.792686",
     "priceEUR_hourly_net": 0.0769,
     "priceEUR_monthly_net": 47.99,
     "regionalPricing": [
@@ -1996,7 +1996,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX43 Dedicated CPU",
-    "lastUpdated": "2025-06-18T12:11:01.375512",
+    "lastUpdated": "2025-06-18T12:13:46.792725",
     "priceEUR_hourly_net": 0.1538,
     "priceEUR_monthly_net": 95.99,
     "regionalPricing": [
@@ -2172,7 +2172,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX53 Dedicated CPU",
-    "lastUpdated": "2025-06-18T12:11:01.375532",
+    "lastUpdated": "2025-06-18T12:13:46.792748",
     "priceEUR_hourly_net": 0.3077,
     "priceEUR_monthly_net": 191.99,
     "regionalPricing": [
@@ -2348,7 +2348,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CCX63 Dedicated CPU",
-    "lastUpdated": "2025-06-18T12:11:01.375552",
+    "lastUpdated": "2025-06-18T12:13:46.792768",
     "priceEUR_hourly_net": 0.4615,
     "priceEUR_monthly_net": 287.99,
     "regionalPricing": [
@@ -2500,7 +2500,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CX22",
-    "lastUpdated": "2025-06-18T12:11:01.375567",
+    "lastUpdated": "2025-06-18T12:13:46.792786",
     "priceEUR_hourly_net": 0.0052,
     "priceEUR_monthly_net": 3.29,
     "regionalPricing": [
@@ -2631,7 +2631,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CX32",
-    "lastUpdated": "2025-06-18T12:11:01.375581",
+    "lastUpdated": "2025-06-18T12:13:46.792801",
     "priceEUR_hourly_net": 0.0105,
     "priceEUR_monthly_net": 6.3,
     "regionalPricing": [
@@ -2762,7 +2762,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CX42",
-    "lastUpdated": "2025-06-18T12:11:01.375597",
+    "lastUpdated": "2025-06-18T12:13:46.792817",
     "priceEUR_hourly_net": 0.0265,
     "priceEUR_monthly_net": 15.9,
     "regionalPricing": [
@@ -2893,7 +2893,7 @@
     "deprecated": false,
     "source": "hetzner_cloud_api",
     "description": "CX52",
-    "lastUpdated": "2025-06-18T12:11:01.375626",
+    "lastUpdated": "2025-06-18T12:13:46.792833",
     "priceEUR_hourly_net": 0.0532,
     "priceEUR_monthly_net": 31.9,
     "regionalPricing": [
@@ -2980,6 +2980,114 @@
     "originalPrice": {
       "hourly": 0.0532,
       "monthly": 31.9,
+      "currency": "EUR"
+    }
+  },
+  {
+    "platform": "cloud",
+    "type": "cloud-loadbalancer",
+    "instanceType": "lb11",
+    "max_connections": 10000,
+    "max_services": 5,
+    "max_targets": 25,
+    "max_assigned_certificates": 10,
+    "priceEUR_hourly_net": 0.0088,
+    "priceEUR_monthly_net": 5.39,
+    "regions": [
+      "fsn1",
+      "nbg1",
+      "hel1",
+      "sin",
+      "hil",
+      "ash"
+    ],
+    "deprecated": false,
+    "source": "hetzner_cloud_api",
+    "description": "LB11",
+    "lastUpdated": "2025-06-18T12:13:47.403649",
+    "hetzner_metadata": {
+      "platform": "cloud",
+      "apiSource": "hcloud_library",
+      "serviceCategory": "networking"
+    },
+    "provider": "hetzner",
+    "priceUSD_hourly": 0.00968,
+    "priceUSD_monthly": 5.93,
+    "originalPrice": {
+      "hourly": 0.0088,
+      "monthly": 5.39,
+      "currency": "EUR"
+    }
+  },
+  {
+    "platform": "cloud",
+    "type": "cloud-loadbalancer",
+    "instanceType": "lb21",
+    "max_connections": 20000,
+    "max_services": 15,
+    "max_targets": 75,
+    "max_assigned_certificates": 25,
+    "priceEUR_hourly_net": 0.0253,
+    "priceEUR_monthly_net": 16.4,
+    "regions": [
+      "fsn1",
+      "nbg1",
+      "hel1",
+      "sin",
+      "hil",
+      "ash"
+    ],
+    "deprecated": false,
+    "source": "hetzner_cloud_api",
+    "description": "LB21",
+    "lastUpdated": "2025-06-18T12:13:47.403672",
+    "hetzner_metadata": {
+      "platform": "cloud",
+      "apiSource": "hcloud_library",
+      "serviceCategory": "networking"
+    },
+    "provider": "hetzner",
+    "priceUSD_hourly": 0.02783,
+    "priceUSD_monthly": 18.04,
+    "originalPrice": {
+      "hourly": 0.0253,
+      "monthly": 16.4,
+      "currency": "EUR"
+    }
+  },
+  {
+    "platform": "cloud",
+    "type": "cloud-loadbalancer",
+    "instanceType": "lb31",
+    "max_connections": 40000,
+    "max_services": 30,
+    "max_targets": 150,
+    "max_assigned_certificates": 50,
+    "priceEUR_hourly_net": 0.0495,
+    "priceEUR_monthly_net": 32.9,
+    "regions": [
+      "fsn1",
+      "nbg1",
+      "hel1",
+      "sin",
+      "hil",
+      "ash"
+    ],
+    "deprecated": false,
+    "source": "hetzner_cloud_api",
+    "description": "LB31",
+    "lastUpdated": "2025-06-18T12:13:47.403683",
+    "hetzner_metadata": {
+      "platform": "cloud",
+      "apiSource": "hcloud_library",
+      "serviceCategory": "networking"
+    },
+    "provider": "hetzner",
+    "priceUSD_hourly": 0.05445,
+    "priceUSD_monthly": 36.19,
+    "originalPrice": {
+      "hourly": 0.0495,
+      "monthly": 32.9,
       "currency": "EUR"
     }
   }
