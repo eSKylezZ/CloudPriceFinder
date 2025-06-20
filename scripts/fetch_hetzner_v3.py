@@ -402,7 +402,7 @@ class HetznerCloudCollector:
         
         return []
     
-    def _get_location_mapping(self, locations: List[Location]) -> Dict[str, Dict[str, str]]:
+    def _get_location_mapping(self, locations: List[Any]) -> Dict[str, Dict[str, str]]:
         """Create mapping of location codes to detailed information."""
         location_map = {}
         
@@ -452,13 +452,15 @@ class HetznerDedicatedCollector:
         processed_servers = []
         
         try:
-            # Method 1: Try using Robot API directly with requests (auction servers)
+            # Method 1: Try using Robot API directly with requests
+            # Server products endpoint (public, no auth required)
+            logger.info("Fetching server products from Robot API...")
+            processed_servers.extend(self._fetch_server_products())
+            
+            # Server market data (auction servers - requires auth)
             if self.has_credentials:
                 logger.info("Fetching server market data from Robot API...")
                 processed_servers.extend(self._fetch_server_market_data())
-                
-                logger.info("Fetching server products from Robot API...")
-                processed_servers.extend(self._fetch_server_products())
             
             # Method 2: Web scrape regular dedicated servers from matrix page
             logger.info("Fetching regular dedicated servers from web...")
@@ -559,13 +561,19 @@ class HetznerDedicatedCollector:
             import requests
             from requests.auth import HTTPBasicAuth
             
-            auth = HTTPBasicAuth(config.robot_user, config.robot_password)
+            # Try without authentication first (public endpoint)
+            headers = {'Accept': 'application/json'}
+            auth = None
+            
+            # Use authentication if available
+            if self.has_credentials:
+                auth = HTTPBasicAuth(config.robot_user, config.robot_password)
             
             # Robot API endpoint for server products
             response = requests.get(
                 "https://robot-ws.your-server.de/order/server/product", 
                 auth=auth,
-                headers={'Accept': 'application/json'},
+                headers=headers,
                 timeout=30
             )
             

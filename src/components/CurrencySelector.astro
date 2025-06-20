@@ -147,6 +147,17 @@
       updatePriceDisplays(selectedCurrency);
     });
     
+    // Handle requests for current currency data
+    window.addEventListener('requestCurrencyData', () => {
+      window.dispatchEvent(new CustomEvent('currencyChanged', {
+        detail: { 
+          currency: currencySelector.value,
+          symbol: currencySymbols[currencySelector.value],
+          rates: exchangeRates
+        }
+      }));
+    });
+    
     // Initialize
     fetchExchangeRates().then(() => {
       updatePriceDisplays(savedCurrency);
