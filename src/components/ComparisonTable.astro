@@ -1009,24 +1009,37 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'US
           );
           
           if (regionalPrice) {
+            // Calculate actual pricing based on current network mode
+            const ipv4Cost = instance.hetzner_metadata?.ipv4_primary_ip_cost || 0.5;
+            
+            // Determine pricing based on current pricing mode
+            let displayHourly = regionalPrice.hourly_net;
+            let displayMonthly = regionalPrice.monthly_net;
+            
+            // If IPv4+IPv6 mode is active (default), add IPv4 cost
+            if (currentPricingMode === 'ipv4_ipv6') {
+              displayHourly += (ipv4Cost / 730.44);
+              displayMonthly += ipv4Cost;
+            }
+            
             // Update hourly pricing
             const hourlyCell = row.querySelector('.pricing-hourly .pricing-value');
-            if (hourlyCell && regionalPrice.hourly_net) {
+            if (hourlyCell) {
               hourlyCell.textContent = new Intl.NumberFormat('en-US', {
                 style: 'currency',
                 currency: 'EUR',
                 minimumFractionDigits: 4,
-              }).format(regionalPrice.hourly_net);
+              }).format(displayHourly);
             }
             
             // Update monthly pricing
             const monthlyCell = row.querySelector('.pricing-monthly .pricing-value');
-            if (monthlyCell && regionalPrice.monthly_net) {
+            if (monthlyCell) {
               monthlyCell.textContent = new Intl.NumberFormat('en-US', {
                 style: 'currency',
                 currency: 'EUR',
                 minimumFractionDigits: 2,
-              }).format(regionalPrice.monthly_net);
+              }).format(displayMonthly);
             }
             
             // Add region-specific indicator
@@ -1034,7 +1047,8 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'US
             if (networkInfo) {
               const description = networkInfo.querySelector('.pricing-description');
               if (description) {
-                description.textContent = `${matchingLocation.city} pricing`;
+                const pricingType = currentPricingMode === 'ipv4_ipv6' ? 'pricing (incl. IPv4)' : 'pricing';
+                description.textContent = `${matchingLocation.city} ${pricingType}`;
                 description.className = 'text-xs text-blue-600 pricing-description';
               }
             }

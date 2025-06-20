@@ -183,12 +183,12 @@ class HetznerCloudCollector:
                         })
                     
                     # Calculate pricing for both network options
-                    # Base price from API is for IPv6-only, IPv4 costs extra
-                    ipv6_only_monthly = monthly_price  # Base price is IPv6-only
+                    # Base price from API is actually IPv6-only pricing
+                    ipv6_only_monthly = monthly_price  # Base regional price (€3.29 for CX22)
                     ipv6_only_hourly = hourly_price
                     
                     # IPv4+IPv6 pricing includes IPv4 Primary IP cost
-                    ipv4_ipv6_monthly = monthly_price + ipv4_primary_ip_cost
+                    ipv4_ipv6_monthly = monthly_price + ipv4_primary_ip_cost  # €3.29 + €0.50 = €3.79
                     ipv4_ipv6_hourly = hourly_price + (ipv4_primary_ip_cost / 730.44)
                     
                     # Create server entry with pricing options
