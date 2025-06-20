@@ -166,7 +166,7 @@
     ],
     "source": "oci_shapes",
     "description": "Oracle Cloud VM.Standard.E3.Flex",
-    "lastUpdated": "2025-06-20T23:32:53.493615",
+    "lastUpdated": "2025-06-20T23:02:04.854117",
     "oci_metadata": {
       "ocpu_count": 1,
       "shape_type": "flexible",
@@ -340,7 +340,7 @@
     ],
     "source": "oci_shapes",
     "description": "Oracle Cloud VM.Standard.E4.Flex",
-    "lastUpdated": "2025-06-20T23:32:53.493636",
+    "lastUpdated": "2025-06-20T23:02:04.854136",
     "oci_metadata": {
       "ocpu_count": 1,
       "shape_type": "flexible",
@@ -514,7 +514,7 @@
     ],
     "source": "oci_shapes",
     "description": "Oracle Cloud VM.Standard.E5.Flex",
-    "lastUpdated": "2025-06-20T23:32:53.493643",
+    "lastUpdated": "2025-06-20T23:02:04.854142",
     "oci_metadata": {
       "ocpu_count": 1,
       "shape_type": "flexible",
@@ -688,7 +688,7 @@
     ],
     "source": "oci_shapes",
     "description": "Oracle Cloud VM.Standard.E2.1.Micro",
-    "lastUpdated": "2025-06-20T23:32:53.493647",
+    "lastUpdated": "2025-06-20T23:02:04.854146",
     "oci_metadata": {
       "ocpu_count": 1,
       "shape_type": "fixed",
@@ -862,7 +862,7 @@
     ],
     "source": "oci_shapes",
     "description": "Oracle Cloud VM.Standard.E2.1",
-    "lastUpdated": "2025-06-20T23:32:53.493652",
+    "lastUpdated": "2025-06-20T23:02:04.854151",
     "oci_metadata": {
       "ocpu_count": 1,
       "shape_type": "fixed",
@@ -1036,7 +1036,7 @@
     ],
     "source": "oci_shapes",
     "description": "Oracle Cloud VM.Standard.E2.2",
-    "lastUpdated": "2025-06-20T23:32:53.493656",
+    "lastUpdated": "2025-06-20T23:02:04.854155",
     "oci_metadata": {
       "ocpu_count": 2,
       "shape_type": "fixed",
@@ -1210,7 +1210,7 @@
     ],
     "source": "oci_shapes",
     "description": "Oracle Cloud VM.Standard.E2.4",
-    "lastUpdated": "2025-06-20T23:32:53.493660",
+    "lastUpdated": "2025-06-20T23:02:04.854159",
     "oci_metadata": {
       "ocpu_count": 4,
       "shape_type": "fixed",
@@ -1384,7 +1384,7 @@
     ],
     "source": "oci_shapes",
     "description": "Oracle Cloud VM.Standard.E2.8",
-    "lastUpdated": "2025-06-20T23:32:53.493664",
+    "lastUpdated": "2025-06-20T23:02:04.854163",
     "oci_metadata": {
       "ocpu_count": 8,
       "shape_type": "fixed",
@@ -1558,7 +1558,7 @@
     ],
     "source": "oci_shapes",
     "description": "Oracle Cloud VM.Standard.E3.1",
-    "lastUpdated": "2025-06-20T23:32:53.493673",
+    "lastUpdated": "2025-06-20T23:02:04.854166",
     "oci_metadata": {
       "ocpu_count": 1,
       "shape_type": "fixed",
@@ -1732,7 +1732,7 @@
     ],
     "source": "oci_shapes",
     "description": "Oracle Cloud VM.Standard.E3.2",
-    "lastUpdated": "2025-06-20T23:32:53.493677",
+    "lastUpdated": "2025-06-20T23:02:04.854170",
     "oci_metadata": {
       "ocpu_count": 2,
       "shape_type": "fixed",
@@ -1906,7 +1906,7 @@
     ],
     "source": "oci_shapes",
     "description": "Oracle Cloud VM.Standard.E3.4",
-    "lastUpdated": "2025-06-20T23:32:53.493681",
+    "lastUpdated": "2025-06-20T23:02:04.854175",
     "oci_metadata": {
       "ocpu_count": 4,
       "shape_type": "fixed",
@@ -2080,7 +2080,7 @@
     ],
     "source": "oci_shapes",
     "description": "Oracle Cloud VM.Standard.E3.8",
-    "lastUpdated": "2025-06-20T23:32:53.493686",
+    "lastUpdated": "2025-06-20T23:02:04.854179",
     "oci_metadata": {
       "ocpu_count": 8,
       "shape_type": "fixed",
@@ -2254,7 +2254,7 @@
     ],
     "source": "oci_shapes",
     "description": "Oracle Cloud VM.Standard.E4.1",
-    "lastUpdated": "2025-06-20T23:32:53.493691",
+    "lastUpdated": "2025-06-20T23:02:04.854182",
     "oci_metadata": {
       "ocpu_count": 1,
       "shape_type": "fixed",
@@ -2428,7 +2428,7 @@
     ],
     "source": "oci_shapes",
     "description": "Oracle Cloud VM.Standard.E4.2",
-    "lastUpdated": "2025-06-20T23:32:53.493695",
+    "lastUpdated": "2025-06-20T23:02:04.854186",
     "oci_metadata": {
       "ocpu_count": 2,
       "shape_type": "fixed",
@@ -2602,7 +2602,7 @@
     ],
     "source": "oci_shapes",
     "description": "Oracle Cloud VM.Standard.E4.4",
-    "lastUpdated": "2025-06-20T23:32:53.493700",
+    "lastUpdated": "2025-06-20T23:02:04.854190",
     "oci_metadata": {
       "ocpu_count": 4,
       "shape_type": "fixed",
@@ -2776,7 +2776,7 @@
     ],
     "source": "oci_shapes",
     "description": "Oracle Cloud VM.Standard.E4.8",
-    "lastUpdated": "2025-06-20T23:32:53.493704",
+    "lastUpdated": "2025-06-20T23:02:04.854193",
     "oci_metadata": {
       "ocpu_count": 8,
       "shape_type": "fixed",
@@ -2950,7 +2950,7 @@
     ],
     "source": "oci_shapes",
     "description": "Oracle Cloud VM.Standard.A1.Flex (Free Tier Eligible)",
-    "lastUpdated": "2025-06-20T23:32:53.493708",
+    "lastUpdated": "2025-06-20T23:02:04.854197",
     "oci_metadata": {
       "ocpu_count": 1,
       "shape_type": "flexible",
@@ -3125,7 +3125,7 @@
     ],
     "source": "oci_shapes",
     "description": "Oracle Cloud VM.Standard.E2.1.Micro (Free Tier Eligible)",
-    "lastUpdated": "2025-06-20T23:32:53.493713",
+    "lastUpdated": "2025-06-20T23:02:04.854206",
     "oci_metadata": {
       "ocpu_count": 1,
       "shape_type": "fixed",
@@ -3300,7 +3300,7 @@
     ],
     "source": "oci_shapes",
     "description": "Oracle Cloud VM.DenseIO.E4.1",
-    "lastUpdated": "2025-06-20T23:32:53.493719",
+    "lastUpdated": "2025-06-20T23:02:04.854210",
     "oci_metadata": {
       "ocpu_count": 1,
       "shape_type": "fixed",
@@ -3477,7 +3477,7 @@
     ],
     "source": "oci_shapes",
     "description": "Oracle Cloud VM.DenseIO.E4.2",
-    "lastUpdated": "2025-06-20T23:32:53.493724",
+    "lastUpdated": "2025-06-20T23:02:04.854214",
     "oci_metadata": {
       "ocpu_count": 2,
       "shape_type": "fixed",
@@ -3654,7 +3654,7 @@
     ],
     "source": "oci_shapes",
     "description": "Oracle Cloud VM.DenseIO.E4.4",
-    "lastUpdated": "2025-06-20T23:32:53.493728",
+    "lastUpdated": "2025-06-20T23:02:04.854218",
     "oci_metadata": {
       "ocpu_count": 4,
       "shape_type": "fixed",
@@ -3831,7 +3831,7 @@
     ],
     "source": "oci_shapes",
     "description": "Oracle Cloud VM.DenseIO.E4.8",
-    "lastUpdated": "2025-06-20T23:32:53.493732",
+    "lastUpdated": "2025-06-20T23:02:04.854222",
     "oci_metadata": {
       "ocpu_count": 8,
       "shape_type": "fixed",
@@ -4008,7 +4008,7 @@
     ],
     "source": "oci_shapes",
     "description": "Oracle Cloud VM.Optimized3.Flex",
-    "lastUpdated": "2025-06-20T23:32:53.493736",
+    "lastUpdated": "2025-06-20T23:02:04.854225",
     "oci_metadata": {
       "ocpu_count": 1,
       "shape_type": "flexible",
@@ -4182,7 +4182,7 @@
     ],
     "source": "oci_shapes",
     "description": "Oracle Cloud VM.GPU3.1",
-    "lastUpdated": "2025-06-20T23:32:53.493742",
+    "lastUpdated": "2025-06-20T23:02:04.854229",
     "oci_metadata": {
       "ocpu_count": 6,
       "shape_type": "fixed",
@@ -4358,7 +4358,7 @@
     ],
     "source": "oci_shapes",
     "description": "Oracle Cloud VM.GPU3.2",
-    "lastUpdated": "2025-06-20T23:32:53.493747",
+    "lastUpdated": "2025-06-20T23:02:04.854233",
     "oci_metadata": {
       "ocpu_count": 12,
       "shape_type": "fixed",
@@ -4534,7 +4534,7 @@
     ],
     "source": "oci_shapes",
     "description": "Oracle Cloud VM.GPU3.4",
-    "lastUpdated": "2025-06-20T23:32:53.493754",
+    "lastUpdated": "2025-06-20T23:02:04.854237",
     "oci_metadata": {
       "ocpu_count": 24,
       "shape_type": "fixed",

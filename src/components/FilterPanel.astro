@@ -297,7 +297,7 @@ const priceRange = instances.length > 0 ? {
               class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
             />
             <span class="ml-2 text-sm text-gray-600 capitalize">
-              {ipType.replace('_', ' + ')}
+              {ipType?.replace('_', ' + ') || ''}
             </span>
           </label>
         ))}
@@ -387,7 +387,7 @@ const priceRange = instances.length > 0 ? {
     });
   });
 
-  function applyFilters() {
+  async function applyFilters() {
     // Get filter values
     const providers = Array.from(document.querySelectorAll('input[name="provider"]:checked'))
       .map(input => (input as HTMLInputElement).value);
@@ -410,7 +410,18 @@ const priceRange = instances.length > 0 ? {
     const maxMemory = parseInt((document.querySelector('input[name="maxMemory"]') as HTMLInputElement)?.value || '9999');
     const maxPrice = parseFloat((document.querySelector('input[name="maxPrice"]') as HTMLInputElement)?.value || '999');
 
-    // Trigger custom event with filter data
+    // Trigger dynamic provider loading based on selected providers
+    if (providers.length > 0) {
+      const loadingEvent = new CustomEvent('providersSelectionChanged', {
+        detail: {
+          selectedProviders: providers,
+          action: 'load'
+        }
+      });
+      window.dispatchEvent(loadingEvent);
+    }
+
+    // Trigger filter event with filter data
     const filterEvent = new CustomEvent('filtersChanged', {
       detail: {
         providers,

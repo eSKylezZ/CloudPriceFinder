@@ -5,8 +5,8 @@ import FilterPanel from '../components/FilterPanel.astro';
 import DataSummary from '../components/DataSummary.astro';
 import { loadInstanceData, loadSummaryData } from '../lib/data-loader';
 
-// Load data at build time
-const instances = await loadInstanceData();
+// Load data at build time using split strategy for better performance
+const instances = await loadInstanceData({ mode: 'split' });
 const summary = await loadSummaryData();
 ---
 
