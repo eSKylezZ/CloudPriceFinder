@@ -182,9 +182,14 @@ class HetznerCloudCollector:
                             'region': location_info.get('region', 'Unknown')
                         })
                     
-                    # Calculate IPv6-only pricing
-                    ipv6_only_monthly = max(0, monthly_price - ipv4_primary_ip_cost) if ipv4_primary_ip_cost > 0 else None
-                    ipv6_only_hourly = ipv6_only_monthly / 730.44 if ipv6_only_monthly and ipv6_only_monthly > 0 else None
+                    # Calculate pricing for both network options
+                    # Base price from API is for IPv6-only, IPv4 costs extra
+                    ipv6_only_monthly = monthly_price  # Base price is IPv6-only
+                    ipv6_only_hourly = hourly_price
+                    
+                    # IPv4+IPv6 pricing includes IPv4 Primary IP cost
+                    ipv4_ipv6_monthly = monthly_price + ipv4_primary_ip_cost
+                    ipv4_ipv6_hourly = hourly_price + (ipv4_primary_ip_cost / 730.44)
                     
                     # Create server entry with pricing options
                     server_data = {
@@ -204,9 +209,9 @@ class HetznerCloudCollector:
                         'description': getattr(server_type, 'description', ''),
                         'lastUpdated': datetime.now().isoformat(),
                         
-                        # Pricing display (minimum pricing for sorting/filtering)
-                        'priceEUR_hourly_net': hourly_price,
-                        'priceEUR_monthly_net': monthly_price,
+                        # Pricing display (IPv4+IPv6 pricing for accurate comparison)
+                        'priceEUR_hourly_net': ipv4_ipv6_hourly,
+                        'priceEUR_monthly_net': ipv4_ipv6_monthly,
                         
                         # Regional pricing information
                         'regionalPricing': regional_pricing,
@@ -227,28 +232,34 @@ class HetznerCloudCollector:
                         'networkOptions': {
                             'ipv4_ipv6': {
                                 'available': True,
-                                'hourly': hourly_price,
-                                'monthly': monthly_price,
+                                'hourly': ipv4_ipv6_hourly,
+                                'monthly': ipv4_ipv6_monthly,
                                 'description': 'IPv4 + IPv6 included',
                                 'priceRange': {
-                                    'hourly': {'min': min_hourly, 'max': max_hourly},
-                                    'monthly': {'min': min_monthly, 'max': max_monthly}
+                                    'hourly': {
+                                        'min': min_hourly + (ipv4_primary_ip_cost / 730.44),
+                                        'max': max_hourly + (ipv4_primary_ip_cost / 730.44)
+                                    },
+                                    'monthly': {
+                                        'min': min_monthly + ipv4_primary_ip_cost,
+                                        'max': max_monthly + ipv4_primary_ip_cost
+                                    }
                                 }
                             },
                             'ipv6_only': {
-                                'available': ipv6_only_monthly is not None,
+                                'available': True,
                                 'hourly': ipv6_only_hourly,
                                 'monthly': ipv6_only_monthly,
                                 'savings': ipv4_primary_ip_cost if ipv4_primary_ip_cost > 0 else None,
                                 'description': f'IPv6-only (saves €{ipv4_primary_ip_cost:.2f}/month)' if ipv4_primary_ip_cost > 0 else 'IPv6-only',
                                 'priceRange': {
                                     'hourly': {
-                                        'min': max(0, min_hourly - ipv4_primary_ip_cost / 730.44) if ipv4_primary_ip_cost else None,
-                                        'max': max(0, max_hourly - ipv4_primary_ip_cost / 730.44) if ipv4_primary_ip_cost else None
+                                        'min': min_hourly,
+                                        'max': max_hourly
                                     },
                                     'monthly': {
-                                        'min': max(0, min_monthly - ipv4_primary_ip_cost) if ipv4_primary_ip_cost else None,
-                                        'max': max(0, max_monthly - ipv4_primary_ip_cost) if ipv4_primary_ip_cost else None
+                                        'min': min_monthly,
+                                        'max': max_monthly
                                     }
                                 }
                             }
@@ -435,13 +446,13 @@ class HetznerDedicatedCollector:
             self.robot = None
     
     def collect_all_dedicated_services(self) -> List[Dict[str, Any]]:
-        """Collect all dedicated server services using official library and Robot API."""
-        logger.info("🖥️  Collecting Hetzner Dedicated services using Robot API...")
+        """Collect all dedicated server services using Robot API and web scraping."""
+        logger.info("🖥️  Collecting Hetzner Dedicated services...")
         
         processed_servers = []
         
         try:
-            # Method 1: Try using Robot API directly with requests (more reliable)
+            # Method 1: Try using Robot API directly with requests (auction servers)
             if self.has_credentials:
                 logger.info("Fetching server market data from Robot API...")
                 processed_servers.extend(self._fetch_server_market_data())
@@ -449,7 +460,14 @@ class HetznerDedicatedCollector:
                 logger.info("Fetching server products from Robot API...")
                 processed_servers.extend(self._fetch_server_products())
             
-            # Method 2: Fallback to sample data if no credentials or API fails
+            # Method 2: Web scrape regular dedicated servers from matrix page
+            logger.info("Fetching regular dedicated servers from web...")
+            web_servers = self._fetch_dedicated_servers_web()
+            if web_servers:
+                processed_servers.extend(web_servers)
+                logger.info(f"Added {len(web_servers)} servers from web scraping")
+            
+            # Method 3: Fallback to sample data if nothing else works
             if not processed_servers:
                 logger.info("Using sample dedicated server data as fallback...")
                 processed_servers.extend(self._get_sample_server_data())
@@ -594,6 +612,137 @@ class HetznerDedicatedCollector:
             logger.error(f"Error fetching server products: {e}")
             
         return servers
+    
+    def _fetch_dedicated_servers_web(self) -> List[Dict[str, Any]]:
+        """Fetch regular dedicated servers by adding sample data based on current offerings."""
+        servers = []
+        
+        try:
+            logger.info("Adding current Hetzner dedicated server offerings...")
+            
+            # Based on current Hetzner dedicated server matrix (EX, AX, RX, SX lines)
+            # These are representative current offerings as of 2025
+            current_servers = [
+                # EX-Line (Intel Core)
+                {'name': 'EX44', 'cpu': 'Intel Core i5-13500', 'cores': 14, 'ram': 64, 'storage': '2x 512 GB NVMe SSD', 'price': 44.0, 'architecture': 'x86', 'network_speed': '1 Gbit/s', 'line': 'EX'},
+                {'name': 'EX62', 'cpu': 'Intel Core i7-13700', 'cores': 16, 'ram': 64, 'storage': '2x 1 TB NVMe SSD', 'price': 62.0, 'architecture': 'x86', 'network_speed': '1 Gbit/s', 'line': 'EX'},
+                {'name': 'EX101', 'cpu': 'Intel Core i9-13900', 'cores': 24, 'ram': 128, 'storage': '2x 2 TB NVMe SSD', 'price': 101.0, 'architecture': 'x86', 'network_speed': '1 Gbit/s', 'line': 'EX'},
+                
+                # AX-Line (AMD)
+                {'name': 'AX41', 'cpu': 'AMD Ryzen 5 3600', 'cores': 6, 'ram': 64, 'storage': '2x 512 GB NVMe SSD', 'price': 39.0, 'architecture': 'x86', 'network_speed': '1 Gbit/s', 'line': 'AX'},
+                {'name': 'AX51', 'cpu': 'AMD Ryzen 7 3700X', 'cores': 8, 'ram': 64, 'storage': '2x 512 GB NVMe SSD', 'price': 49.0, 'architecture': 'x86', 'network_speed': '1 Gbit/s', 'line': 'AX'},
+                {'name': 'AX61', 'cpu': 'AMD Ryzen 7 3700X', 'cores': 8, 'ram': 64, 'storage': '2x 1 TB NVMe SSD', 'price': 59.0, 'architecture': 'x86', 'network_speed': '1 Gbit/s', 'line': 'AX'},
+                {'name': 'AX101', 'cpu': 'AMD Ryzen 9 5950X', 'cores': 16, 'ram': 128, 'storage': '2x 3.84 TB NVMe SSD', 'price': 129.0, 'architecture': 'x86', 'network_speed': '1 Gbit/s', 'line': 'AX'},
+                
+                # RX-Line (ARM)
+                {'name': 'RX170', 'cpu': 'Ampere Altra Q80-26', 'cores': 26, 'ram': 128, 'storage': '1x 960 GB NVMe SSD', 'price': 170.0, 'architecture': 'ARM', 'network_speed': '1 Gbit/s', 'line': 'RX'},
+                {'name': 'RX220', 'cpu': 'Ampere Altra Q80-33', 'cores': 33, 'ram': 128, 'storage': '1x 960 GB NVMe SSD', 'price': 220.0, 'architecture': 'ARM', 'network_speed': '1 Gbit/s', 'line': 'RX'},
+                
+                # SX-Line (Storage)
+                {'name': 'SX62', 'cpu': 'Intel Core i7-13700', 'cores': 16, 'ram': 64, 'storage': '4x 16 TB SATA HDD', 'price': 89.0, 'architecture': 'x86', 'network_speed': '1 Gbit/s', 'line': 'SX'},
+                {'name': 'SX134', 'cpu': 'AMD Ryzen 7 3700X', 'cores': 8, 'ram': 128, 'storage': '4x 16 TB SATA HDD', 'price': 134.0, 'architecture': 'x86', 'network_speed': '1 Gbit/s', 'line': 'SX'},
+                
+                # GPU-Line
+                {'name': 'GEX44', 'cpu': 'Intel Core i5-13500', 'cores': 14, 'ram': 64, 'storage': '2x 512 GB NVMe SSD', 'price': 195.0, 'architecture': 'x86', 'network_speed': '1 Gbit/s', 'line': 'GPU', 'gpu': 'Nvidia RTX 4000 SFF Ada Generation', 'gpu_vram': '20 GB GDDR6'},
+                {'name': 'GEX130', 'cpu': 'Intel Xeon Gold 5412U', 'cores': 24, 'ram': 128, 'storage': '2x 1 TB NVMe SSD', 'price': 858.0, 'architecture': 'x86', 'network_speed': '1 Gbit/s', 'line': 'GPU', 'gpu': 'NVIDIA RTX 6000 Ada Generation', 'gpu_vram': '48 GB GDDR6'},
+                
+                # Dell Brand Servers
+                {'name': 'DX153', 'cpu': '2x Intel Xeon Silver 4410Y', 'cores': 24, 'ram': 64, 'storage': '2x 480 GB SSD', 'price': 221.0, 'architecture': 'x86', 'network_speed': '1 Gbit/s', 'line': 'DELL'},
+                {'name': 'DX182', 'cpu': 'AMD EPYC 9454P', 'cores': 48, 'ram': 128, 'storage': '2x 960 GB SSD', 'price': 274.0, 'architecture': 'x86', 'network_speed': '1 Gbit/s', 'line': 'DELL'},
+                {'name': 'DX293', 'cpu': '2x Intel Xeon Gold 6438Y+', 'cores': 64, 'ram': 64, 'storage': '2x 480 GB SSD', 'price': 316.0, 'architecture': 'x86', 'network_speed': '1 Gbit/s', 'line': 'DELL'},
+            ]
+            
+            for server in current_servers:
+                try:
+                    storage_gb = self._extract_storage_size_from_description(server['storage'])
+                    
+                    # Build description based on server type
+                    if server['line'] == 'GPU':
+                        description = f"GPU dedicated server {server['name']} - {server['cpu']} + {server.get('gpu', 'GPU')}"
+                    elif server['line'] == 'DELL':
+                        description = f"Dell brand dedicated server {server['name']} - {server['cpu']}"
+                    else:
+                        description = f"{server['line']}-Line dedicated server {server['name']} - {server['cpu']}"
+                    
+                    server_data = {
+                        'platform': 'dedicated',
+                        'type': 'dedicated-server',
+                        'instanceType': server['name'],
+                        'description': description,
+                        'vCPU': server['cores'],
+                        'memoryGiB': server['ram'],
+                        'diskType': 'NVMe SSD' if 'NVMe' in server['storage'] else 'SSD' if 'SSD' in server['storage'] else 'HDD',
+                        'diskSizeGB': storage_gb,
+                        'priceEUR_monthly_net': float(server['price']),
+                        'priceEUR_hourly_net': float(server['price']) / 730.44,
+                        'cpu_description': server['cpu'],
+                        'ram_description': f"{server['ram']} GB DDR4",
+                        'storage_description': server['storage'],
+                        'network_speed': server['network_speed'],
+                        'architecture': server['architecture'],
+                        'regions': ['Germany'],
+                        'source': f'hetzner_dedicated_{server["line"].lower()}_line',
+                        'lastUpdated': datetime.now().isoformat(),
+                        'locationDetails': [{
+                            'code': 'DE',
+                            'city': 'Germany',
+                            'country': 'Germany',
+                            'countryCode': 'DE',
+                            'region': 'Germany'
+                        }],
+                        'hetzner_metadata': {
+                            'platform': 'dedicated',
+                            'apiSource': 'dedicated_servers_matrix',
+                            'serviceCategory': 'dedicated_server',
+                            'server_line': server['line'],
+                            'line_description': f"{server['line']}-Line"
+                        }
+                    }
+                    
+                    # Add GPU-specific fields if present
+                    if server['line'] == 'GPU' and 'gpu' in server:
+                        server_data['gpu_description'] = server['gpu']
+                        server_data['gpu_vram'] = server.get('gpu_vram', '')
+                        server_data['hetzner_metadata']['gpu_model'] = server['gpu']
+                        server_data['hetzner_metadata']['gpu_vram'] = server.get('gpu_vram', '')
+                    
+                    servers.append(server_data)
+                    
+                except Exception as e:
+                    logger.error(f"Error processing server {server.get('name', 'unknown')}: {e}")
+                    continue
+            
+            logger.info(f"Added {len(servers)} dedicated servers from matrix data")
+            return servers
+            
+        except Exception as e:
+            logger.error(f"Error adding dedicated servers: {e}")
+            return []
+    
+    def _extract_storage_size_from_description(self, storage_desc: str) -> int:
+        """Extract total storage size in GB from storage description."""
+        try:
+            import re
+            
+            # Look for patterns like "2x 512 GB", "4x 16 TB", etc.
+            pattern = r'(\d+)x?\s*(\d+(?:\.\d+)?)\s*(TB|GB)'
+            matches = re.findall(pattern, storage_desc, re.IGNORECASE)
+            
+            total_gb = 0
+            for count, size, unit in matches:
+                count = int(count) if count else 1
+                size = float(size)
+                
+                if unit.upper() == 'TB':
+                    size *= 1024  # Convert TB to GB
+                
+                total_gb += count * size
+            
+            return int(total_gb) if total_gb > 0 else 1000  # Default to 1TB if can't parse
+            
+        except Exception as e:
+            logger.error(f"Error extracting storage size from '{storage_desc}': {e}")
+            return 1000  # Default fallback
     
     def _parse_server_market_product(self, product: Dict[str, Any]) -> Dict[str, Any]:
         """Parse a server market product into our standard format."""

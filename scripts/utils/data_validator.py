@@ -1,5 +1,5 @@
 """
-Data validation utilities for CloudCosts.
+Data validation utilities for CloudPriceFinder.
 """
 
 from typing import Dict, Any, List

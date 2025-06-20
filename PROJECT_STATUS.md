@@ -1,4 +1,4 @@
-# 📊 CloudCosts v2.0 - Project Status
+# 📊 CloudPriceFinder v2.0 - Project Status
 
 ## ✅ **Completed Features**
 
@@ -12,9 +12,11 @@
 ### 🌩️ **Hetzner Integration (Complete)**
 - ✅ **Cloud Services**: Servers, load balancers, volumes, floating IPs, networks
 - ✅ **Dedicated Servers**: Via Robot API integration
+- ✅ **Regional Pricing**: Location-specific pricing with availability filtering
 - ✅ **Dual Platform Support**: Cloud and dedicated infrastructure
 - ✅ **Enhanced Metadata**: Platform indicators, service categories
 - ✅ **Currency Conversion**: EUR to USD with original preserved
+- ✅ **Network Options**: IPv4/IPv6 support with flexible data structure handling
 
 ### 🤖 **GitHub Actions Automation**
 - ✅ **Automated Data Collection**: Every 6 hours
@@ -30,11 +32,15 @@
 - ✅ **Developer Documentation**: Architecture and patterns
 
 ### 🎨 **Frontend Features**
-- ✅ **Interactive Filtering**: By provider, specs, price, region
+- ✅ **Advanced Filtering**: By provider, specs, price, regions with regional pricing support
+- ✅ **Network Options Support**: IPv4/IPv6 filtering with object format compatibility
+- ✅ **Instance Type Grouping**: Cloud Server vs Dedicated Server categories
+- ✅ **Regional Pricing Display**: Location-specific pricing with filtering
 - ✅ **Dynamic Sorting**: All columns with direction control
 - ✅ **Responsive Design**: Mobile and desktop optimized
 - ✅ **Real-time Search**: Client-side filtering
 - ✅ **Platform Indicators**: Cloud vs dedicated badges
+- ✅ **Data Accuracy Disclaimer**: User guidance on pricing verification
 
 ## 🔄 **Provider Implementation Status**
 
@@ -67,7 +73,7 @@
 ## 📁 **Project Structure**
 
 ```
-CloudCosts/
+CloudPriceFinder/
 ├── 🌐 Frontend (Astro + TypeScript)
 │   ├── src/components/     # UI components
 │   ├── src/layouts/        # Page layouts  
@@ -112,7 +118,7 @@ CloudCosts/
 
 ## 🏁 **Ready for Production**
 
-CloudCosts v2.0 is **production-ready** with:
+CloudPriceFinder v2.0 is **production-ready** with:
 - 🚀 Complete automation pipeline
 - 📊 Real Hetzner data integration
 - 🔒 Security best practices

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-CloudCosts v2.0 is a completely redesigned multi-cloud instance comparison application that helps users compare costs and specifications across AWS, Azure, Google Cloud, Hetzner, Oracle Cloud, and OVH. The project uses a modern hybrid architecture with Python data collection and an Astro-based frontend.
+CloudPriceFinder v2.0 is a completely redesigned multi-cloud instance comparison application that helps users compare costs and specifications across AWS, Azure, Google Cloud, Hetzner, Oracle Cloud, and OVH. The project uses a modern hybrid architecture with Python data collection and an Astro-based frontend.
 
 ## Architecture
 
@@ -172,6 +172,8 @@ interface CloudInstance {
 - **Type Safety**: Complete TypeScript definitions and interfaces
 - **Development Tooling**: ESLint, Prettier, build scripts, and development server
 - **GitHub Actions**: Complete automation for data collection and deployment
+- **Filtering System**: Advanced filtering with region-specific pricing and network options support
+- **Regional Pricing**: Support for location-specific pricing display and filtering
 
 ### 🔄 In Progress / Placeholders
 - **AWS Provider**: Placeholder script awaiting implementation
@@ -230,11 +232,28 @@ interface CloudInstance {
 2. **Hetzner API Errors**: Check `HETZNER_API_TOKEN` environment variable
 3. **Build Failures**: Ensure Node.js 18+ and Python 3.8+ are installed
 4. **Type Errors**: Run `npm run type-check` for detailed TypeScript errors
+5. **Filtering Issues**: Cloud instances not appearing may indicate network options filter problems - check data structure compatibility
 
 ### Data Collection Problems
 - Check internet connectivity for API calls
 - Verify environment variables are set correctly
 - Check logs in console for specific error messages
 - Ensure `data/` directory exists and is writable
+
+## Recent Fixes and Improvements
+
+### Filtering System Enhancements (2025-06-18)
+- **Fixed Network Options Filter**: Updated to handle both object and string formats for networkOptions data
+- **Improved Region Filtering**: Enhanced to work with regionalPricing array structure and locationDetails
+- **Instance Type Grouping**: Organized types into "Cloud Server" and "Dedicated Server" categories
+- **Regional Pricing Display**: Fixed price display to show region-specific pricing when available
+- **Popup Interaction**: Added hover delay for region information popups to improve usability
+- **Data Accuracy Disclaimer**: Added notice about pricing data being approximate and requiring verification
+
+### Technical Details
+- **Network Options Compatibility**: Filter now checks for both `{ipv4_ipv6: {...}, ipv6_only: {...}}` object format and legacy string format
+- **Regional Pricing Logic**: Uses `regionalPricing` array to determine availability and pricing for specific regions
+- **Debug Cleanup**: Removed extensive debug logging while maintaining core functionality
+- **User Experience**: Added space in "Last Updated: " display and pricing accuracy notice
 
 This architecture provides a solid foundation for a scalable, maintainable cloud cost comparison platform with room for growth and additional providers.

@@ -74,25 +74,25 @@ const getCurrentPrice = (instance: any, mode: string = 'ipv4_ipv6') => {
   };
 };
 
-const formatPriceRange = (priceRange: any, value: number, currency: string = 'EUR') => {
+const formatPriceRange = (priceRange: any, value: number, currency: string = 'USD') => {
   if (!priceRange || !priceRange.hasVariation) {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency,
-      minimumFractionDigits: currency === 'EUR' ? 2 : 4,
+      minimumFractionDigits: 4,
     }).format(value);
   }
   
   const minFormatted = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: currency,
-    minimumFractionDigits: currency === 'EUR' ? 2 : 4,
+    minimumFractionDigits: 4,
   }).format(priceRange.min);
   
   const maxFormatted = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: currency,
-    minimumFractionDigits: currency === 'EUR' ? 2 : 4,
+    minimumFractionDigits: 4,
   }).format(priceRange.max);
   
   return `${minFormatted} - ${maxFormatted}`;
@@ -147,8 +147,16 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'EU
             <span class="ml-2 text-sm text-gray-700">Memory</span>
           </label>
           <label class="flex items-center">
-            <input type="checkbox" id="col-disk" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
-            <span class="ml-2 text-sm text-gray-700">Disk</span>
+            <input type="checkbox" id="col-architecture" checked class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+            <span class="ml-2 text-sm text-gray-700">Architecture</span>
+          </label>
+          <label class="flex items-center">
+            <input type="checkbox" id="col-disk" checked class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+            <span class="ml-2 text-sm text-gray-700">Storage</span>
+          </label>
+          <label class="flex items-center">
+            <input type="checkbox" id="col-networkSpeed" checked class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+            <span class="ml-2 text-sm text-gray-700">Network Speed</span>
           </label>
           <label class="flex items-center">
             <input type="checkbox" id="col-network" checked class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
@@ -227,9 +235,25 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'EU
               </svg>
             </div>
           </th>
-          <th class="col-disk px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 cursor-pointer hover:bg-gray-100 hidden z-10" data-sort="diskSizeGB">
+          <th class="col-architecture px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 cursor-pointer hover:bg-gray-100 z-10" data-sort="architecture">
             <div class="flex items-center">
-              Disk
+              Architecture
+              <svg class="w-4 h-4 ml-1 sort-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+              </svg>
+            </div>
+          </th>
+          <th class="col-disk px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 cursor-pointer hover:bg-gray-100 z-10" data-sort="diskSizeGB">
+            <div class="flex items-center">
+              Storage
+              <svg class="w-4 h-4 ml-1 sort-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+              </svg>
+            </div>
+          </th>
+          <th class="col-networkSpeed px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 cursor-pointer hover:bg-gray-100 z-10" data-sort="network_speed">
+            <div class="flex items-center">
+              Network Speed
               <svg class="w-4 h-4 ml-1 sort-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
               </svg>
@@ -304,11 +328,24 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'EU
             <td class="col-memory px-3 py-3 whitespace-nowrap text-sm text-gray-900">
               {instance.memoryGiB ? `${instance.memoryGiB} GiB` : '-'}
             </td>
-            <td class="col-disk px-3 py-3 whitespace-nowrap text-sm text-gray-900 hidden">
+            <td class="col-architecture px-3 py-3 whitespace-nowrap text-sm text-gray-900">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                {instance.architecture || 'x86'}
+              </span>
+            </td>
+            <td class="col-disk px-3 py-3 whitespace-nowrap text-sm text-gray-900">
               <div class="flex flex-col">
                 <span>{instance.diskSizeGB ? `${instance.diskSizeGB} GB` : '-'}</span>
                 {instance.diskType && (
                   <span class="text-xs text-gray-500">{instance.diskType}</span>
+                )}
+              </div>
+            </td>
+            <td class="col-networkSpeed px-3 py-3 whitespace-nowrap text-sm text-gray-900">
+              <div class="flex flex-col">
+                <span>{instance.network_speed || '-'}</span>
+                {instance.network_speed && (
+                  <span class="text-xs text-gray-500">Connection</span>
                 )}
               </div>
             </td>
@@ -324,11 +361,15 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'EU
             </td>
             <td class="col-priceHour px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900 pricing-hourly">
               <div class="flex flex-col">
-                <span class="pricing-value">
+                <span 
+                  class="pricing-value"
+                  data-usd-price={instance.priceUSD_hourly || 0}
+                  data-eur-price={instance.priceEUR_hourly_net || 0}
+                >
                   {formatPriceRange(
                     instance.priceRange?.hourly, 
                     instance.priceUSD_hourly || instance.priceEUR_hourly_net || 0,
-                    instance.priceEUR_hourly_net ? 'EUR' : 'USD'
+                    'USD'
                   )}
                 </span>
                 {instance.priceRange?.hourly?.hasVariation && (
@@ -338,11 +379,15 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'EU
             </td>
             <td class="col-priceMonth px-3 py-3 whitespace-nowrap text-sm text-gray-900 pricing-monthly">
               <div class="flex flex-col">
-                <span class="pricing-value">
+                <span 
+                  class="pricing-value"
+                  data-usd-price={instance.priceUSD_monthly || 0}
+                  data-eur-price={instance.priceEUR_monthly_net || 0}
+                >
                   {formatPriceRange(
                     instance.priceRange?.monthly, 
                     instance.priceUSD_monthly || instance.priceEUR_monthly_net || 0,
-                    instance.priceEUR_monthly_net ? 'EUR' : 'USD'
+                    'USD'
                   )}
                 </span>
                 {instance.priceRange?.monthly?.hasVariation && (
@@ -448,6 +493,38 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'EU
     let currentSortDirection = 'asc';
     let activeFilters = {};
     let popupTimeouts = new Map();
+    
+    // Handle currency changes from the currency selector
+    window.addEventListener('currencyChanged', (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const { currency, symbol, rates } = customEvent.detail;
+      
+      // Update all price displays with new currency
+      document.querySelectorAll('.pricing-value[data-usd-price]').forEach(element => {
+        const usdPrice = parseFloat(element.getAttribute('data-usd-price') || '0');
+        if (usdPrice > 0) {
+          const rate = rates[currency] || 1;
+          const convertedPrice = usdPrice * rate;
+          
+          // Format price based on currency
+          let formattedPrice;
+          if (['SEK', 'NOK', 'DKK'].includes(currency)) {
+            // Scandinavian currencies: number + symbol
+            formattedPrice = `${convertedPrice.toFixed(2)} ${symbol}`;
+          } else if (currency === 'JPY') {
+            // Japanese Yen: no decimals
+            formattedPrice = `${symbol}${Math.round(convertedPrice)}`;
+          } else {
+            // Most currencies: symbol + number with 4 decimals for hourly prices
+            const isHourly = element.closest('.pricing-hourly');
+            const decimals = isHourly ? 4 : 2;
+            formattedPrice = `${symbol}${convertedPrice.toFixed(decimals)}`;
+          }
+          
+          element.textContent = formattedPrice;
+        }
+      });
+    });
     
     // Handle column controls dropdown
     if (columnControlsBtn && columnControls) {

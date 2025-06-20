@@ -1,6 +1,7 @@
 ---
 import type { CloudInstance } from '../types';
 import { getUniqueValues } from '../lib/data-loader';
+import CurrencySelector from './CurrencySelector.astro';
 
 export interface Props {
   instances: CloudInstance[];
@@ -92,6 +93,11 @@ const priceRange = instances.length > 0 ? {
 
 <div class="bg-white rounded-lg shadow-sm border p-6">
   <h2 class="text-lg font-semibold text-gray-900 mb-4">Filters</h2>
+  
+  <!-- Currency Selector -->
+  <div class="mb-6 pb-4 border-b border-gray-200">
+    <CurrencySelector />
+  </div>
   
   <div class="space-y-6" id="filter-panel">
     <!-- Provider Filter -->
@@ -201,12 +207,13 @@ const priceRange = instances.length > 0 ? {
     <!-- Price Range -->
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-2">
-        Max Price (USD/hour)
+        <span id="price-filter-label">Max Price (USD/hour)</span>
       </label>
       <input
         type="number"
         name="maxPrice"
-        placeholder="Max price"
+        id="max-price-filter"
+        placeholder="Max price ($)"
         min={priceRange.min}
         max={priceRange.max}
         step="0.01"
@@ -357,6 +364,27 @@ const priceRange = instances.length > 0 ? {
     if (clearButton) {
       clearButton.addEventListener('click', clearFilters);
     }
+    
+    // Handle currency changes for price filter
+    window.addEventListener('currencyChanged', (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const { currency, symbol } = customEvent.detail;
+      
+      // Update price filter label and placeholder
+      const priceLabel = document.getElementById('price-filter-label');
+      const maxPriceInput = document.getElementById('max-price-filter') as HTMLInputElement;
+      
+      if (priceLabel) {
+        priceLabel.textContent = `Max Price (${currency}/hour)`;
+      }
+      
+      if (maxPriceInput) {
+        const placeholder = ['SEK', 'NOK', 'DKK'].includes(currency) 
+          ? `Max price (${symbol})` 
+          : `Max price (${symbol})`;
+        maxPriceInput.placeholder = placeholder;
+      }
+    });
   });
 
   function applyFilters() {
