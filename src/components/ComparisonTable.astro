@@ -493,11 +493,17 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'US
     let currentSortDirection = 'asc';
     let activeFilters = {};
     let popupTimeouts = new Map();
+    let currentCurrency = localStorage.getItem('selectedCurrency') || 'USD';
+    let exchangeRates = { 'USD': 1.0 };
     
     // Handle currency changes from the currency selector
     window.addEventListener('currencyChanged', (event: Event) => {
       const customEvent = event as CustomEvent;
       const { currency, symbol, rates } = customEvent.detail;
+      
+      // Update current currency and rates
+      currentCurrency = currency;
+      exchangeRates = rates;
       
       // Update all price displays with new currency
       document.querySelectorAll('.pricing-value[data-usd-price]').forEach(element => {
@@ -525,6 +531,44 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'US
         }
       });
     });
+    
+    // Helper function to format price with current currency
+    function formatPriceWithCurrentCurrency(price: number, isHourly: boolean = false): string {
+      if (!price || price === 0) return '-';
+      
+      // Get current currency symbols
+      const currencySymbols = {
+        'USD': '$', 'EUR': '€', 'GBP': '£', 'SEK': 'kr', 'NOK': 'kr', 
+        'DKK': 'kr', 'CHF': 'Fr', 'CAD': '$', 'AUD': '$', 'JPY': '¥'
+      };
+      
+      const symbol = currencySymbols[currentCurrency] || currentCurrency;
+      const rate = exchangeRates[currentCurrency] || 1;
+      const convertedPrice = price * rate;
+      
+      // Format based on currency
+      if (['SEK', 'NOK', 'DKK'].includes(currentCurrency)) {
+        const decimals = isHourly ? 4 : 2;
+        return `${convertedPrice.toFixed(decimals)} ${symbol}`;
+      } else if (currentCurrency === 'JPY') {
+        return `${symbol}${Math.round(convertedPrice)}`;
+      } else {
+        const decimals = isHourly ? 4 : 2;
+        return `${symbol}${convertedPrice.toFixed(decimals)}`;
+      }
+    }
+    
+    // Helper function to convert EUR price to current currency and format
+    function convertAndFormatEURPrice(eurPrice: number, isHourly: boolean = false): string {
+      if (!eurPrice || eurPrice === 0) return '-';
+      
+      // First convert EUR to USD (using inverse of EUR rate)
+      const eurToUsdRate = exchangeRates['EUR'] || 0.92;
+      const usdPrice = eurPrice / eurToUsdRate;
+      
+      // Then format using current currency
+      return formatPriceWithCurrentCurrency(usdPrice, isHourly);
+    }
     
     // Handle column controls dropdown
     if (columnControlsBtn && columnControls) {
@@ -1022,24 +1066,16 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'US
               displayMonthly += ipv4Cost;
             }
             
-            // Update hourly pricing
+            // Update hourly pricing using current currency
             const hourlyCell = row.querySelector('.pricing-hourly .pricing-value');
             if (hourlyCell) {
-              hourlyCell.textContent = new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'EUR',
-                minimumFractionDigits: 4,
-              }).format(displayHourly);
+              hourlyCell.textContent = convertAndFormatEURPrice(displayHourly, true);
             }
             
-            // Update monthly pricing
+            // Update monthly pricing using current currency
             const monthlyCell = row.querySelector('.pricing-monthly .pricing-value');
             if (monthlyCell) {
-              monthlyCell.textContent = new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'EUR',
-                minimumFractionDigits: 2,
-              }).format(displayMonthly);
+              monthlyCell.textContent = convertAndFormatEURPrice(displayMonthly, false);
             }
             
             // Add region-specific indicator
@@ -1091,27 +1127,33 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'US
         const trafficInfos = row.querySelectorAll('.traffic-info');
         trafficInfos.forEach(info => info.remove());
         
-        // Reset to default pricing
+        // Reset to default pricing using current currency
         const hourlyCell = row.querySelector('.pricing-hourly .pricing-value');
         if (hourlyCell) {
-          const price = instance.priceEUR_hourly_net || instance.priceUSD_hourly || 0;
-          const currency = instance.priceEUR_hourly_net ? 'EUR' : 'USD';
-          hourlyCell.textContent = new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: currency,
-            minimumFractionDigits: currency === 'EUR' ? 4 : 4,
-          }).format(price);
+          const eurPrice = instance.priceEUR_hourly_net;
+          const usdPrice = instance.priceUSD_hourly;
+          
+          if (eurPrice) {
+            hourlyCell.textContent = convertAndFormatEURPrice(eurPrice, true);
+          } else if (usdPrice) {
+            hourlyCell.textContent = formatPriceWithCurrentCurrency(usdPrice, true);
+          } else {
+            hourlyCell.textContent = '-';
+          }
         }
         
         const monthlyCell = row.querySelector('.pricing-monthly .pricing-value');
         if (monthlyCell) {
-          const price = instance.priceEUR_monthly_net || instance.priceUSD_monthly || 0;
-          const currency = instance.priceEUR_monthly_net ? 'EUR' : 'USD';
-          monthlyCell.textContent = new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: currency,
-            minimumFractionDigits: currency === 'EUR' ? 2 : 2,
-          }).format(price);
+          const eurPrice = instance.priceEUR_monthly_net;
+          const usdPrice = instance.priceUSD_monthly;
+          
+          if (eurPrice) {
+            monthlyCell.textContent = convertAndFormatEURPrice(eurPrice, false);
+          } else if (usdPrice) {
+            monthlyCell.textContent = formatPriceWithCurrentCurrency(usdPrice, false);
+          } else {
+            monthlyCell.textContent = '-';
+          }
         }
         
         // Reset network description
@@ -1162,7 +1204,7 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'US
               }
             }
             
-            // Update pricing with range support
+            // Update pricing with range support using current currency
             if (hourlyCell && option.hourly !== null) {
               const pricingValue = hourlyCell.querySelector('.pricing-value');
               const variationWarning = hourlyCell.querySelector('.text-xs.text-orange-600');
@@ -1170,19 +1212,13 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'US
               if (pricingValue) {
                 const priceRange = option.priceRange?.hourly;
                 if (priceRange && priceRange.hasVariation) {
-                  const minFormatted = new Intl.NumberFormat('en-US', {
-                    style: 'currency', currency: 'EUR', minimumFractionDigits: 4,
-                  }).format(priceRange.min);
-                  const maxFormatted = new Intl.NumberFormat('en-US', {
-                    style: 'currency', currency: 'EUR', minimumFractionDigits: 4,
-                  }).format(priceRange.max);
+                  const minFormatted = convertAndFormatEURPrice(priceRange.min, true);
+                  const maxFormatted = convertAndFormatEURPrice(priceRange.max, true);
                   pricingValue.textContent = `${minFormatted} - ${maxFormatted}`;
                   
                   if (variationWarning) variationWarning.style.display = '';
                 } else {
-                  pricingValue.textContent = new Intl.NumberFormat('en-US', {
-                    style: 'currency', currency: 'EUR', minimumFractionDigits: 4,
-                  }).format(option.hourly);
+                  pricingValue.textContent = convertAndFormatEURPrice(option.hourly, true);
                   
                   if (variationWarning) variationWarning.style.display = 'none';
                 }
@@ -1196,19 +1232,13 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'US
               if (pricingValue) {
                 const priceRange = option.priceRange?.monthly;
                 if (priceRange && priceRange.hasVariation) {
-                  const minFormatted = new Intl.NumberFormat('en-US', {
-                    style: 'currency', currency: 'EUR', minimumFractionDigits: 2,
-                  }).format(priceRange.min);
-                  const maxFormatted = new Intl.NumberFormat('en-US', {
-                    style: 'currency', currency: 'EUR', minimumFractionDigits: 2,
-                  }).format(priceRange.max);
+                  const minFormatted = convertAndFormatEURPrice(priceRange.min, false);
+                  const maxFormatted = convertAndFormatEURPrice(priceRange.max, false);
                   pricingValue.textContent = `${minFormatted} - ${maxFormatted}`;
                   
                   if (variationWarning) variationWarning.style.display = '';
                 } else {
-                  pricingValue.textContent = new Intl.NumberFormat('en-US', {
-                    style: 'currency', currency: 'EUR', minimumFractionDigits: 2,
-                  }).format(option.monthly);
+                  pricingValue.textContent = convertAndFormatEURPrice(option.monthly, false);
                   
                   if (variationWarning) variationWarning.style.display = 'none';
                 }
@@ -1257,5 +1287,11 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'US
       // Re-setup region popups after rendering
       setupRegionPopups();
     }
+    
+    // Initialize exchange rates from currency selector on page load
+    setTimeout(() => {
+      const currencyEvent = new CustomEvent('requestCurrencyData');
+      window.dispatchEvent(currencyEvent);
+    }, 100);
   });
 </script>
