@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CloudCosts Data Orchestrator
+CloudPriceFinder Data Orchestrator
 Coordinates all cloud provider data fetching and processing.
 """
 
@@ -17,11 +17,18 @@ from typing import Dict, List, Any, Optional
 
 # Import individual fetchers
 try:
-    # Use Hetzner v3 script only
+    # Try to import official libraries version first
     from fetch_hetzner_v3 import fetch_hetzner_cloud
     HETZNER_VERSION = "v3.0 (Official Libraries)"
 except ImportError:
-    raise ImportError("fetch_hetzner_v3.py is required but not found. Please ensure the file exists.")
+    try:
+        # Fallback to enhanced Hetzner v2 script
+        from fetch_hetzner_v2 import fetch_hetzner_cloud
+        HETZNER_VERSION = "v2.0 (Manual API)"
+    except ImportError:
+        # Final fallback to original script
+        from fetch_hetzner import fetch_hetzner_cloud
+        HETZNER_VERSION = "v1.0 (Legacy)"
 from utils.currency_converter import convert_currency
 from utils.data_validator import validate_instance_data
 from utils.data_normalizer import normalize_instance_data
@@ -247,7 +254,7 @@ class CloudDataOrchestrator:
     
     async def run(self) -> bool:
         """Run the complete data orchestration process."""
-        print("=== CloudCosts Data Orchestrator ===")
+        print("=== CloudPriceFinder Data Orchestrator ===")
         print(f"Timestamp: {datetime.now().isoformat()}")
         
         # Ensure data directory exists
