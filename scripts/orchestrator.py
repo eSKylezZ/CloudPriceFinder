@@ -42,10 +42,42 @@ logger = logging.getLogger(__name__)
 
 # Configuration
 DATA_DIR = Path("data")
-OUTPUT_FILE = DATA_DIR / "all_instances.json"
+OUTPUT_FILE = DATA_DIR / "all_instances.json"  # Keep for backward compatibility
 SUMMARY_FILE = DATA_DIR / "summary.json"
+PROVIDERS_DIR = DATA_DIR / "providers"
 MAX_WORKERS = 4
 TIMEOUT_SECONDS = 300  # 5 minutes per provider
+
+# Provider Configuration - CENTRAL CONTROL FOR DATA FETCHING
+# Set 'enabled': False to skip fetching and use existing data files
+# Set 'enabled': True to fetch fresh data from the provider's API
+# This allows you to selectively update only specific providers
+PROVIDER_CONFIG = {
+    'hetzner': {
+        'enabled': True,  # Set to False to skip fetching and use existing data
+        'description': 'Hetzner Cloud and Dedicated Servers'
+    },
+    'aws': {
+        'enabled': False,  # Not implemented yet
+        'description': 'Amazon Web Services'
+    },
+    'azure': {
+        'enabled': False,  # Not implemented yet
+        'description': 'Microsoft Azure'
+    },
+    'gcp': {
+        'enabled': False,  # Not implemented yet
+        'description': 'Google Cloud Platform'
+    },
+    'oci': {
+        'enabled': True,  # Set to False to skip fetching and use existing data
+        'description': 'Oracle Cloud Infrastructure'
+    },
+    'ovh': {
+        'enabled': False,  # Not implemented yet
+        'description': 'OVH Cloud'
+    },
+}
 
 class CloudDataOrchestrator:
     """Orchestrates data collection from all cloud providers."""
@@ -61,6 +93,23 @@ class CloudDataOrchestrator:
         }
         self.results = {}
         self.errors = {}
+        
+    def _load_existing_data(self, provider: str) -> List[Dict[str, Any]]:
+        """Load existing data for a provider from JSON file."""
+        provider_file = PROVIDERS_DIR / f"{provider}.json"
+        
+        if provider_file.exists():
+            try:
+                with open(provider_file, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                logger.info(f"✅ Loaded {len(data)} existing instances from {provider}")
+                return data
+            except Exception as e:
+                logger.error(f"Failed to load existing data for {provider}: {e}")
+                return []
+        else:
+            logger.warning(f"No existing data file found for {provider} at {provider_file}")
+            return []
         
     def _fetch_hetzner(self) -> List[Dict[str, Any]]:
         """Fetch Hetzner data using available implementation."""
@@ -88,9 +137,15 @@ class CloudDataOrchestrator:
         return []
     
     def _fetch_oci(self) -> List[Dict[str, Any]]:
-        """Fetch OCI data - placeholder for now."""
-        logger.warning("OCI fetcher not implemented yet - returning empty data")
-        return []
+        """Fetch OCI data using OCI fetcher."""
+        try:
+            logger.info("Fetching Oracle Cloud Infrastructure data...")
+            from fetch_oci import fetch_oci_data
+            data = fetch_oci_data()
+            return data
+        except Exception as e:
+            logger.error(f"OCI fetch failed: {e}")
+            raise
     
     def _fetch_ovh(self) -> List[Dict[str, Any]]:
         """Fetch OVH data - placeholder for now."""
@@ -186,25 +241,49 @@ class CloudDataOrchestrator:
             return provider, [], str(e)
     
     async def fetch_all_providers(self) -> Dict[str, List[Dict[str, Any]]]:
-        """Fetch data from all providers concurrently."""
-        logger.info("Starting concurrent data fetch from all providers...")
+        """Fetch data from enabled providers concurrently or load existing data for disabled ones."""
+        enabled_providers = []
+        disabled_providers = []
         
-        with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-            # Submit all tasks
-            future_to_provider = {
-                executor.submit(self._fetch_provider_data, provider): provider
-                for provider in self.providers.keys()
-            }
+        # Separate enabled and disabled providers
+        for provider in self.providers.keys():
+            config = PROVIDER_CONFIG.get(provider, {'enabled': False})
+            if config['enabled']:
+                enabled_providers.append(provider)
+                logger.info(f"🔄 {provider}: ENABLED - Will fetch new data")
+            else:
+                disabled_providers.append(provider)
+                logger.info(f"⏭️  {provider}: DISABLED - Will use existing data")
+        
+        # Load existing data for disabled providers
+        for provider in disabled_providers:
+            existing_data = self._load_existing_data(provider)
+            self.results[provider] = existing_data
+        
+        # Fetch new data for enabled providers
+        if enabled_providers:
+            logger.info(f"Starting concurrent data fetch from {len(enabled_providers)} enabled providers...")
             
-            # Collect results with timeout
-            for future in concurrent.futures.as_completed(future_to_provider, timeout=TIMEOUT_SECONDS):
-                provider, data, error = future.result()
+            with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+                # Submit tasks only for enabled providers
+                future_to_provider = {
+                    executor.submit(self._fetch_provider_data, provider): provider
+                    for provider in enabled_providers
+                }
                 
-                if error:
-                    self.errors[provider] = error
-                    self.results[provider] = []
-                else:
-                    self.results[provider] = data
+                # Collect results with timeout
+                for future in concurrent.futures.as_completed(future_to_provider, timeout=TIMEOUT_SECONDS):
+                    provider, data, error = future.result()
+                    
+                    if error:
+                        self.errors[provider] = error
+                        # Fallback to existing data if fetch fails
+                        logger.warning(f"Failed to fetch {provider} data, attempting to load existing data...")
+                        self.results[provider] = self._load_existing_data(provider)
+                    else:
+                        self.results[provider] = data
+        else:
+            logger.info("No providers enabled for fetching, using only existing data")
         
         return self.results
     
@@ -252,13 +331,33 @@ class CloudDataOrchestrator:
             'errors': self.errors
         }
     
+    def _display_configuration(self):
+        """Display the current provider configuration."""
+        print("\\n🔧 Provider Configuration:")
+        print("-" * 50)
+        
+        enabled_count = 0
+        for provider, config in PROVIDER_CONFIG.items():
+            status = "🔄 ENABLED " if config['enabled'] else "⏭️  DISABLED"
+            print(f"  {provider.upper():<8} {status} - {config['description']}")
+            if config['enabled']:
+                enabled_count += 1
+        
+        print(f"\\n📊 Summary: {enabled_count}/{len(PROVIDER_CONFIG)} providers enabled for fetching")
+        if enabled_count < len(PROVIDER_CONFIG):
+            print("📝 Note: Disabled providers will use existing data files")
+    
     async def run(self) -> bool:
         """Run the complete data orchestration process."""
         print("=== CloudPriceFinder Data Orchestrator ===")
         print(f"Timestamp: {datetime.now().isoformat()}")
         
-        # Ensure data directory exists
+        # Display configuration
+        self._display_configuration()
+        
+        # Ensure data directories exist
         DATA_DIR.mkdir(exist_ok=True)
+        PROVIDERS_DIR.mkdir(exist_ok=True)
         
         try:
             # Fetch all provider data
@@ -275,9 +374,31 @@ class CloudDataOrchestrator:
             # Generate summary
             summary = self._generate_summary(all_data)
             
-            # Save combined data
+            # Save provider-specific data files
+            provider_files = {}
+            for provider, data in self.results.items():
+                if data:  # Only save if we have data
+                    provider_file = PROVIDERS_DIR / f"{provider}.json"
+                    with open(provider_file, 'w', encoding='utf-8') as f:
+                        json.dump(data, f, indent=2, ensure_ascii=False)
+                    provider_files[provider] = {
+                        'file': f"providers/{provider}.json",
+                        'count': len(data),
+                        'lastUpdated': datetime.now().isoformat()
+                    }
+                    print(f"💾 Saved {len(data)} {provider} instances to {provider_file}")
+            
+            # Save combined data (backward compatibility)
             with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
                 json.dump(all_data, f, indent=2, ensure_ascii=False)
+            
+            # Enhanced summary with provider file info
+            summary['providerFiles'] = provider_files
+            summary['dataStructure'] = {
+                'combined': 'data/all_instances.json',
+                'providers': provider_files,
+                'description': 'Data available in both combined format and individual provider files'
+            }
             
             # Save summary
             with open(SUMMARY_FILE, 'w', encoding='utf-8') as f:

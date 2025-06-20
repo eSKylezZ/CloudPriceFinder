@@ -13,14 +13,20 @@ CloudPriceFinder v2.0 is a completely redesigned multi-cloud instance comparison
 - **Orchestrator**: `scripts/orchestrator.py` - Master controller for all data fetching
 - **Individual Fetchers**: `scripts/fetch_{provider}.py` - Provider-specific data collection
 - **Shared Utilities**: `scripts/utils/` - Common functionality for validation, normalization, and currency conversion
-- **Output**: Standardized JSON files in `data/` directory
+- **Output**: Standardized JSON files in `data/` directory with both combined and split formats
+  - `data/all_instances.json` - Combined data (backward compatibility)
+  - `data/providers/{provider}.json` - Individual provider files for selective loading
+  - `data/summary.json` - Enhanced summary with provider file metadata
 
 ### Frontend Layer (Astro + TypeScript)
 - **Framework**: Astro v4 with static site generation
 - **Styling**: Tailwind CSS for responsive design
 - **Components**: Reusable UI components in `src/components/`
 - **Pages**: Route-based pages in `src/pages/`
-- **Data Integration**: TypeScript utilities for loading and processing JSON data
+- **Data Integration**: TypeScript utilities for loading and processing JSON data with multiple loading strategies:
+  - Combined loading (legacy compatibility)
+  - Split loading (load individual provider files)
+  - Selective loading (load only specific providers)
 - **Type Safety**: Comprehensive TypeScript definitions in `src/types/`
 
 ### Build & Deploy Pipeline
@@ -41,6 +47,32 @@ CloudPriceFinder v2.0 is a completely redesigned multi-cloud instance comparison
 - `npm run fetch-hetzner` - Fetch Hetzner data only (fully implemented)
 - `python scripts/orchestrator.py` - Run complete data collection pipeline
 - Individual scripts: `python scripts/fetch_{provider}.py`
+
+#### Provider Configuration (NEW FEATURE)
+The orchestrator now includes a **central configuration system** to enable/disable providers:
+
+**Location**: `scripts/orchestrator.py` - `PROVIDER_CONFIG` section
+
+**Usage**:
+```python
+PROVIDER_CONFIG = {
+    'hetzner': {
+        'enabled': True,   # Set to False to skip fetching and use existing data
+        'description': 'Hetzner Cloud and Dedicated Servers'
+    },
+    'oci': {
+        'enabled': True,   # Set to False to skip fetching and use existing data  
+        'description': 'Oracle Cloud Infrastructure'
+    },
+    # ... other providers
+}
+```
+
+**Benefits**:
+- **Selective Updates**: Only fetch data from providers you want to update
+- **Save API Calls**: Skip providers to avoid hitting rate limits or timeouts
+- **Use Existing Data**: Disabled providers will load data from saved JSON files
+- **Faster Development**: Test with subset of providers during development
 
 ### Code Quality
 - `npm run type-check` - TypeScript type checking
@@ -79,12 +111,23 @@ Required packages:
   - Permissions: Read access is sufficient
   - Used by: `scripts/fetch_hetzner.py`
 
+#### Oracle Cloud Infrastructure (OCI) - Implemented
+**No Authentication Required** - Uses public APIs and documentation
+- `scripts/fetch_oci.py` - Complete OCI compute instance fetcher
+- Fetches pricing for 26+ instance types including:
+  - Standard E-series (AMD EPYC and Intel)
+  - Ampere A1 (ARM-based instances)
+  - DenseIO shapes with NVMe storage
+  - GPU instances with NVIDIA V100
+  - Free tier eligible instances
+- Supports all OCI regions globally
+- Uses Oracle's public pricing data and compute shape specifications
+
 #### Placeholders for Other Providers
 When implementing other cloud providers, you may need:
 - `AWS_ACCESS_KEY_ID` & `AWS_SECRET_ACCESS_KEY`
 - `AZURE_SUBSCRIPTION_ID` & `AZURE_CLIENT_ID` etc.
 - `GOOGLE_CLOUD_PROJECT` & service account credentials
-- `OCI_CONFIG_PROFILE` or OCI credentials
 - `OVH_ENDPOINT` & `OVH_APPLICATION_KEY` etc.
 
 ## Data Standards
@@ -168,18 +211,19 @@ interface CloudInstance {
 ### ✅ Completed
 - **Frontend**: Complete Astro application with filtering, sorting, and responsive design
 - **Hetzner Provider**: Full API integration with cloud and dedicated server support
-- **Data Pipeline**: Orchestrator, validation, normalization, and currency conversion
+- **Oracle Cloud Infrastructure (OCI)**: Complete compute instance fetcher with 26+ instance types
+- **Data Pipeline**: Orchestrator, validation, normalization, currency conversion, and split data files
 - **Type Safety**: Complete TypeScript definitions and interfaces
 - **Development Tooling**: ESLint, Prettier, build scripts, and development server
 - **GitHub Actions**: Complete automation for data collection and deployment
 - **Filtering System**: Advanced filtering with region-specific pricing and network options support
 - **Regional Pricing**: Support for location-specific pricing display and filtering
+- **Currency Persistence**: Fixed currency selection during filtering operations
 
 ### 🔄 In Progress / Placeholders
 - **AWS Provider**: Placeholder script awaiting implementation
 - **Azure Provider**: Placeholder script awaiting implementation
 - **Google Cloud Provider**: Placeholder script awaiting implementation
-- **Oracle Cloud Provider**: Placeholder script awaiting implementation
 - **OVH Provider**: Placeholder script awaiting implementation
 
 ### 🚀 Ready for Enhancement

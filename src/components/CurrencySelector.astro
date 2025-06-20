@@ -30,7 +30,7 @@
     const currencySelector = document.getElementById('currency-selector') as HTMLSelectElement;
     
     // Default exchange rates (fallback values, will be fetched dynamically)
-    let exchangeRates = {
+    let exchangeRates: { [key: string]: number } = {
       'USD': 1.0,
       'EUR': 0.92,
       'GBP': 0.79,
@@ -44,7 +44,7 @@
     };
     
     // Currency symbols mapping
-    const currencySymbols = {
+    const currencySymbols: { [key: string]: string } = {
       'USD': '$',
       'EUR': '€',
       'GBP': '£',

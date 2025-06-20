@@ -1255,7 +1255,7 @@ def main():
         
         if data:
             # Save to file
-            output_file = "data/hetzner.json"
+            output_file = "data/providers/hetzner.json"
             os.makedirs(os.path.dirname(output_file), exist_ok=True)
             
             with open(output_file, "w", encoding="utf-8") as f:

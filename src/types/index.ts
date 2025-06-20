@@ -7,6 +7,18 @@ export interface APIResponse<T> {
   timestamp: string;
 }
 
+export interface ProviderFileInfo {
+  file: string;
+  count: number;
+  lastUpdated: string;
+}
+
+export interface DataStructure {
+  combined: string;
+  providers: Record<string, ProviderFileInfo>;
+  description: string;
+}
+
 export interface DataSummary {
   totalInstances: number;
   providersCount: number;
@@ -18,4 +30,6 @@ export interface DataSummary {
   byProvider?: Record<string, number>;
   byType?: Record<string, number>;
   errors?: Record<string, string>;
+  providerFiles?: Record<string, ProviderFileInfo>;
+  dataStructure?: DataStructure;
 }

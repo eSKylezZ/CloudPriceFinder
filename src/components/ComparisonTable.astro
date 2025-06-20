@@ -101,7 +101,7 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'US
 
 <div class="bg-white rounded-lg shadow-sm border">
   <div class="px-6 py-4 border-b border-gray-200">
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between mb-4">
       <h2 class="text-lg font-semibold text-gray-900">
         Instance Comparison
       </h2>
@@ -118,6 +118,36 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'US
         <div class="text-sm text-gray-500" id="result-count">
           {instances.length} instances
         </div>
+      </div>
+    </div>
+    
+    <!-- Search Bar -->
+    <div class="flex items-center space-x-4">
+      <div class="flex-1 max-w-md">
+        <div class="relative">
+          <input
+            type="text"
+            id="search-input"
+            placeholder="Search instances (type, name, region, etc.)"
+            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+          />
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          </div>
+          <button
+            id="clear-search"
+            class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 hidden"
+          >
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="text-xs text-gray-500 hidden lg:block">
+        Tip: Drag column borders to resize
       </div>
     </div>
     
@@ -192,7 +222,7 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'US
   </div>
 
   <div class="overflow-x-auto max-h-[70vh] overflow-y-auto">
-    <table class="min-w-full divide-y divide-gray-200 text-sm" id="instances-table">
+    <table class="min-w-full divide-y divide-gray-200 text-sm resizable-table" id="instances-table">
       <thead class="bg-gray-50">
         <tr>
           <th class="col-provider px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 cursor-pointer hover:bg-gray-100 z-10" data-sort="provider">
@@ -203,7 +233,7 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'US
               </svg>
             </div>
           </th>
-          <th class="col-instanceType px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 cursor-pointer hover:bg-gray-100 z-10" data-sort="instanceType">
+          <th class="col-instanceType px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 cursor-pointer hover:bg-gray-100 z-10" data-sort="instanceType" style="width: 200px; min-width: 200px;">
             <div class="flex items-center">
               Instance Type
               <svg class="w-4 h-4 ml-1 sort-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -306,7 +336,7 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'US
               </span>
             </td>
             <td class="col-instanceType px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
-              <div class="max-w-24 truncate">
+              <div class="max-w-48 truncate">
                 {instance.instanceType}
               </div>
             </td>
@@ -490,11 +520,14 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'US
       .map(row => JSON.parse((row as HTMLElement).dataset.instance || '{}'));
     let currentPricingMode = 'ipv4_ipv6';
     let currentSortField = '';
-    let currentSortDirection = 'asc';
-    let activeFilters = {};
-    let popupTimeouts = new Map();
+    let currentSortDirection: 'asc' | 'desc' = 'asc';
+    let activeFilters: any = {};
+    let popupTimeouts: Map<string, number> = new Map();
     let currentCurrency = localStorage.getItem('selectedCurrency') || 'USD';
-    let exchangeRates = { 'USD': 1.0 };
+    let exchangeRates: { [key: string]: number } = { 'USD': 1.0 };
+    let searchTerm = '';
+    let isResizing = false;
+    let resizeColumn: HTMLElement | null = null;
     
     // Handle currency changes from the currency selector
     window.addEventListener('currencyChanged', (event: Event) => {
@@ -537,7 +570,7 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'US
       if (!price || price === 0) return '-';
       
       // Get current currency symbols
-      const currencySymbols = {
+      const currencySymbols: { [key: string]: string } = {
         'USD': '$', 'EUR': '€', 'GBP': '£', 'SEK': 'kr', 'NOK': 'kr', 
         'DKK': 'kr', 'CHF': 'Fr', 'CAD': '$', 'AUD': '$', 'JPY': '¥'
       };
@@ -563,11 +596,44 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'US
       if (!eurPrice || eurPrice === 0) return '-';
       
       // First convert EUR to USD (using inverse of EUR rate)
-      const eurToUsdRate = exchangeRates['EUR'] || 0.92;
+      const eurToUsdRate = (exchangeRates as any)['EUR'] || 0.92;
       const usdPrice = eurPrice / eurToUsdRate;
       
       // Then format using current currency
       return formatPriceWithCurrentCurrency(usdPrice, isHourly);
+    }
+    
+    // Handle search functionality
+    const searchInput = document.getElementById('search-input') as HTMLInputElement;
+    const clearSearchBtn = document.getElementById('clear-search');
+    
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const target = e.target as HTMLInputElement;
+        searchTerm = target.value.toLowerCase();
+        
+        // Show/hide clear button
+        if (clearSearchBtn) {
+          if (searchTerm) {
+            clearSearchBtn.classList.remove('hidden');
+          } else {
+            clearSearchBtn.classList.add('hidden');
+          }
+        }
+        
+        // Apply search filter
+        applySearchFilter();
+      });
+      
+      // Handle clear search
+      if (clearSearchBtn) {
+        clearSearchBtn.addEventListener('click', () => {
+          searchInput.value = '';
+          searchTerm = '';
+          clearSearchBtn.classList.add('hidden');
+          applySearchFilter();
+        });
+      }
     }
     
     // Handle column controls dropdown
@@ -630,7 +696,7 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'US
         const popup = trigger.querySelector('.all-regions-popup');
         if (!popup) return;
         
-        let showTimeout, hideTimeout;
+        let showTimeout: number, hideTimeout: number;
         
         trigger.addEventListener('mouseenter', () => {
           clearTimeout(hideTimeout);
@@ -1019,6 +1085,11 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'US
       
       renderInstances(filtered);
       
+      // Apply search filter after rendering if there's an active search term
+      if (searchTerm !== '') {
+        applySearchFilter();
+      }
+      
       // Update pricing display for region-specific pricing
       if (filters.regions?.length === 1) {
         updateRegionSpecificPricing(filters.regions[0]);
@@ -1027,7 +1098,8 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'US
         resetToDefaultPricing();
       }
       
-      if (resultCount) {
+      // Update result count (will be overwritten by applySearchFilter if search is active)
+      if (searchTerm === '' && resultCount) {
         resultCount.textContent = `${filtered.length} instances`;
       }
     }
@@ -1260,26 +1332,41 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'US
     function renderInstances(instances: any[]) {
       if (!tableBody) return;
       
-      // Hide all rows first
-      document.querySelectorAll('.instance-row').forEach(row => {
-        (row as HTMLElement).style.display = 'none';
-      });
+      // Check if we need to rebuild the table (new instances not in existing rows)
+      const existingRows = Array.from(document.querySelectorAll('.instance-row'));
+      const needsRebuild = instances.some(instance => 
+        !existingRows.find(row => {
+          const rowData = JSON.parse((row as HTMLElement).dataset.instance || '{}');
+          return rowData.instanceType === instance.instanceType && 
+                 rowData.provider === instance.provider;
+        })
+      );
       
-      // Show matching rows in order
-      instances.forEach((instance) => {
-        const matchingRow = Array.from(document.querySelectorAll('.instance-row'))
-          .find(row => {
-            const rowData = JSON.parse((row as HTMLElement).dataset.instance || '{}');
-            return rowData.instanceType === instance.instanceType && 
-                   rowData.provider === instance.provider;
-          });
+      if (needsRebuild) {
+        // Rebuild table with new data
+        rebuildTable(instances);
+      } else {
+        // Hide all rows first
+        document.querySelectorAll('.instance-row').forEach(row => {
+          (row as HTMLElement).style.display = 'none';
+        });
         
-        if (matchingRow) {
-          (matchingRow as HTMLElement).style.display = '';
-          // Move to correct position
-          tableBody.appendChild(matchingRow);
-        }
-      });
+        // Show matching rows in order
+        instances.forEach((instance) => {
+          const matchingRow = Array.from(document.querySelectorAll('.instance-row'))
+            .find(row => {
+              const rowData = JSON.parse((row as HTMLElement).dataset.instance || '{}');
+              return rowData.instanceType === instance.instanceType && 
+                     rowData.provider === instance.provider;
+            });
+          
+          if (matchingRow) {
+            (matchingRow as HTMLElement).style.display = '';
+            // Move to correct position
+            tableBody.appendChild(matchingRow);
+          }
+        });
+      }
       
       // Update pricing display after rendering
       updatePricingDisplay();
@@ -1287,6 +1374,325 @@ const formatPriceRange = (priceRange: any, value: number, currency: string = 'US
       // Re-setup region popups after rendering
       setupRegionPopups();
     }
+    
+    function rebuildTable(instances: any[]) {
+      if (!tableBody) return;
+      
+      // Clear existing table body
+      tableBody.innerHTML = '';
+      
+      // Create new rows for all instances
+      instances.forEach((instance) => {
+        const row = createInstanceRow(instance);
+        tableBody.appendChild(row);
+      });
+    }
+    
+    function createInstanceRow(instance: any): HTMLElement {
+      const row = document.createElement('tr');
+      row.className = 'hover:bg-gray-50 instance-row';
+      row.setAttribute('data-instance', JSON.stringify(instance));
+      
+      // Create table cells - simplified version, you may need to adjust based on your exact needs
+      row.innerHTML = `
+        <td class="col-provider px-3 py-3 whitespace-nowrap">
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-${getProviderColor(instance.provider)}-100 text-${getProviderColor(instance.provider)}-800">
+            ${instance.provider.toUpperCase()}
+          </span>
+        </td>
+        <td class="col-instanceType px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+          <div class="max-w-48 truncate">${instance.instanceType}</div>
+        </td>
+        <td class="col-type px-3 py-3 whitespace-nowrap">
+          <div class="flex flex-col space-y-1">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              ${instance.type.replace('cloud-', '').replace('dedicated-', '').replace('-', ' ')}
+            </span>
+            ${instance.platform ? `<span class="text-xs text-gray-500 capitalize">${instance.platform}</span>` : ''}
+          </div>
+        </td>
+        <td class="col-vCPU px-3 py-3 whitespace-nowrap text-sm text-gray-900">${instance.vCPU || '-'}</td>
+        <td class="col-memory px-3 py-3 whitespace-nowrap text-sm text-gray-900">${instance.memoryGiB ? `${instance.memoryGiB} GiB` : '-'}</td>
+        <td class="col-architecture px-3 py-3 whitespace-nowrap text-sm text-gray-900">
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+            ${instance.architecture || 'x86'}
+          </span>
+        </td>
+        <td class="col-disk px-3 py-3 whitespace-nowrap text-sm text-gray-900">
+          <div class="flex flex-col">
+            <span>${instance.diskSizeGB ? `${instance.diskSizeGB} GB` : '-'}</span>
+            ${instance.diskType ? `<span class="text-xs text-gray-500">${instance.diskType}</span>` : ''}
+          </div>
+        </td>
+        <td class="col-networkSpeed px-3 py-3 whitespace-nowrap text-sm text-gray-900">
+          <div class="flex flex-col">
+            <span>${instance.network_speed || '-'}</span>
+            ${instance.network_speed ? '<span class="text-xs text-gray-500">Connection</span>' : ''}
+          </div>
+        </td>
+        <td class="col-network px-3 py-3 whitespace-nowrap">
+          <div class="flex flex-col space-y-1" data-network-info="true">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-cyan-100 text-cyan-800 pricing-mode-indicator">
+              IPv4 + IPv6
+            </span>
+            <span class="text-xs text-gray-500 pricing-description">Standard pricing</span>
+          </div>
+        </td>
+        <td class="col-priceHour px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900 pricing-hourly">
+          <div class="flex flex-col">
+            <span class="pricing-value" data-usd-price="${instance.priceUSD_hourly || 0}" data-eur-price="${instance.priceEUR_hourly_net || 0}">
+              $${(instance.priceUSD_hourly || instance.priceEUR_hourly_net || 0).toFixed(4)}
+            </span>
+          </div>
+        </td>
+        <td class="col-priceMonth px-3 py-3 whitespace-nowrap text-sm text-gray-900 pricing-monthly">
+          <div class="flex flex-col">
+            <span class="pricing-value" data-usd-price="${instance.priceUSD_monthly || 0}" data-eur-price="${instance.priceEUR_monthly_net || 0}">
+              $${(instance.priceUSD_monthly || instance.priceEUR_monthly_net || 0).toFixed(2)}
+            </span>
+          </div>
+        </td>
+        <td class="col-regions px-3 py-3 whitespace-nowrap text-sm text-gray-500">
+          <div class="flex flex-wrap gap-1 max-w-32 relative regions-container" data-regions='${JSON.stringify(instance.locationDetails || [])}'>
+            ${createRegionsDisplay(instance.locationDetails || instance.regions || [])}
+          </div>
+        </td>
+        <td class="col-description px-3 py-3 whitespace-nowrap text-sm text-gray-500 hidden">
+          <div class="max-w-48 truncate" title="${instance.description || ''}">${instance.description || '-'}</div>
+        </td>
+      `;
+      
+      return row;
+    }
+    
+    function getProviderColor(provider: string): string {
+      const colors: Record<string, string> = {
+        aws: 'orange',
+        azure: 'blue', 
+        gcp: 'green',
+        hetzner: 'red',
+        oci: 'purple',
+        ovh: 'indigo',
+      };
+      return colors[provider] || 'gray';
+    }
+    
+    function createRegionsDisplay(regions: any[]): string {
+      if (!regions || regions.length === 0) return '-';
+      
+      // Show first 3 regions
+      const visibleRegions = regions.slice(0, 3);
+      const hiddenCount = Math.max(0, regions.length - 3);
+      
+      let html = '';
+      
+      visibleRegions.forEach(location => {
+        if (typeof location === 'string') {
+          html += `<span class="text-xs">${location}</span>`;
+        } else if (location.code) {
+          html += `
+            <div class="relative group">
+              <span class="inline-flex items-center space-x-1 cursor-pointer hover:bg-gray-100 px-1 py-0.5 rounded">
+                <img src="https://flagsapi.com/${location.countryCode}/flat/16.png" alt="${location.country}" class="w-4 h-3 rounded-sm" loading="lazy" />
+                <span class="text-xs">${location.code}</span>
+              </span>
+            </div>
+          `;
+        }
+      });
+      
+      if (hiddenCount > 0) {
+        html += `<span class="text-xs text-gray-400">+${hiddenCount}</span>`;
+      }
+      
+      return html;
+    }
+    
+    // Search filter function
+    function applySearchFilter() {
+      const rows = document.querySelectorAll('.instance-row');
+      let visibleCount = 0;
+      
+      // If no search term, show all rows and count them
+      if (searchTerm === '') {
+        rows.forEach(row => {
+          const rowElement = row as HTMLElement;
+          rowElement.style.display = '';
+          visibleCount++;
+        });
+      } else {
+        // First, reset all rows to visible, then apply search filter
+        rows.forEach(row => {
+          const rowElement = row as HTMLElement;
+          const instance = JSON.parse(rowElement.dataset.instance || '{}');
+          const matchesSearchTerm = matchesSearch(instance, searchTerm);
+          
+          if (matchesSearchTerm) {
+            rowElement.style.display = '';
+            visibleCount++;
+          } else {
+            rowElement.style.display = 'none';
+          }
+        });
+      }
+      
+      // Update result count
+      if (resultCount) {
+        resultCount.textContent = `${visibleCount} instances`;
+      }
+    }
+    
+    function matchesSearch(instance: any, searchTerm: string): boolean {
+      const searchableFields = [
+        instance.instanceType,
+        instance.provider,
+        instance.type,
+        instance.description,
+        instance.architecture,
+        instance.diskType,
+        instance.cpu_description,
+        instance.ram_description,
+        instance.storage_description,
+        ...(instance.regions || []),
+        ...(instance.locationDetails || []).map((loc: any) => [loc.city, loc.country, loc.code]).flat()
+      ];
+      
+      return searchableFields.some(field => 
+        field && field.toString().toLowerCase().includes(searchTerm)
+      );
+    }
+    
+    // Column resizing functionality
+    function initializeColumnResizing() {
+      const table = document.getElementById('instances-table');
+      if (!table) return;
+      
+      const headers = table.querySelectorAll('th');
+      
+      headers.forEach((header, index) => {
+        // Add resize handle
+        const resizeHandle = document.createElement('div');
+        resizeHandle.className = 'resize-handle';
+        resizeHandle.style.cssText = `
+          position: absolute;
+          right: 0;
+          top: 0;
+          bottom: 0;
+          width: 4px;
+          cursor: col-resize;
+          user-select: none;
+          background: transparent;
+        `;
+        
+        resizeHandle.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          isResizing = true;
+          resizeColumn = header as HTMLElement;
+          document.body.style.cursor = 'col-resize';
+          document.body.style.userSelect = 'none';
+        });
+        
+        // Make header relative for absolute positioning of handle
+        (header as HTMLElement).style.position = 'relative';
+        header.appendChild(resizeHandle);
+      });
+      
+      // Global mouse events for resizing
+      document.addEventListener('mousemove', (e) => {
+        if (!isResizing || !resizeColumn) return;
+        
+        const rect = resizeColumn.getBoundingClientRect();
+        const width = e.clientX - rect.left;
+        
+        if (width > 50) { // Minimum width
+          resizeColumn.style.width = width + 'px';
+          resizeColumn.style.minWidth = width + 'px';
+          
+          // Also update corresponding table cells to remove width constraints
+          const table = document.getElementById('instances-table');
+          if (table) {
+            const columnIndex = Array.from(resizeColumn.parentElement?.children || []).indexOf(resizeColumn);
+            const rows = table.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+              const cell = row.children[columnIndex] as HTMLElement;
+              if (cell) {
+                // Remove max-width constraints from the cell and its content
+                const contentDiv = cell.querySelector('div');
+                if (contentDiv) {
+                  contentDiv.style.maxWidth = width + 'px';
+                  contentDiv.classList.remove('max-w-24', 'max-w-32', 'max-w-48');
+                  if (width > 200) {
+                    contentDiv.classList.remove('truncate');
+                  } else {
+                    contentDiv.classList.add('truncate');
+                  }
+                }
+              }
+            });
+          }
+        }
+      });
+      
+      document.addEventListener('mouseup', () => {
+        if (isResizing) {
+          isResizing = false;
+          resizeColumn = null;
+          document.body.style.cursor = '';
+          document.body.style.userSelect = '';
+        }
+      });
+    }
+    
+    // Handle dynamic provider loading
+    window.addEventListener('providersSelectionChanged', async (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const { selectedProviders, action } = customEvent.detail;
+      
+      if (action === 'load' && selectedProviders.length > 0) {
+        try {
+          // Show loading indicator
+          if (resultCount) {
+            resultCount.textContent = 'Loading providers...';
+          }
+          
+          // Dynamically import the dynamic loader
+          const { loadSelectedProviders } = await import('../lib/dynamic-loader.js');
+          
+          // Load selected provider data
+          const newData = await loadSelectedProviders(selectedProviders);
+          
+          if (newData.length > 0) {
+            // Update allInstances with new data
+            allInstances = newData;
+            
+            // Re-render the table with new data
+            renderInstances(allInstances);
+            
+            // Update result count
+            if (resultCount) {
+              resultCount.textContent = `${allInstances.length} instances`;
+            }
+            
+            // Apply current filters to new data
+            const currentFilters = activeFilters;
+            if (Object.keys(currentFilters).length > 0) {
+              filterAndRenderInstances(currentFilters);
+            }
+            
+            console.log(`🔄 Dynamically loaded ${newData.length} instances from providers:`, selectedProviders);
+          }
+        } catch (error) {
+          console.error('Error loading provider data:', error);
+          if (resultCount) {
+            resultCount.textContent = 'Error loading data';
+          }
+        }
+      }
+    });
+    
+    // Initialize column resizing
+    initializeColumnResizing();
     
     // Initialize exchange rates from currency selector on page load
     setTimeout(() => {
