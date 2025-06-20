@@ -1,1 +1,1 @@
-# Utils package for CloudCosts data collection
+# Utils package for CloudPriceFinder data collection

@@ -6,8 +6,8 @@ This guide walks you through setting up automated cloud pricing data collection 
 
 ### 1. Fork or Clone Repository
 ```bash
-git clone https://github.com/your-username/cloudcosts.git
-cd cloudcosts
+git clone https://github.com/eSKylezZ/CloudPriceFinder.git
+cd CloudPriceFinder
 ```
 
 ### 2. Set Up API Credentials
@@ -32,7 +32,7 @@ Go to **Settings** → **Secrets and variables** → **Actions** and add:
 For automatic deployment:
 1. Go to **Settings** → **Pages**
 2. Source: **GitHub Actions**
-3. Your site will be available at `https://username.github.io/cloudcosts`
+3. Your site will be available at `https://username.github.io/CloudPriceFinder`
 
 ## 📋 Available Workflows
 
@@ -177,7 +177,7 @@ The workflow automatically validates:
 **Setup:**
 1. Enable in repository settings
 2. Workflow handles deployment automatically
-3. Site available at `username.github.io/cloudcosts`
+3. Site available at `username.github.io/CloudPriceFinder`
 
 ### Custom Domain
 Add to workflow:

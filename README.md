@@ -1,15 +1,15 @@
-# CloudCosts v2.0
+# CloudPriceFinder v2.0
 
 > Multi-cloud instance cost comparison tool with automated data collection
 
-CloudCosts is an open-source application that helps you compare cloud instance costs and specifications across multiple providers. Built with Astro + TypeScript frontend and Python data collection, featuring automated GitHub Actions workflows for zero-maintenance operation.
+CloudPriceFinder is an open-source application that helps you compare cloud instance costs and specifications across multiple providers. Built with Astro + TypeScript frontend and Python data collection, featuring automated GitHub Actions workflows for zero-maintenance operation.
 
 ## 🌟 Features
 
 - 🌩️ **Multi-Cloud Support** - Compare instances across major cloud providers
 - 💰 **Real-Time Pricing** - Automated data collection from provider APIs
-- 🔍 **Advanced Filtering** - Filter by CPU, memory, price, provider, and instance type
-- 📊 **Interactive Comparison** - Sort and compare instances side-by-side
+- 🔍 **Advanced Filtering** - Filter by CPU, memory, price, provider, regions, and instance types with regional pricing support
+- 📊 **Interactive Comparison** - Sort and compare instances side-by-side with region-specific pricing
 - 📱 **Responsive Design** - Works perfectly on desktop and mobile
 - 🔒 **Privacy First** - No tracking, no analytics, no data collection
 - ⚡ **Fast Performance** - Static site generation for optimal loading speed
@@ -45,8 +45,8 @@ See our [GitHub Actions Setup Guide](./docs/GITHUB_ACTIONS_SETUP.md) for detaile
 #### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/cloudcosts.git
-cd cloudcosts
+git clone https://github.com/eSKylezZ/CloudPriceFinder.git
+cd CloudPriceFinder
 
 # Install Node.js dependencies
 npm install
@@ -80,7 +80,7 @@ Visit `http://localhost:4321` to see the application.
 
 ## 🤖 Automated Data Collection
 
-CloudCosts includes GitHub Actions workflows for fully automated data collection and deployment:
+CloudPriceFinder includes GitHub Actions workflows for fully automated data collection and deployment:
 
 ### 🔄 Automated Workflows
 
@@ -98,7 +98,7 @@ CloudCosts includes GitHub Actions workflows for fully automated data collection
 
 ### 🚀 Zero-Maintenance Operation
 
-Once configured, CloudCosts runs completely automatically:
+Once configured, CloudPriceFinder runs completely automatically:
 - No manual data updates needed
 - Always shows current pricing
 - Handles API errors gracefully
@@ -118,17 +118,19 @@ Once configured, CloudCosts runs completely automatically:
 
 ### 🌩️ Hetzner Integration (Complete)
 
-CloudCosts includes comprehensive Hetzner integration supporting:
+CloudPriceFinder includes comprehensive Hetzner integration supporting:
 
 - **Cloud Services**: Servers, load balancers, volumes, floating IPs, networks
 - **Dedicated Servers**: Full Robot API integration with server types and pricing
+- **Regional Pricing**: Location-specific pricing with filtering and comparison
 - **Platform Indicators**: Clear distinction between cloud and dedicated offerings
 - **Enhanced Metadata**: Service categories, platform types, and detailed specifications
 - **Currency Conversion**: EUR to USD with original prices preserved
+- **Advanced Filtering**: Network options, instance type grouping, and region-specific availability
 
 ## 🏗️ Architecture
 
-CloudCosts uses a modern hybrid architecture:
+CloudPriceFinder uses a modern hybrid architecture:
 
 - **Frontend**: Astro v4 static site generator with TypeScript and Tailwind CSS
 - **Data Collection**: Python scripts with orchestrator pattern for provider APIs
@@ -189,7 +191,7 @@ All cloud provider data is normalized to a consistent format:
 
 ## 🚀 Deployment Options
 
-CloudCosts generates a static site that can be deployed to:
+CloudPriceFinder generates a static site that can be deployed to:
 
 - **Cloudflare Pages** - Global edge deployment (recommended)
 - **Netlify** - Deploy directly from GitHub
@@ -225,10 +227,10 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## 🆘 Support
 
-- 🐛 [Issues](https://github.com/yourusername/cloudcosts/issues) - Bug reports and feature requests
-- 💬 [Discussions](https://github.com/yourusername/cloudcosts/discussions) - Community support
-- 📧 [Contact](mailto:your-email@example.com) - Direct support
+- 🐛 [Issues](https://github.com/eSKylezZ/CloudPriceFinder/issues) - Bug reports and feature requests
+- 💬 [Discussions](https://github.com/eSKylezZ/CloudPriceFinder/discussions) - Community support
+- 📧 [Contact](https://github.com/eSKylezZ/CloudPriceFinder) - Project repository
 
 ---
 
-**CloudCosts v2.0** - Making cloud cost comparison simple, automated, and transparent.
+**CloudPriceFinder v2.0** - Making cloud cost comparison simple, automated, and transparent.

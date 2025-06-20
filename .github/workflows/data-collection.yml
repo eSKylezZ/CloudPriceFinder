@@ -118,7 +118,7 @@ jobs:
       
     - name: 🔧 Build static site
       run: |
-        echo "🏗️ Building CloudCosts static site..."
+        echo "🏗️ Building CloudPriceFinder static site..."
         npm run build
         
     - name: 📈 Generate build report

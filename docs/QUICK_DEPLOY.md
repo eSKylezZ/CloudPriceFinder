@@ -1,11 +1,11 @@
 # 🚀 Quick Deploy Guide
 
-Get CloudCosts running with automated data collection in under 10 minutes!
+Get CloudPriceFinder running with automated data collection in under 10 minutes!
 
 ## ⚡ Super Quick Setup
 
 ### 1. Fork Repository (30 seconds)
-- Go to the CloudCosts repository
+- Go to the CloudPriceFinder repository
 - Click **Fork** in the top right
 - Choose your account/organization
 
@@ -13,7 +13,7 @@ Get CloudCosts running with automated data collection in under 10 minutes!
 1. Visit [Hetzner Cloud Console](https://console.hetzner.cloud)
 2. Go to **Security** → **API Tokens**
 3. Click **Generate API Token**
-4. Set description: `CloudCosts Data Collection`
+4. Set description: `CloudPriceFinder Data Collection`
 5. Permission: **Read** (read-only)
 6. Copy the token (you'll need it next!)
 
@@ -32,11 +32,11 @@ Get CloudCosts running with automated data collection in under 10 minutes!
 ### 5. Enable GitHub Pages (1 minute)
 1. Go to **Settings** → **Pages**
 2. Source: **GitHub Actions**
-3. Your site will be live at `https://yourusername.github.io/cloudcosts`
+3. Your site will be live at `https://yourusername.github.io/CloudPriceFinder`
 
 ## ✅ That's It!
 
-Your CloudCosts instance is now:
+Your CloudPriceFinder instance is now:
 - 🔄 **Auto-collecting** pricing data every 6 hours
 - 🌐 **Auto-deploying** to GitHub Pages
 - 📊 **Validating** data quality automatically
@@ -51,7 +51,7 @@ Your CloudCosts instance is now:
 4. Should show "✅ Collected X instances"
 
 ### Check Your Site (10 minutes after setup)
-1. Visit `https://yourusername.github.io/cloudcosts`
+1. Visit `https://yourusername.github.io/CloudPriceFinder`
 2. Should show Hetzner pricing data
 3. Use filters and sorting to explore
 
@@ -108,7 +108,7 @@ Once running successfully:
 - Add more cloud providers as we implement them
 
 ### Share
-- Share your CloudCosts URL with team members
+- Share your CloudPriceFinder URL with team members
 - Embed pricing data in other tools
 - Use as reference for cloud cost decisions
 

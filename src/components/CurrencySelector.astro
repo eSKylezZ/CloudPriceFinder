@@ -1,0 +1,172 @@
+---
+// Currency selector component for switching between different currencies
+---
+
+<div class="currency-selector-container">
+  <div class="flex items-center space-x-2">
+    <label for="currency-selector" class="text-sm font-medium text-gray-700">
+      Currency:
+    </label>
+    <select 
+      id="currency-selector" 
+      class="currency-selector rounded-md border border-gray-300 bg-white px-3 py-1 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+    >
+      <option value="USD" selected>USD ($)</option>
+      <option value="EUR">EUR (€)</option>
+      <option value="GBP">GBP (£)</option>
+      <option value="SEK">SEK (kr)</option>
+      <option value="NOK">NOK (kr)</option>
+      <option value="DKK">DKK (kr)</option>
+      <option value="CHF">CHF (Fr)</option>
+      <option value="CAD">CAD ($)</option>
+      <option value="AUD">AUD ($)</option>
+      <option value="JPY">JPY (¥)</option>
+    </select>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const currencySelector = document.getElementById('currency-selector') as HTMLSelectElement;
+    
+    // Default exchange rates (fallback values, will be fetched dynamically)
+    let exchangeRates = {
+      'USD': 1.0,
+      'EUR': 0.92,
+      'GBP': 0.79,
+      'SEK': 10.85,
+      'NOK': 11.12,
+      'DKK': 6.87,
+      'CHF': 0.88,
+      'CAD': 1.41,
+      'AUD': 1.55,
+      'JPY': 149.50
+    };
+    
+    // Currency symbols mapping
+    const currencySymbols = {
+      'USD': '$',
+      'EUR': '€',
+      'GBP': '£',
+      'SEK': 'kr',
+      'NOK': 'kr',
+      'DKK': 'kr',
+      'CHF': 'Fr',
+      'CAD': '$',
+      'AUD': '$',
+      'JPY': '¥'
+    };
+    
+    // Load saved currency preference
+    const savedCurrency = localStorage.getItem('selectedCurrency') || 'USD';
+    currencySelector.value = savedCurrency;
+    
+    // Fetch exchange rates from API
+    async function fetchExchangeRates() {
+      try {
+        // Using a free exchange rate API (you may want to use a different one)
+        const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+        if (response.ok) {
+          const data = await response.json();
+          exchangeRates = {
+            'USD': 1.0,
+            ...data.rates
+          };
+          console.log('Exchange rates updated:', exchangeRates);
+        }
+      } catch (error) {
+        console.warn('Failed to fetch exchange rates, using fallback values:', error);
+      }
+    }
+    
+    // Convert price from USD to target currency
+    function convertPrice(usdPrice: number, targetCurrency: string): number {
+      const rate = exchangeRates[targetCurrency] || 1;
+      return usdPrice * rate;
+    }
+    
+    // Format price with appropriate currency symbol and decimal places
+    function formatPrice(price: number, currency: string): string {
+      const symbol = currencySymbols[currency] || currency;
+      const decimals = currency === 'JPY' ? 0 : (currency.endsWith('K') ? 2 : 4);
+      
+      // For Scandinavian currencies, put symbol after the number
+      if (['SEK', 'NOK', 'DKK'].includes(currency)) {
+        return `${price.toFixed(decimals)} ${symbol}`;
+      }
+      
+      return `${symbol}${price.toFixed(decimals)}`;
+    }
+    
+    // Update all price displays on the page
+    function updatePriceDisplays(targetCurrency: string) {
+      // Update hourly prices
+      document.querySelectorAll('.pricing-hourly .pricing-value').forEach(element => {
+        const originalUsdPrice = parseFloat(element.getAttribute('data-usd-price') || '0');
+        if (originalUsdPrice > 0) {
+          const convertedPrice = convertPrice(originalUsdPrice, targetCurrency);
+          element.textContent = formatPrice(convertedPrice, targetCurrency);
+        }
+      });
+      
+      // Update monthly prices
+      document.querySelectorAll('.pricing-monthly .pricing-value').forEach(element => {
+        const originalUsdPrice = parseFloat(element.getAttribute('data-usd-price') || '0');
+        if (originalUsdPrice > 0) {
+          const convertedPrice = convertPrice(originalUsdPrice, targetCurrency);
+          element.textContent = formatPrice(convertedPrice, targetCurrency);
+        }
+      });
+      
+      // Update price filter labels and placeholders
+      const maxPriceFilter = document.getElementById('max-price-filter') as HTMLInputElement;
+      if (maxPriceFilter) {
+        const placeholder = `Max price per hour (${currencySymbols[targetCurrency]})`;
+        maxPriceFilter.placeholder = placeholder;
+      }
+      
+      // Dispatch currency change event for other components
+      window.dispatchEvent(new CustomEvent('currencyChanged', {
+        detail: { 
+          currency: targetCurrency,
+          symbol: currencySymbols[targetCurrency],
+          rates: exchangeRates
+        }
+      }));
+    }
+    
+    // Handle currency selection change
+    currencySelector.addEventListener('change', (e) => {
+      const target = e.target as HTMLSelectElement;
+      const selectedCurrency = target.value;
+      
+      // Save preference
+      localStorage.setItem('selectedCurrency', selectedCurrency);
+      
+      // Update displays
+      updatePriceDisplays(selectedCurrency);
+    });
+    
+    // Initialize
+    fetchExchangeRates().then(() => {
+      updatePriceDisplays(savedCurrency);
+    });
+    
+    // Refresh exchange rates every hour
+    setInterval(fetchExchangeRates, 3600000);
+  });
+</script>
+
+<style>
+  .currency-selector-container {
+    @apply flex items-center;
+  }
+  
+  .currency-selector {
+    @apply min-w-[120px];
+  }
+  
+  .currency-selector:focus {
+    @apply ring-2 ring-primary-500 ring-opacity-50;
+  }
+</style>

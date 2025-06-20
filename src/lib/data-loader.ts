@@ -1,5 +1,5 @@
 /**
- * Data loading utilities for CloudCosts frontend.
+ * Data loading utilities for CloudPriceFinder frontend.
  * Handles loading and processing of cloud instance data.
  */
 

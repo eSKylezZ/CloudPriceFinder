@@ -3,7 +3,7 @@ import tailwind from '@astrojs/tailwind';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  site: process.env.SITE_URL || 'https://cloudcosts.example.com',
+  site: process.env.SITE_URL || 'https://cloudpricefinder.com/',
   integrations: [
     tailwind(),
     sitemap()

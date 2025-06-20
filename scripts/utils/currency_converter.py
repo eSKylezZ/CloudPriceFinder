@@ -1,5 +1,5 @@
 """
-Currency conversion utilities for CloudCosts.
+Currency conversion utilities for CloudPriceFinder.
 Converts prices from various currencies to USD.
 """
 

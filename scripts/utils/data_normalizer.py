@@ -1,5 +1,5 @@
 """
-Data normalization utilities for CloudCosts.
+Data normalization utilities for CloudPriceFinder.
 Standardizes data formats across different cloud providers.
 """
 
@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 def normalize_instance_data(raw_data: Dict[str, Any], provider: str) -> Dict[str, Any]:
     """
-    Normalize raw provider data to standard CloudCosts format.
+    Normalize raw provider data to standard CloudPriceFinder format.
     
     Args:
         raw_data: Raw data from provider API

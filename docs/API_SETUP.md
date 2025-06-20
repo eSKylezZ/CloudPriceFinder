@@ -1,19 +1,19 @@
 # API Setup Guide
 
-This guide explains how to create read-only API keys for CloudCosts data collection.
+This guide explains how to create read-only API keys for CloudPriceFinder data collection.
 
 ## 🌩️ Hetzner Cloud API (Read-Only)
 
 ### Step 1: Access Hetzner Cloud Console
 1. Go to [Hetzner Cloud Console](https://console.hetzner.cloud)
 2. Log in to your Hetzner account
-3. Select your project (or create a new one for CloudCosts)
+3. Select your project (or create a new one for CloudPriceFinder)
 
 ### Step 2: Create API Token
 1. Navigate to **Security** → **API Tokens** in the left sidebar
 2. Click **Generate API Token**
 3. Configure the token:
-   - **Description**: `CloudCosts Data Collection (Read-Only)`
+   - **Description**: `CloudPriceFinder Data Collection (Read-Only)`
    - **Permissions**: **Read** (this is the most restrictive option)
    - **Expiry**: Choose based on your security policy (1 year recommended)
 4. Click **Generate Token**
@@ -32,7 +32,7 @@ The read-only token can access:
 ### Security Notes
 - Read-only tokens cannot make any changes to your infrastructure
 - Tokens can be revoked at any time from the console
-- Consider using a dedicated project for CloudCosts to isolate access
+- Consider using a dedicated project for CloudPriceFinder to isolate access
 
 ---
 
@@ -159,4 +159,4 @@ If you encounter issues:
 3. Test API access manually using curl or provider CLI tools
 4. Review this documentation for setup steps
 
-For CloudCosts-specific issues, please open an issue in the GitHub repository.
+For CloudPriceFinder-specific issues, please open an issue in the GitHub repository.
