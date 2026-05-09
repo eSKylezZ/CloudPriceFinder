@@ -350,16 +350,156 @@ Astro only copies files from `public/` to `dist/`. Either (a) move `data/` to `p
 
 ---
 
-## Out of scope for v1 (deferred to v3.1+)
+## Not doing (explicitly out of scope)
 
-- Spot pricing
-- Storage / database / networking pricing / LLM models and pricing between the the main providers that host them AWS bedrock etc...
-- Secondary providers (Hetzner, OVH, DO, Linode, Scaleway, Vultr, Contabo) — code retained, just disabled
-- AWS China / GovCloud regions (Don't do this too complicated and very niche, remove azure china section)
-- Historical price tracking & charts (data cost, doesnt matter for companies to track, if costs have gone up companies will either pay, get a deal or move.)
-- CSV/PDF export
+- AWS China / GovCloud regions — too niche, uses a separate pricing API
+- Azure China regions — remove any existing china section
+- Historical price tracking & charts — data storage cost not worth it for the use case
 
 ---
+
+## CloudPriceFinder v3.1
+
+> **Execution order:** Stage 0 (done) → A → F → B → C → D → E
+
+---
+
+## Stage 0 — Hotfix: Cloudflare Rocket Loader ✅
+
+- [x] **Goal:** Fix live-site warning about preload credentials mode mismatch caused by Cloudflare Rocket Loader rewriting Astro's `<script type="module">` tags.
+
+**Tasks**
+- [x] Add `cfRocketLoaderBypass` Vite plugin to `astro.config.mjs` — injects `data-cfasync="false"` on all `<script type="module">` tags at build time
+- [x] Add `Cache-Control: no-transform` to `_headers` `/*` block
+- [ ] **Manual:** Disable Rocket Loader in Cloudflare dashboard → Speed → Optimization → Content Optimization → Rocket Loader → Off
+
+---
+
+## Stage 0b — Hotfix: Instance Detail Crash (toFixed on undefined)
+
+- [x] **Goal:** Fix `TypeError: Cannot read properties of undefined (reading 'toFixed')` thrown when expanding an instance row for instances with missing price fields.
+
+**Root cause:** `renderDetail` in `src/components/ComparisonTable.astro` called `.toFixed()` directly on `priceUSD_hourly`, `effectiveHourlyUSD`, `savingsVsOnDemandPct`, and regional `priceUSD_hourly`/`priceUSD_monthly` without null-guards. Some instances in the data have these fields missing, causing the entire detail panel to crash.
+
+**Tasks**
+- [x] Harden `formatUSD` and `formatSmall` helpers to accept `number | undefined | null` and return `'—'` for missing values
+- [x] Add `fmt(n, decimals)` and `fmtPct(n, decimals)` local helpers inside `renderDetail`
+- [x] Replace all bare `.toFixed()` calls in the `renderDetail` template literals with the safe helpers
+
+---
+
+## Stage A — Full Region Coverage
+
+- [ ] **Goal:** Every provider fetcher dynamically discovers all commercially available regions from the provider's own API — no hardcoded region lists that go stale.
+
+**Tasks**
+- [ ] **AWS** (`scripts/fetch_aws.py`): Replace static `self.regions['standard']` map with dynamic discovery from the live `region_index.json`. Verify newer regions are included: `ap-south-2`, `ap-southeast-3`, `ap-southeast-4`, `eu-central-2`, `eu-south-1`, `eu-south-2`, `me-central-1`, `il-central-1`, `ca-west-1`
+- [ ] **Azure** (`scripts/fetch_azure.py`): Confirm no region filter artificially limits the retail API response. Azure's API is global — validate full region count
+- [ ] **GCP** (`scripts/fetch_gcp.py`): Confirm all regions returned in SKU `serviceRegions` are captured. Verify newer regions (`me-central1`, `af-south1`) are present in output
+- [ ] **OCI** (`scripts/fetch_oci.py`): Cross-check region list against oracle.com. Add any missing regions (`ap-singapore-2`, `mx-monterrey-1`, etc.)
+- [ ] Verify `data/index.json` region lists update automatically when fetchers pick up new regions — no frontend changes needed
+
+**Definition of Done**
+- [ ] Each fetcher resolves regions dynamically (not from a hardcoded list)
+- [ ] Region counts per provider match the provider's public region page
+
+---
+
+## Stage B — Spot / Preemptible Pricing
+
+- [ ] **Goal:** Add spot/preemptible as a fourth pricing tier alongside on-demand / 1yr / 3yr.
+
+**Tasks**
+- [ ] Extend `CommitmentPrice` in `src/types/cloud.ts`: add `term: 'spot'`, `payment: 'spot'`, optional `spotEvictionRate?: 'low' | 'medium' | 'high'`
+- [ ] **AWS Spot** (`scripts/fetch_aws.py`): Fetch spot price history from EC2 spot pricing endpoint. Use most recent price per instance type per region. Store as `term: 'spot'`, `product: 'spot'`
+- [ ] **Azure Spot** (`scripts/fetch_azure.py`): Filter retail API for `priceType: 'Spot'` rows and attach to matching VM SKUs
+- [ ] **GCP Preemptible** (`scripts/fetch_gcp.py`): Billing SKUs with `usageType: 'Preemptible'` already flow through the pipeline — tag as `term: 'spot'`, `product: 'spot'`
+- [ ] **OCI Preemptible** (`scripts/fetch_oci.py`): Check cetools API for preemptible pricing. If unavailable, document the gap (same pattern as commitment pricing caveat)
+- [ ] Update `scripts/utils/data_validator.py` to accept `term: 'spot'`
+- [ ] Frontend (`src/components/ComparisonTable.astro`): Add "Spot" option to commitment toggle with tooltip: "Spot prices fluctuate and instances can be interrupted"
+
+**Definition of Done**
+- [ ] Spot prices visible in table for AWS, Azure, GCP at minimum
+- [ ] Toggle works DOM-only (no extra network requests)
+
+---
+
+## Stage C — Secondary Providers Re-enablement
+
+- [ ] **Goal:** Re-enable the 7 archived providers. Fetcher code already exists in `scripts/` — update for current APIs and flip the enabled flags.
+
+**Priority order:**
+1. **DigitalOcean** (`scripts/fetch_digitalocean.py`) — largest secondary provider user base
+2. **Hetzner** (`scripts/fetch_hetzner.py`)
+3. **Linode / Akamai Cloud** (`scripts/fetch_linode.py`) — check for endpoint changes post-rebrand
+4. **Vultr** (`scripts/fetch_vultr.py`)
+5. **Scaleway** (`scripts/fetch_scaleway.py`)
+6. **OVH** (`scripts/fetch_ovh.py`)
+7. **Contabo** (`scripts/fetch_contabo.py`) — limited public API, may need scraping
+
+**For each provider:**
+- [ ] Run fetcher, confirm non-empty valid output
+- [ ] Pass `data_validator.py`
+- [ ] Set `enabled: True` in `scripts/orchestrator.py` `PROVIDER_CONFIG`
+- [ ] Confirm provider appears in `data/index.json` and FilterPanel dropdown
+
+---
+
+## Stage D — LLM / AI Model Pricing
+
+- [ ] **Goal:** New pricing category for LLM inference — a large and growing share of cloud spend.
+
+**Tasks**
+- [ ] Create `scripts/fetch_llm_pricing.py`:
+  - **AWS Bedrock**: Claude, Titan, Llama, Mistral — per-token input/output pricing
+  - **Azure OpenAI**: Retail Prices API `productName: 'Azure OpenAI'` — GPT-4o, o1, etc.
+  - **GCP Vertex AI**: Billing Catalog API `displayName` contains `'Vertex AI'` — Gemini models
+  - **OCI Generative AI**: cetools API — check for GenAI SKUs
+- [ ] Add `LLMModel` type to `src/types/cloud.ts`: `provider`, `model`, `inputPricePer1KTokens`, `outputPricePer1KTokens`, `contextWindowK`, `lastUpdated`
+- [ ] New data tier: `data/llm/index.json` + `data/llm/{provider}/{model-id}.json`
+- [ ] New page: `src/pages/llm.astro` — sortable table by provider / model / input price / output price / context window
+- [ ] Add "LLM Pricing" link to nav in `src/layouts/BaseLayout.astro`
+- [ ] Wire into weekly data-collection workflow (`.github/workflows/data-collection.yml`)
+
+---
+
+## Stage E — Storage Pricing
+
+- [ ] **Goal:** Expand beyond compute into storage — another major cost category.
+
+**Phase 1 (v3.1) — Object + Block storage only:**
+- [ ] Add `StorageProduct` type to `src/types/cloud.ts`: `provider`, `category` (`object` | `block`), `tier`, `pricePerGBMonth`, `pricePerRequest`, `region`
+- [ ] Create `scripts/fetch_storage.py`:
+  - **Object storage**: S3, Azure Blob, GCS, OCI Object Storage — per-GB-month + per-request pricing
+  - **Block storage**: EBS, Azure Managed Disks, GCP Persistent Disk, OCI Block Volumes — per-GB-month by type (SSD / HDD / Ultra)
+- [ ] New data tier: `data/storage/{provider}/{product-id}.json`
+- [ ] New page: `src/pages/storage.astro` — storage price comparison table
+- [ ] Add "Storage" link to nav
+
+**Phase 2 (v3.2 — out of scope for v3.1):**
+- Database pricing (RDS, Azure SQL, Cloud SQL, OCI Database)
+- Egress / data transfer pricing
+
+---
+
+## Stage F — CSV / PDF Export
+
+- [ ] **Goal:** Let users export comparison results for sharing or procurement workflows.
+
+**Tasks**
+- [ ] Add "Export CSV" button to `src/components/ComparisonTable.astro` — client-side only, uses already-loaded family data. Columns: provider, instance, region, vCPU, RAM, on-demand $/hr, 1yr $/hr, 3yr $/hr, spot $/hr
+- [ ] Add "Export / Print" button to `src/pages/compare.astro` — triggers `window.print()` with a `@media print` stylesheet that hides nav/footer and formats the compare table cleanly
+- [ ] No new dependencies — native browser APIs only
+
+---
+
+## Stage G — UI updates
+
+- [ ] **Goal:** Let users compare easier
+
+**Tasks**
+- [ ] Have the ability to select multiple VMs before going to the compare page, could be a select multiple an a pop up bar appears asking if you want to compare
+- [ ] Fix the Compare side-by-side option so it compare the closted matched ones, currently it only goes to the compare screen with the first VM and not the others. 
 
 ## v2 historical reference (for context only)
 

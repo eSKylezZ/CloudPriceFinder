@@ -315,12 +315,13 @@
     return Math.min(...matches.map((c) => c.effectiveHourlyUSD));
   }
 
-  function formatUSD(n: number, decimals = 4): string {
+  function formatUSD(n: number | undefined | null, decimals = 4): string {
+    if (n == null || isNaN(n)) return '—';
     return `$${n.toFixed(decimals)}`;
   }
 
-  function formatSmall(n: number): string {
-    // For very small per-vCPU prices, use more decimal places
+  function formatSmall(n: number | undefined | null): string {
+    if (n == null || isNaN(n)) return '—';
     if (n < 0.001) return `$${n.toFixed(6)}`;
     if (n < 0.01) return `$${n.toFixed(5)}`;
     return `$${n.toFixed(4)}`;
@@ -568,6 +569,9 @@
   });
 
   function renderDetail(container: HTMLElement, detail: V3InstanceFile, equivMap: Record<string, EquivRecord>) {
+    const fmt = (n: number | undefined | null, d = 4) => (n != null && !isNaN(n) ? `$${n.toFixed(d)}` : '—');
+    const fmtPct = (n: number | undefined | null, d = 1) => (n != null && !isNaN(n) ? `${n.toFixed(d)}%` : '—');
+
     const commitmentRows = (detail.commitments ?? [])
       .sort((a, b) => {
         const termOrder: Record<string, number> = { '1yr': 0, '3yr': 1 };
@@ -580,8 +584,8 @@
           <td class="pr-4 py-1 font-medium text-gray-700">${c.term}</td>
           <td class="pr-4 py-1 text-gray-600">${c.payment}</td>
           <td class="pr-4 py-1 text-gray-600">${c.product}</td>
-          <td class="pr-4 py-1 font-medium text-gray-900">$${c.effectiveHourlyUSD.toFixed(4)}/hr</td>
-          <td class="pr-4 py-1 text-green-700">Save ${c.savingsVsOnDemandPct.toFixed(1)}%</td>
+          <td class="pr-4 py-1 font-medium text-gray-900">${fmt(c.effectiveHourlyUSD)}/hr</td>
+          <td class="pr-4 py-1 text-green-700">Save ${fmtPct(c.savingsVsOnDemandPct)}</td>
         </tr>
       `
       )
@@ -595,8 +599,8 @@
             ([region, pricing]) => `
           <tr class="border-b border-gray-100">
             <td class="pr-4 py-1 font-medium text-gray-700">${region}</td>
-            <td class="pr-4 py-1 text-gray-900">$${pricing.priceUSD_hourly.toFixed(4)}/hr</td>
-            <td class="pr-4 py-1 text-gray-600">$${pricing.priceUSD_monthly.toFixed(2)}/mo</td>
+            <td class="pr-4 py-1 text-gray-900">${fmt(pricing.priceUSD_hourly)}/hr</td>
+            <td class="pr-4 py-1 text-gray-600">${fmt(pricing.priceUSD_monthly, 2)}/mo</td>
           </tr>
         `
           )
@@ -649,9 +653,9 @@
               ${detail.diskSizeGB ? `<tr><td class="pr-4 py-0.5 text-gray-500">Storage</td><td class="text-gray-800">${detail.diskSizeGB} GB ${detail.diskType ?? ''}</td></tr>` : ''}
               ${detail.networkPerformance ? `<tr><td class="pr-4 py-0.5 text-gray-500">Network</td><td class="text-gray-800">${detail.networkPerformance}</td></tr>` : ''}
               ${detail.gpu ? `<tr><td class="pr-4 py-0.5 text-gray-500">GPU</td><td class="text-gray-800">${detail.gpu.count}x ${detail.gpu.type} (${detail.gpu.memoryGiB} GiB)</td></tr>` : ''}
-              <tr><td class="pr-4 py-0.5 text-gray-500">On-Demand</td><td class="text-gray-800 font-medium">$${detail.priceUSD_hourly.toFixed(4)}/hr</td></tr>
-              <tr><td class="pr-4 py-0.5 text-gray-500">$/vCPU/hr</td><td class="text-gray-800">$${(detail.priceUSD_hourly / (detail.vCPU || 1)).toFixed(5)}</td></tr>
-              <tr><td class="pr-4 py-0.5 text-gray-500">$/GiB/hr</td><td class="text-gray-800">$${(detail.priceUSD_hourly / (detail.memoryGiB || 1)).toFixed(5)}</td></tr>
+              <tr><td class="pr-4 py-0.5 text-gray-500">On-Demand</td><td class="text-gray-800 font-medium">${fmt(detail.priceUSD_hourly)}/hr</td></tr>
+              <tr><td class="pr-4 py-0.5 text-gray-500">$/vCPU/hr</td><td class="text-gray-800">${fmt(detail.priceUSD_hourly != null ? detail.priceUSD_hourly / (detail.vCPU || 1) : null, 5)}</td></tr>
+              <tr><td class="pr-4 py-0.5 text-gray-500">$/GiB/hr</td><td class="text-gray-800">${fmt(detail.priceUSD_hourly != null ? detail.priceUSD_hourly / (detail.memoryGiB || 1) : null, 5)}</td></tr>
               <tr><td class="pr-4 py-0.5 text-gray-500">Regions</td><td class="text-gray-800">${(detail.regions ?? []).length} available</td></tr>
               <tr><td class="pr-4 py-0.5 text-gray-500">Updated</td><td class="text-gray-500">${detail.lastUpdated?.split('T')[0] ?? '-'}</td></tr>
             </tbody>
