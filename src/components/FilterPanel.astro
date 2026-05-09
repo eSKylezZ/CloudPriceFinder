@@ -1,349 +1,129 @@
 ---
-import type { CloudInstance } from '../types';
-import { getUniqueValues } from '../lib/data-loader';
-import CurrencySelector from './CurrencySelector.astro';
-
-export interface Props {
-  instances: CloudInstance[];
-}
-
-const { instances } = Astro.props;
-
-const providers = getUniqueValues(instances, 'provider');
-const instanceTypes = getUniqueValues(instances, 'type');
-const ipTypes = getUniqueValues(instances, 'ipType').filter(Boolean);
-
-// Group instance types into categories
-const groupedInstanceTypes = {
-  cloudServer: instanceTypes.filter(type => 
-    type === 'cloud-server' || 
-    type === 'cloud-loadbalancer' || 
-    type === 'cloud-volume' || 
-    type === 'cloud-network' || 
-    type === 'cloud-floating-ip' || 
-    type === 'cloud-snapshot' || 
-    type === 'cloud-certificate'
-  ),
-  dedicatedServer: instanceTypes.filter(type => 
-    type === 'dedicated-server' || 
-    type === 'dedicated-auction' || 
-    type === 'dedicated-storage' || 
-    type === 'dedicated-colocation'
-  )
-};
-
-// Handle both old and new networkOptions structure
-const networkOptionsSet = new Set<string>();
-instances.forEach(instance => {
-  // New structure: networkOptions is an object with keys
-  if (instance.networkOptions && typeof instance.networkOptions === 'object') {
-    Object.keys(instance.networkOptions).forEach(key => {
-      if (instance.networkOptions![key as keyof typeof instance.networkOptions]?.available) {
-        networkOptionsSet.add(key);
-      }
-    });
-  }
-  // Legacy structure: networkOptions is a string
-  else if (instance.networkOptions && typeof instance.networkOptions === 'string') {
-    networkOptionsSet.add(instance.networkOptions);
-  }
-  // Fallback to networkType or defaultNetworkType
-  else if (instance.networkType) {
-    networkOptionsSet.add(instance.networkType);
-  }
-  else if (instance.defaultNetworkType) {
-    networkOptionsSet.add(instance.defaultNetworkType);
-  }
-});
-const networkOptions = Array.from(networkOptionsSet).filter(Boolean);
-
-// Extract all unique regions/locations
-const regionsSet = new Set<string>();
-instances.forEach(instance => {
-  if (instance.locationDetails && Array.isArray(instance.locationDetails)) {
-    instance.locationDetails.forEach(location => {
-      if (location.country) {
-        regionsSet.add(location.country);
-      }
-    });
-  } else if (instance.regions && Array.isArray(instance.regions)) {
-    instance.regions.forEach(region => {
-      regionsSet.add(region);
-    });
-  }
-});
-const regions = Array.from(regionsSet).sort();
-
-// Calculate ranges for sliders
-const vCPURange = instances.length > 0 ? {
-  min: Math.min(...instances.map(i => i.vCPU || 1).filter(Boolean)),
-  max: Math.max(...instances.map(i => i.vCPU || 1).filter(Boolean))
-} : { min: 1, max: 32 };
-
-const memoryRange = instances.length > 0 ? {
-  min: Math.min(...instances.map(i => i.memoryGiB || 1).filter(Boolean)),
-  max: Math.max(...instances.map(i => i.memoryGiB || 1).filter(Boolean))
-} : { min: 1, max: 256 };
-
-const priceRange = instances.length > 0 ? {
-  min: Math.min(...instances.map(i => i.priceUSD_hourly)),
-  max: Math.max(...instances.map(i => i.priceUSD_hourly))
-} : { min: 0, max: 10 };
+// FilterPanel v3: drives available options from index.json (loaded client-side).
+// No build-time data dependency — all filter population happens in the <script>.
 ---
 
 <div class="bg-white rounded-lg shadow-sm border p-6">
   <h2 class="text-lg font-semibold text-gray-900 mb-4">Filters</h2>
-  
-  <!-- Currency Selector -->
-  <div class="mb-6 pb-4 border-b border-gray-200">
-    <CurrencySelector />
-  </div>
-  
+
   <div class="space-y-6" id="filter-panel">
-    <!-- Provider Filter -->
+
+    <!-- Provider Filter (populated by JS from index.json) -->
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-2">
-        Cloud Providers
-      </label>
-      <div class="space-y-2">
-        {providers.map((provider) => (
-          <label class="flex items-center">
-            <input
-              type="checkbox"
-              name="provider"
-              value={provider}
-              checked
-              class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-            />
-            <span class="ml-2 text-sm text-gray-600 capitalize">{provider}</span>
-          </label>
+      <label class="block text-sm font-medium text-gray-700 mb-2">Cloud Providers</label>
+      <div class="space-y-2" id="provider-checkboxes">
+        <!-- skeleton placeholders -->
+        {[1,2,3,4].map(() => (
+          <div class="h-5 bg-gray-100 rounded animate-pulse w-28"></div>
         ))}
       </div>
     </div>
 
-    <!-- Region Filter -->
-    {regions.length > 0 && (
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-2">
-        Regions
-      </label>
-      <div class="space-y-2 max-h-32 overflow-y-auto">
-        {regions.map((region) => (
-          <label class="flex items-center">
-            <input
-              type="checkbox"
-              name="region"
-              value={region}
-              checked={region === 'Germany' || region === 'germany'}
-              class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-            />
-            <span class="ml-2 text-sm text-gray-600">{region}</span>
-          </label>
-        ))}
+    <!-- Family Filter (populated by JS after provider selection) -->
+    <div id="family-filter-section">
+      <label class="block text-sm font-medium text-gray-700 mb-2">Instance Family</label>
+      <div class="space-y-1 max-h-44 overflow-y-auto" id="family-checkboxes">
+        <div class="text-xs text-gray-400 italic">Loading families...</div>
       </div>
     </div>
-    )}
+
+    <!-- Commitment Term -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">Pricing Term</label>
+      <div class="space-y-1">
+        <label class="flex items-center">
+          <input type="radio" name="commitmentTerm" value="on-demand" checked
+            class="border-gray-300 text-primary-600 focus:ring-primary-500" />
+          <span class="ml-2 text-sm text-gray-600">On-Demand</span>
+        </label>
+        <label class="flex items-center">
+          <input type="radio" name="commitmentTerm" value="1yr"
+            class="border-gray-300 text-primary-600 focus:ring-primary-500" />
+          <span class="ml-2 text-sm text-gray-600">1-Year Reserved</span>
+        </label>
+        <label class="flex items-center">
+          <input type="radio" name="commitmentTerm" value="3yr"
+            class="border-gray-300 text-primary-600 focus:ring-primary-500" />
+          <span class="ml-2 text-sm text-gray-600">3-Year Reserved</span>
+        </label>
+      </div>
+    </div>
 
     <!-- vCPU Range -->
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-2">
-        vCPU Count
-      </label>
-      <div class="space-y-2">
-        <div class="flex items-center space-x-2">
-          <input
-            type="number"
-            name="minVCPU"
-            placeholder="Min"
-            min={vCPURange.min}
-            max={vCPURange.max}
-            value={vCPURange.min}
-            class="w-20 rounded border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500"
-          />
-          <span class="text-gray-500">to</span>
-          <input
-            type="number"
-            name="maxVCPU"
-            placeholder="Max"
-            min={vCPURange.min}
-            max={vCPURange.max}
-            value={vCPURange.max}
-            class="w-20 rounded border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500"
-          />
-        </div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">vCPU Count</label>
+      <div class="flex items-center space-x-2">
+        <input type="number" name="minVCPU" id="min-vcpu" placeholder="Min"
+          min="1" max="1024" value="1"
+          class="w-20 rounded border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500" />
+        <span class="text-gray-500">to</span>
+        <input type="number" name="maxVCPU" id="max-vcpu" placeholder="Max"
+          min="1" max="1024" value="1024"
+          class="w-20 rounded border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500" />
       </div>
     </div>
 
     <!-- Memory Range -->
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-2">
-        Memory (GiB)
-      </label>
-      <div class="space-y-2">
-        <div class="flex items-center space-x-2">
-          <input
-            type="number"
-            name="minMemory"
-            placeholder="Min"
-            min={memoryRange.min}
-            max={memoryRange.max}
-            value={memoryRange.min}
-            class="w-20 rounded border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500"
-          />
-          <span class="text-gray-500">to</span>
-          <input
-            type="number"
-            name="maxMemory"
-            placeholder="Max"
-            min={memoryRange.min}
-            max={memoryRange.max}
-            value={memoryRange.max}
-            class="w-20 rounded border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500"
-          />
-        </div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">Memory (GiB)</label>
+      <div class="flex items-center space-x-2">
+        <input type="number" name="minMemory" id="min-memory" placeholder="Min"
+          min="0.5" max="65536" value="0.5"
+          class="w-20 rounded border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500" />
+        <span class="text-gray-500">to</span>
+        <input type="number" name="maxMemory" id="max-memory" placeholder="Max"
+          min="0.5" max="65536" value="65536"
+          class="w-20 rounded border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500" />
       </div>
     </div>
 
-    <!-- Price Range -->
+    <!-- Max Hourly Price -->
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-2">
-        <span id="price-filter-label">Max Price (USD/hour)</span>
-      </label>
-      <input
-        type="number"
-        name="maxPrice"
-        id="max-price-filter"
-        placeholder="Max price ($)"
-        min={priceRange.min}
-        max={priceRange.max}
-        step="0.01"
-        value={priceRange.max}
-        class="w-full rounded border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500"
-      />
+      <label class="block text-sm font-medium text-gray-700 mb-2">Max Price (USD/hour)</label>
+      <input type="number" name="maxPrice" id="max-price" placeholder="e.g. 2.00"
+        min="0" step="0.01"
+        class="w-full rounded border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500" />
     </div>
 
-    <!-- Instance Type Filter -->
+    <!-- GPU filter -->
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-2">
-        Instance Types
+      <label class="flex items-center">
+        <input type="checkbox" id="gpu-only"
+          class="rounded border-gray-300 text-primary-600 focus:ring-primary-500" />
+        <span class="ml-2 text-sm text-gray-700">GPU instances only</span>
       </label>
-      <div class="space-y-3 max-h-40 overflow-y-auto">
-        
-        <!-- Cloud Server Category -->
-        {groupedInstanceTypes.cloudServer.length > 0 && (
-          <div>
-            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Cloud Server</div>
-            <div class="space-y-1 ml-2">
-              {groupedInstanceTypes.cloudServer.map((type) => (
-                <label class="flex items-center">
-                  <input
-                    type="checkbox"
-                    name="instanceType"
-                    value={type}
-                    checked
-                    class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                  />
-                  <span class="ml-2 text-sm text-gray-600">
-                    {type === 'cloud-server' ? 'Server' : type.replace('cloud-', '').replace('-', ' ')}
-                  </span>
-                </label>
-              ))}
-            </div>
-          </div>
-        )}
+    </div>
 
-        <!-- Dedicated Server Category -->
-        {groupedInstanceTypes.dedicatedServer.length > 0 && (
-          <div>
-            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Dedicated Server</div>
-            <div class="space-y-1 ml-2">
-              {groupedInstanceTypes.dedicatedServer.map((type) => (
-                <label class="flex items-center">
-                  <input
-                    type="checkbox"
-                    name="instanceType"
-                    value={type}
-                    checked
-                    class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                  />
-                  <span class="ml-2 text-sm text-gray-600">
-                    {type === 'dedicated-server' ? 'Server' : 
-                     type === 'dedicated-auction' ? 'Auction' :
-                     type.replace('dedicated-', '').replace('-', ' ')}
-                  </span>
-                </label>
-              ))}
-            </div>
-          </div>
-        )}
-        
+    <!-- Architecture -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">Architecture</label>
+      <div class="space-y-1">
+        <label class="flex items-center">
+          <input type="radio" name="architecture" value="any" checked
+            class="border-gray-300 text-primary-600 focus:ring-primary-500" />
+          <span class="ml-2 text-sm text-gray-600">Any</span>
+        </label>
+        <label class="flex items-center">
+          <input type="radio" name="architecture" value="x86_64"
+            class="border-gray-300 text-primary-600 focus:ring-primary-500" />
+          <span class="ml-2 text-sm text-gray-600">x86_64</span>
+        </label>
+        <label class="flex items-center">
+          <input type="radio" name="architecture" value="arm64"
+            class="border-gray-300 text-primary-600 focus:ring-primary-500" />
+          <span class="ml-2 text-sm text-gray-600">arm64</span>
+        </label>
       </div>
     </div>
-
-    <!-- IP Type Filter -->
-    {ipTypes.length > 0 && (
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-2">
-        Network Type
-      </label>
-      <div class="space-y-2">
-        {ipTypes.map((ipType) => (
-          <label class="flex items-center">
-            <input
-              type="checkbox"
-              name="ipType"
-              value={ipType}
-              checked
-              class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-            />
-            <span class="ml-2 text-sm text-gray-600 capitalize">
-              {ipType?.replace('_', ' + ') || ''}
-            </span>
-          </label>
-        ))}
-      </div>
-    </div>
-    )}
-
-    <!-- Network Options Filter -->
-    {networkOptions.length > 0 && (
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-2">
-        Network Options
-      </label>
-      <div class="space-y-2">
-        {networkOptions.map((option) => (
-          <label class="flex items-center">
-            <input
-              type="checkbox"
-              name="networkOption"
-              value={option}
-              checked
-              class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-            />
-            <span class="ml-2 text-sm text-gray-600 capitalize">
-              {String(option).replace('_', ' ').replace('ipv4 ipv6', 'IPv4 + IPv6').replace('ipv6 only', 'IPv6-only')}
-            </span>
-          </label>
-        ))}
-      </div>
-    </div>
-    )}
 
     <!-- Action Buttons -->
     <div class="space-y-2 pt-4 border-t border-gray-200">
-      <button
-        type="button"
-        id="apply-filters"
-        class="w-full bg-primary-600 text-white py-2 px-4 rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 text-sm"
-      >
+      <button type="button" id="apply-filters"
+        class="w-full bg-primary-600 text-white py-2 px-4 rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 text-sm">
         Apply Filters
       </button>
-      <button
-        type="button"
-        id="clear-filters"
-        class="w-full bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 text-sm"
-      >
+      <button type="button" id="clear-filters"
+        class="w-full bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 text-sm">
         Clear All
       </button>
     </div>
@@ -351,121 +131,149 @@ const priceRange = instances.length > 0 ? {
 </div>
 
 <script>
-  // Client-side filtering logic
-  document.addEventListener('DOMContentLoaded', () => {
-    const applyButton = document.getElementById('apply-filters');
-    const clearButton = document.getElementById('clear-filters');
-    // const filterPanel = document.getElementById('filter-panel');
-    
-    if (applyButton) {
-      applyButton.addEventListener('click', applyFilters);
-    }
-    
-    if (clearButton) {
-      clearButton.addEventListener('click', clearFilters);
-    }
-    
-    // Handle currency changes for price filter
-    window.addEventListener('currencyChanged', (event: Event) => {
-      const customEvent = event as CustomEvent;
-      const { currency, symbol } = customEvent.detail;
-      
-      // Update price filter label and placeholder
-      const priceLabel = document.getElementById('price-filter-label');
-      const maxPriceInput = document.getElementById('max-price-filter') as HTMLInputElement;
-      
-      if (priceLabel) {
-        priceLabel.textContent = `Max Price (${currency}/hour)`;
-      }
-      
-      if (maxPriceInput) {
-        const placeholder = ['SEK', 'NOK', 'DKK'].includes(currency) 
-          ? `Max price (${symbol})` 
-          : `Max price (${symbol})`;
-        maxPriceInput.placeholder = placeholder;
-      }
-    });
+  import type { V3Index, V3ProviderEntry } from '../types';
+
+  let indexData: V3Index | null = null;
+
+  // Receive index from page bootstrap
+  window.addEventListener('indexLoaded', (event: Event) => {
+    const { index } = (event as CustomEvent<{ index: V3Index }>).detail;
+    indexData = index;
+    populateProviders(index);
+    populateFamilies(index.providers);
   });
 
-  async function applyFilters() {
-    // Get filter values
-    const providers = Array.from(document.querySelectorAll('input[name="provider"]:checked'))
-      .map(input => (input as HTMLInputElement).value);
-    
-    const regions = Array.from(document.querySelectorAll('input[name="region"]:checked'))
-      .map(input => (input as HTMLInputElement).value);
-    
-    const instanceTypes = Array.from(document.querySelectorAll('input[name="instanceType"]:checked'))
-      .map(input => (input as HTMLInputElement).value);
-    
-    const ipTypes = Array.from(document.querySelectorAll('input[name="ipType"]:checked'))
-      .map(input => (input as HTMLInputElement).value);
-    
-    const networkOptions = Array.from(document.querySelectorAll('input[name="networkOption"]:checked'))
-      .map(input => (input as HTMLInputElement).value);
-    
-    const minVCPU = parseInt((document.querySelector('input[name="minVCPU"]') as HTMLInputElement)?.value || '0');
-    const maxVCPU = parseInt((document.querySelector('input[name="maxVCPU"]') as HTMLInputElement)?.value || '999');
-    const minMemory = parseInt((document.querySelector('input[name="minMemory"]') as HTMLInputElement)?.value || '0');
-    const maxMemory = parseInt((document.querySelector('input[name="maxMemory"]') as HTMLInputElement)?.value || '9999');
-    const maxPrice = parseFloat((document.querySelector('input[name="maxPrice"]') as HTMLInputElement)?.value || '999');
+  function populateProviders(index: V3Index) {
+    const container = document.getElementById('provider-checkboxes');
+    if (!container) return;
 
-    // Trigger dynamic provider loading based on selected providers
-    if (providers.length > 0) {
-      const loadingEvent = new CustomEvent('providersSelectionChanged', {
-        detail: {
-          selectedProviders: providers,
-          action: 'load'
-        }
+    container.innerHTML = '';
+    index.providers.forEach((provider) => {
+      const label = document.createElement('label');
+      label.className = 'flex items-center';
+      label.innerHTML = `
+        <input type="checkbox" name="provider" value="${provider.id}" checked
+          class="rounded border-gray-300 text-primary-600 focus:ring-primary-500" />
+        <span class="ml-2 text-sm text-gray-600 uppercase">${provider.id}</span>
+        <span class="ml-1 text-xs text-gray-400">(${provider.instanceCount.toLocaleString()})</span>
+      `;
+      container.appendChild(label);
+    });
+
+    // Refresh family list when provider selection changes
+    container.querySelectorAll('input[name="provider"]').forEach((input) => {
+      input.addEventListener('change', () => {
+        if (!indexData) return;
+        const selectedIds = getSelectedProviders();
+        const selected = indexData.providers.filter((p) => selectedIds.includes(p.id));
+        populateFamilies(selected);
       });
-      window.dispatchEvent(loadingEvent);
+    });
+  }
+
+  function populateFamilies(providers: V3ProviderEntry[]) {
+    const container = document.getElementById('family-checkboxes');
+    if (!container) return;
+
+    if (providers.length === 0) {
+      container.innerHTML = '<div class="text-xs text-gray-400 italic">No providers selected</div>';
+      return;
     }
 
-    // Trigger filter event with filter data
-    const filterEvent = new CustomEvent('filtersChanged', {
-      detail: {
-        providers,
-        regions,
-        instanceTypes,
-        ipTypes,
-        networkOptions,
-        minVCPU,
-        maxVCPU,
-        minMemory,
-        maxMemory,
-        maxPrice
-      }
+    container.innerHTML = '';
+    providers.forEach((provider) => {
+      const heading = document.createElement('div');
+      heading.className = 'text-xs font-semibold text-gray-500 uppercase tracking-wider mt-2 mb-1';
+      heading.textContent = provider.id.toUpperCase();
+      container.appendChild(heading);
+
+      provider.families.forEach((family) => {
+        const label = document.createElement('label');
+        label.className = 'flex items-center ml-2';
+        label.innerHTML = `
+          <input type="checkbox" name="family" value="${provider.id}:${family.id}" checked
+            class="rounded border-gray-300 text-primary-600 focus:ring-primary-500" />
+          <span class="ml-2 text-sm text-gray-600">${family.id}</span>
+          <span class="ml-1 text-xs text-gray-400">(${family.count})</span>
+        `;
+        container.appendChild(label);
+      });
     });
-    
-    document.dispatchEvent(filterEvent);
+  }
+
+  function getSelectedProviders(): string[] {
+    return Array.from(
+      document.querySelectorAll<HTMLInputElement>('input[name="provider"]:checked')
+    ).map((el) => el.value);
+  }
+
+  document.getElementById('apply-filters')?.addEventListener('click', applyFilters);
+  document.getElementById('clear-filters')?.addEventListener('click', clearFilters);
+
+  function applyFilters() {
+    const providers = getSelectedProviders();
+
+    const families = Array.from(
+      document.querySelectorAll<HTMLInputElement>('input[name="family"]:checked')
+    ).map((el) => {
+      const [provider, family] = el.value.split(':');
+      return { provider, family };
+    });
+
+    const commitmentTerm = (
+      document.querySelector<HTMLInputElement>('input[name="commitmentTerm"]:checked')?.value ??
+      'on-demand'
+    ) as 'on-demand' | '1yr' | '3yr';
+
+    const architecture =
+      document.querySelector<HTMLInputElement>('input[name="architecture"]:checked')?.value ?? 'any';
+
+    const minVCPU = parseFloat(
+      (document.getElementById('min-vcpu') as HTMLInputElement)?.value || '1'
+    );
+    const maxVCPU = parseFloat(
+      (document.getElementById('max-vcpu') as HTMLInputElement)?.value || '1024'
+    );
+    const minMemory = parseFloat(
+      (document.getElementById('min-memory') as HTMLInputElement)?.value || '0.5'
+    );
+    const maxMemory = parseFloat(
+      (document.getElementById('max-memory') as HTMLInputElement)?.value || '65536'
+    );
+    const maxPriceRaw = (document.getElementById('max-price') as HTMLInputElement)?.value;
+    const maxPrice = maxPriceRaw ? parseFloat(maxPriceRaw) : Infinity;
+    const gpuOnly = (document.getElementById('gpu-only') as HTMLInputElement)?.checked ?? false;
+
+    window.dispatchEvent(
+      new CustomEvent('filtersChanged', {
+        detail: { providers, families, commitmentTerm, architecture, minVCPU, maxVCPU, minMemory, maxMemory, maxPrice, gpuOnly },
+      })
+    );
   }
 
   function clearFilters() {
-    // Reset all checkboxes to checked
-    document.querySelectorAll('input[type="checkbox"]').forEach(input => {
-      const inputElement = input as HTMLInputElement;
-      if (inputElement.name === 'region') {
-        // For regions, only check Germany by default
-        inputElement.checked = inputElement.value === 'Germany' || inputElement.value === 'germany';
-      } else {
-        inputElement.checked = true;
-      }
+    document.querySelectorAll<HTMLInputElement>('input[type="checkbox"]').forEach((el) => {
+      el.checked = true;
     });
-    
-    // Reset range inputs to their original values
-    const vcpuMin = document.querySelector('input[name="minVCPU"]') as HTMLInputElement;
-    const vcpuMax = document.querySelector('input[name="maxVCPU"]') as HTMLInputElement;
-    const memMin = document.querySelector('input[name="minMemory"]') as HTMLInputElement;
-    const memMax = document.querySelector('input[name="maxMemory"]') as HTMLInputElement;
-    const priceMax = document.querySelector('input[name="maxPrice"]') as HTMLInputElement;
-    
-    if (vcpuMin) vcpuMin.value = vcpuMin.min;
-    if (vcpuMax) vcpuMax.value = vcpuMax.max;
-    if (memMin) memMin.value = memMin.min;
-    if (memMax) memMax.value = memMax.max;
-    if (priceMax) priceMax.value = priceMax.max;
-    
-    // Apply the cleared filters
+    const odRadio = document.querySelector<HTMLInputElement>(
+      'input[name="commitmentTerm"][value="on-demand"]'
+    );
+    if (odRadio) odRadio.checked = true;
+    const anyArch = document.querySelector<HTMLInputElement>(
+      'input[name="architecture"][value="any"]'
+    );
+    if (anyArch) anyArch.checked = true;
+    const maxPriceInput = document.getElementById('max-price') as HTMLInputElement;
+    if (maxPriceInput) maxPriceInput.value = '';
+    const minVCPU = document.getElementById('min-vcpu') as HTMLInputElement;
+    if (minVCPU) minVCPU.value = '1';
+    const maxVCPU = document.getElementById('max-vcpu') as HTMLInputElement;
+    if (maxVCPU) maxVCPU.value = '1024';
+    const minMem = document.getElementById('min-memory') as HTMLInputElement;
+    if (minMem) minMem.value = '0.5';
+    const maxMem = document.getElementById('max-memory') as HTMLInputElement;
+    if (maxMem) maxMem.value = '65536';
+
     applyFilters();
   }
 </script>
