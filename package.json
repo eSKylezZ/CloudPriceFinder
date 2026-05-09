@@ -1,7 +1,7 @@
 {
   "name": "cloudpricefinder",
   "version": "3.0.0",
-  "description": "CloudPriceFinder — free, open-source cloud instance cost comparison for AWS, Azure, GCP, and OCI",
+  "description": "CloudPriceFinder \u00e2\u20ac\u201d free, open-source cloud instance cost comparison for AWS, Azure, GCP, and OCI",
   "type": "module",
   "scripts": {
     "dev": "astro dev",
@@ -24,20 +24,15 @@
     "astro": "^6.3.1",
     "tailwindcss": "^4.3.0"
   },
-  "optionalDependencies": {
-    "@rollup/rollup-win32-x64-msvc": "^4.60.3",
-    "@tailwindcss/oxide-win32-x64-msvc": "^4.3.0",
-    "lightningcss-win32-x64-msvc": "^1.32.0"
-  },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.59.2",
     "@typescript-eslint/parser": "^8.59.2",
-    "eslint": "^9.39.4",
+    "eslint": "^10.3.0",
     "eslint-plugin-astro": "^1.7.0",
     "prettier": "^3.8.3",
-    "prettier-plugin-astro": "^0.14.0",
-    "typescript": "^5.9.3",
-    "vitest": "^3.2.4"
+    "prettier-plugin-astro": "^0.14.1",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.5"
   },
   "keywords": [
     "cloud",
