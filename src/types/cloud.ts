@@ -146,7 +146,7 @@ export interface CloudInstance {
   };
   
   // Provider-specific data
-  raw?: Record<string, any>;
+  raw?: Record<string, unknown>;
 }
 
 export type CloudProvider = 

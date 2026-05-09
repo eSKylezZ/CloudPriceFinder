@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Cloud shape -->
+  <path d="M24 14C24 14 23.9 14 23.8 14C23.9 13.7 24 13.4 24 13C24 11.3 22.7 10 21 10C20.4 10 19.8 10.2 19.3 10.5C18.5 9 16.9 8 15 8C12.2 8 10 10.2 10 13C10 13.1 10 13.2 10 13.3C8.8 13.6 8 14.7 8 16C8 17.7 9.3 19 11 19H24C25.7 19 27 17.7 27 16C27 14.9 26.1 14 24 14Z" fill="#2563eb"/>
+  <!-- Bar chart / dollar sign -->
+  <rect x="13" y="21" width="3" height="5" rx="1" fill="#1d4ed8"/>
+  <rect x="17" y="23" width="3" height="3" rx="1" fill="#3b82f6"/>
+  <rect x="9" y="22" width="3" height="4" rx="1" fill="#60a5fa"/>
+</svg>

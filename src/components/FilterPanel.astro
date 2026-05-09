@@ -3,7 +3,7 @@
 // No build-time data dependency — all filter population happens in the <script>.
 ---
 
-<div class="bg-white rounded-lg shadow-sm border p-6">
+<div class="bg-white rounded-lg shadow-xs border border-gray-200 p-6">
   <h2 class="text-lg font-semibold text-gray-900 mb-4">Filters</h2>
 
   <div class="space-y-6" id="filter-panel">
@@ -14,7 +14,7 @@
       <div class="space-y-2" id="provider-checkboxes">
         <!-- skeleton placeholders -->
         {[1,2,3,4].map(() => (
-          <div class="h-5 bg-gray-100 rounded animate-pulse w-28"></div>
+          <div class="h-5 bg-gray-100 rounded-sm animate-pulse w-28"></div>
         ))}
       </div>
     </div>
@@ -55,11 +55,11 @@
       <div class="flex items-center space-x-2">
         <input type="number" name="minVCPU" id="min-vcpu" placeholder="Min"
           min="1" max="1024" value="1"
-          class="w-20 rounded border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500" />
+          class="w-20 rounded-sm border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500" />
         <span class="text-gray-500">to</span>
         <input type="number" name="maxVCPU" id="max-vcpu" placeholder="Max"
           min="1" max="1024" value="1024"
-          class="w-20 rounded border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500" />
+          class="w-20 rounded-sm border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500" />
       </div>
     </div>
 
@@ -69,11 +69,11 @@
       <div class="flex items-center space-x-2">
         <input type="number" name="minMemory" id="min-memory" placeholder="Min"
           min="0.5" max="65536" value="0.5"
-          class="w-20 rounded border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500" />
+          class="w-20 rounded-sm border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500" />
         <span class="text-gray-500">to</span>
         <input type="number" name="maxMemory" id="max-memory" placeholder="Max"
           min="0.5" max="65536" value="65536"
-          class="w-20 rounded border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500" />
+          class="w-20 rounded-sm border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500" />
       </div>
     </div>
 
@@ -82,14 +82,14 @@
       <label class="block text-sm font-medium text-gray-700 mb-2">Max Price (USD/hour)</label>
       <input type="number" name="maxPrice" id="max-price" placeholder="e.g. 2.00"
         min="0" step="0.01"
-        class="w-full rounded border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500" />
+        class="w-full rounded-sm border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500" />
     </div>
 
     <!-- GPU filter -->
     <div>
       <label class="flex items-center">
         <input type="checkbox" id="gpu-only"
-          class="rounded border-gray-300 text-primary-600 focus:ring-primary-500" />
+          class="rounded-sm border-gray-300 text-primary-600 focus:ring-primary-500" />
         <span class="ml-2 text-sm text-gray-700">GPU instances only</span>
       </label>
     </div>
@@ -119,11 +119,11 @@
     <!-- Action Buttons -->
     <div class="space-y-2 pt-4 border-t border-gray-200">
       <button type="button" id="apply-filters"
-        class="w-full bg-primary-600 text-white py-2 px-4 rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 text-sm">
+        class="w-full bg-primary-600 text-white py-2 px-4 rounded-md hover:bg-primary-700 focus:outline-hidden focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 text-sm">
         Apply Filters
       </button>
       <button type="button" id="clear-filters"
-        class="w-full bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 text-sm">
+        class="w-full bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 focus:outline-hidden focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 text-sm">
         Clear All
       </button>
     </div>
@@ -153,7 +153,7 @@
       label.className = 'flex items-center';
       label.innerHTML = `
         <input type="checkbox" name="provider" value="${provider.id}" checked
-          class="rounded border-gray-300 text-primary-600 focus:ring-primary-500" />
+          class="rounded-sm border-gray-300 text-primary-600 focus:ring-primary-500" />
         <span class="ml-2 text-sm text-gray-600 uppercase">${provider.id}</span>
         <span class="ml-1 text-xs text-gray-400">(${provider.instanceCount.toLocaleString()})</span>
       `;
@@ -192,7 +192,7 @@
         label.className = 'flex items-center ml-2';
         label.innerHTML = `
           <input type="checkbox" name="family" value="${provider.id}:${family.id}" checked
-            class="rounded border-gray-300 text-primary-600 focus:ring-primary-500" />
+            class="rounded-sm border-gray-300 text-primary-600 focus:ring-primary-500" />
           <span class="ml-2 text-sm text-gray-600">${family.id}</span>
           <span class="ml-1 text-xs text-gray-400">(${family.count})</span>
         `;

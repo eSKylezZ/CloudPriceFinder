@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#f9fafb"/>
+  <!-- Blue accent band -->
+  <rect width="1200" height="8" fill="#2563eb"/>
+  <!-- Logo / icon placeholder -->
+  <circle cx="140" cy="315" r="72" fill="#eff6ff"/>
+  <!-- Cloud icon inside circle -->
+  <path d="M170 305C170 305 169.8 305 169.6 305C169.8 304.3 170 303.5 170 302.7C170 299.2 167.2 296.5 163.8 296.5C162.6 296.5 161.5 296.9 160.5 297.5C158.9 294.5 155.8 292.5 152.2 292.5C146.7 292.5 142.2 297 142.2 302.5C142.2 302.7 142.2 302.9 142.2 303.1C139.8 303.7 138.2 305.9 138.2 308.4C138.2 311.4 140.7 313.8 143.7 313.8H170C173 313.8 175.5 311.3 175.5 308.3C175.5 306.3 173.2 305 170 305Z" fill="#2563eb"/>
+  <!-- Bar chart bars in circle -->
+  <rect x="148" y="320" width="7" height="14" rx="2" fill="#1d4ed8"/>
+  <rect x="158" y="325" width="7" height="9" rx="2" fill="#3b82f6"/>
+  <rect x="138" y="322" width="7" height="12" rx="2" fill="#60a5fa"/>
+
+  <!-- Title -->
+  <text x="240" y="280" font-family="system-ui, -apple-system, sans-serif" font-size="64" font-weight="700" fill="#111827">CloudPriceFinder</text>
+  <!-- Subtitle -->
+  <text x="240" y="345" font-family="system-ui, -apple-system, sans-serif" font-size="32" fill="#6b7280">Compare cloud instance costs across</text>
+  <text x="240" y="390" font-family="system-ui, -apple-system, sans-serif" font-size="32" fill="#6b7280">AWS, Azure, GCP, and OCI</text>
+  <!-- Tags -->
+  <rect x="240" y="425" width="180" height="44" rx="22" fill="#eff6ff"/>
+  <text x="330" y="452" font-family="system-ui, -apple-system, sans-serif" font-size="20" fill="#2563eb" text-anchor="middle" font-weight="600">Free &amp; Open Source</text>
+  <rect x="440" y="425" width="140" height="44" rx="22" fill="#f0fdf4"/>
+  <text x="510" y="452" font-family="system-ui, -apple-system, sans-serif" font-size="20" fill="#16a34a" text-anchor="middle" font-weight="600">No Ads</text>
+  <rect x="600" y="425" width="240" height="44" rx="22" fill="#fefce8"/>
+  <text x="720" y="452" font-family="system-ui, -apple-system, sans-serif" font-size="20" fill="#ca8a04" text-anchor="middle" font-weight="600">Weekly Pricing Updates</text>
+  <!-- URL -->
+  <text x="240" y="550" font-family="system-ui, -apple-system, sans-serif" font-size="28" fill="#2563eb" font-weight="600">cloudpricefinder.com</text>
+</svg>
