@@ -60,7 +60,9 @@ coverage/
 # Local configuration
 .claude/settings.local.json
 config.local.json
+.claude/worktrees/*
 .gitignore.local
+
 
 # Backup files
 *.bak
