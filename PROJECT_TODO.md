@@ -185,18 +185,18 @@
 
 ## Stage 6 — Build-Time Aggregator
 
-- [ ] **Goal:** New `scripts/aggregate.py` consumes `data/providers/*.raw.json` and produces the three-tier output structure: `data/index.json` + `data/families/*` + `data/instances/*`.
+- [x] **Goal:** New `scripts/aggregate.py` consumes `data/providers/*.raw.json` and produces the three-tier output structure: `data/index.json` + `data/families/*` + `data/instances/*`.
 
 **Tasks**
-- [ ] Create `scripts/aggregate.py` with this contract:
+- [x] Create `scripts/aggregate.py` with this contract:
   - Input: `data/providers/{aws,azure,gcp,oci}.raw.json`
   - Output:
     - `data/index.json` — provider list, family list per provider, region list per provider, vCPU/RAM range buckets, commitment terms supported, lastUpdated, instance counts. Target < 100 KB.
     - `data/families/{provider}/{family-id}.json` — all instances in that family, all regions, all commitments. Target < 250 KB each.
     - `data/instances/{provider}/{instance-id}.json` — single-instance detail file with full per-region pricing breakdown. Target < 20 KB each.
-- [ ] Compute normalized comparison metrics at this stage and store in index: per family, the median `$/vCPU/hr` and `$/GiB-RAM/hr` for on-demand in `us-east-1`-equivalent region.
-- [ ] Generate a `data/equivalents.json` lookup of cross-provider family equivalents (precomputed, naive matching by closest vCPU+RAM at lowest hourly). This feeds Stage 8.
-- [ ] Wire `aggregate.py` into [scripts/orchestrator.py](scripts/orchestrator.py) so `python scripts/orchestrator.py` runs fetch → aggregate end-to-end.
+- [x] Compute normalized comparison metrics at this stage and store in index: per family, the median `$/vCPU/hr` and `$/GiB-RAM/hr` for on-demand in `us-east-1`-equivalent region.
+- [x] Generate a `data/equivalents.json` lookup of cross-provider family equivalents (precomputed, naive matching by closest vCPU+RAM at lowest hourly). This feeds Stage 8.
+- [x] Wire `aggregate.py` into [scripts/orchestrator.py](scripts/orchestrator.py) so `python scripts/orchestrator.py` runs fetch -> aggregate end-to-end.
 
 **Verification**
 - `du -sh data/index.json` < 100K
@@ -205,8 +205,8 @@
 - `python -c "import json; print(len(json.load(open('data/index.json'))['providers']))"` prints `4`
 
 **Definition of Done**
-- [ ] Aggregator is idempotent (running twice produces byte-identical output for unchanged input)
-- [ ] PR: `v3/stage-6-aggregator`
+- [x] Aggregator is idempotent (running twice produces byte-identical output for unchanged input)
+- [x] PR: `v3/stage-6-aggregator`
 
 ---
 
@@ -333,12 +333,15 @@ Astro only copies files from `public/` to `dist/`. Either (a) move `data/` to `p
 - [ ] Decide branding (`CloudPriceFinder` vs new name) and apply consistently across `package.json`, `<title>`, README, og-image.
 - [ ] Rewrite `README.md` for the new architecture (delete v2 implementation notes, add v3 quickstart).
 - [ ] Delete or archive `CLAUDE.md` v2 sections that no longer apply.
+- [ ] Clean up the repo, remove any files no longer used, archive for a /local/ folder thats will need to be gitignored. Check everything the repo should be super clean.
 - [ ] Add a prominent **pricing-accuracy disclaimer** on the main page footer: "Pricing is fetched weekly from public provider APIs. Always verify with the provider before purchasing. We are not affiliated with AWS, Azure, GCP, or OCI."
 - [ ] Add **data-source attribution** on the About page: link to each provider's pricing API doc page.
 - [ ] Add a `lastUpdated` badge on the main page reading from `index.json`.
 - [ ] Add a favicon and basic OG image.
 - [ ] Sitemap (`@astrojs/sitemap` is already installed) — verify it lists `/`, `/about`, `/compare`.
 - [ ] Lighthouse run: ≥ 90 perf, ≥ 95 a11y, ≥ 100 SEO, ≥ 100 best-practices.
+- [ ] Check GitHub for security issues on repo, fix issues. Ask user to input them if they cannot be fetched.
+- [ ] Update packages (python and astro) to the latest version and test they do not break functionality.
 
 **Definition of Done**
 - [ ] One person who has never seen the project lands on the URL and can complete a comparison in < 60 seconds

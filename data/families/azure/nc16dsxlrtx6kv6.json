@@ -1,0 +1,1 @@
+[{"provider": "azure", "type": "cloud-server", "instanceType": "NC16dsxlRTX6Kv6", "vCPU": 16, "memoryGiB": 64.0, "priceUSD_hourly": 0.18, "priceUSD_monthly": 131.4792, "architecture": "x86_64", "family": "nc16dsxlrtx6kv6", "commitments": [], "regions": ["United States"], "source": "Azure Retail Prices API", "lastUpdated": "2026-05-09T10:48:41.058281", "marketSegment": "global"}]
