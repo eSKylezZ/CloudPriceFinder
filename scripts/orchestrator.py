@@ -145,9 +145,19 @@ class CloudDataOrchestrator:
             raise
     
     def _fetch_aws(self) -> List[Dict[str, Any]]:
-        """Fetch AWS data - placeholder for now."""
-        logger.warning("AWS fetcher not implemented yet - returning empty data")
-        return []
+        """Fetch AWS EC2 on-demand + reserved + savings-plan pricing."""
+        try:
+            import sys
+            _scripts_dir = os.path.dirname(os.path.abspath(__file__))
+            _repo_root = os.path.dirname(_scripts_dir)
+            if _repo_root not in sys.path:
+                sys.path.insert(0, _repo_root)
+            from scripts.fetch_aws import fetch_aws_data
+            logger.info("Fetching AWS EC2 pricing data (all standard regions)…")
+            return fetch_aws_data()
+        except Exception as e:
+            logger.error(f"AWS fetch failed: {e}")
+            raise
     
     def _fetch_azure(self) -> List[Dict[str, Any]]:
         """Fetch Azure data - placeholder for now."""

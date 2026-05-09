@@ -77,7 +77,7 @@
 
 ## Stage 2 — AWS Fetcher Rewrite ⚠️ priority
 
-- [ ] **Goal:** Replace the hardcoded "representative" data ([fetch_aws.py:159](scripts/fetch_aws.py#L159)) with real AWS Pricing API calls.
+- [x] **Goal:** Replace the hardcoded "representative" data ([fetch_aws.py:159](scripts/fetch_aws.py#L159)) with real AWS Pricing API calls.
 
 **Background**
 - The AWS Pricing API exposes per-region per-service JSON files. Index: `https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/index.json`.
@@ -86,8 +86,8 @@
 - Savings plans are at `currentSavingsPlanIndexUrl` from the top-level index.
 
 **Tasks**
-- [ ] Add `ijson` to `requirements.txt`.
-- [ ] Rewrite `scripts/fetch_aws.py` from scratch. Skeleton:
+- [x] Add `ijson` to `requirements.txt`.
+- [x] Rewrite `scripts/fetch_aws.py` from scratch. Skeleton:
   1. Fetch top-level offer index
   2. Fetch EC2 `region_index.json`
   3. For each region in the verified region list (keep the existing `self.regions['standard']` map), stream the per-region EC2 JSON
@@ -95,9 +95,9 @@
   5. Capture **on-demand** prices into `priceUSD_hourly` and **reserved** prices (1yr/3yr × no-/partial-/all-upfront) into `commitments[]`
   6. Fetch savings-plan index, then per-region savings-plan JSON; merge as `product: 'savings-plan'` commitments
   7. Output `data/providers/aws.raw.json`
-- [ ] Skip Spot, dedicated host, and capacity-block SKUs (out of scope for v1).
-- [ ] Skip China/GovCloud regions for v1 (their pricing API is separate and weird) — note in code, mark for v3.1.
-- [ ] Add a `--regions` CLI flag for testing (e.g. `--regions us-east-1`).
+- [x] Skip Spot, dedicated host, and capacity-block SKUs (out of scope for v1).
+- [x] Skip China/GovCloud regions for v1 (their pricing API is separate and weird) — note in code, mark for v3.1.
+- [x] Add a `--regions` CLI flag for testing (e.g. `--regions us-east-1`).
 
 **Verification**
 - `python scripts/fetch_aws.py --regions us-east-1` produces a JSON with > 200 instance types, each with non-empty `commitments[]` containing both `reserved` and `savings-plan` products
@@ -105,9 +105,9 @@
 - `python scripts/utils/data_validator.py data/providers/aws.raw.json` passes
 
 **Definition of Done**
-- [ ] Live API calls only — zero hardcoded prices
-- [ ] Memory usage stays under 1 GB during full-region run (verify with `/usr/bin/time -v` on Linux CI)
-- [ ] PR: `v3/stage-2-aws-fetcher`
+- [x] Live API calls only — zero hardcoded prices
+- [x] Memory usage stays under 1 GB during full-region run (verify with `/usr/bin/time -v` on Linux CI)
+- [x] PR: `v3/stage-2-aws-fetcher`
 
 ---
 
