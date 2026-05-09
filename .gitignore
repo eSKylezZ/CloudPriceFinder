@@ -65,6 +65,9 @@ config.local.json
 .gitignore.local
 
 
+# Local archive folder (developer-only files, not shipped)
+local/
+
 # Backup files
 *.bak
 *.backup

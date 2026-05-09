@@ -146,7 +146,8 @@ export interface CloudInstance {
   };
   
   // Provider-specific data
-  raw?: Record<string, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  raw?: Record<string, unknown>;
 }
 
 export type CloudProvider = 

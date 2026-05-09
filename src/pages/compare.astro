@@ -13,12 +13,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <h1 class="text-3xl font-bold text-gray-900 mb-2">Side-by-Side Comparison</h1>
       <p class="text-gray-600">
         Compare up to 4 instances across providers. Use the search boxes to add instances, or
-        follow a <span class="font-mono text-sm bg-gray-100 px-1 rounded">?items=aws:m7i.xlarge,azure:Standard_D4s_v5</span> deep-link.
+        follow a <span class="font-mono text-sm bg-gray-100 px-1 rounded-sm">?items=aws:m7i.xlarge,azure:Standard_D4s_v5</span> deep-link.
       </p>
     </div>
 
     <!-- Instance picker -->
-    <div class="bg-white rounded-lg shadow-sm border p-4 mb-6">
+    <div class="bg-white rounded-lg shadow-xs border border-gray-200 p-4 mb-6">
       <div class="flex items-center justify-between mb-3">
         <h2 class="text-sm font-semibold text-gray-700 uppercase tracking-wider">Instances to compare (max 4)</h2>
         <a href="/" class="text-sm text-primary-600 hover:underline">Back to table</a>
@@ -49,7 +49,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
       </svg>
       <p class="text-gray-500 font-medium">Search for instances above to begin comparing</p>
-      <p class="text-gray-400 text-sm mt-1">Or use a deep link like <span class="font-mono bg-white border border-gray-200 px-1 rounded text-xs">/compare?items=aws:m7i.xlarge,azure:Standard_D4s_v5</span></p>
+      <p class="text-gray-400 text-sm mt-1">Or use a deep link like <span class="font-mono bg-white border border-gray-200 px-1 rounded-sm text-xs">/compare?items=aws:m7i.xlarge,azure:Standard_D4s_v5</span></p>
     </div>
 
     <!-- Comparison table -->
@@ -144,12 +144,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           oci: 'bg-purple-100 text-purple-800',
         };
         div.innerHTML = `
-          <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${providerColor[item.provider] ?? 'bg-gray-100 text-gray-700'}">
+          <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-xs font-medium ${providerColor[item.provider] ?? 'bg-gray-100 text-gray-700'}">
             ${item.provider.toUpperCase()}
           </span>
           <span class="text-sm font-mono text-gray-800">${item.instanceType}</span>
           ${item.error ? `<span class="text-xs text-red-600" title="${item.error}">!</span>` : ''}
-          <button class="remove-item-btn text-gray-400 hover:text-red-500 focus:outline-none"
+          <button class="remove-item-btn text-gray-400 hover:text-red-500 focus:outline-hidden"
             data-idx="${idx}" title="Remove">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -171,7 +171,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
               autocomplete="off" spellcheck="false" />
           </div>
           <button id="add-instance-btn"
-            class="px-3 py-2 bg-primary-600 text-white text-sm rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500">
+            class="px-3 py-2 bg-primary-600 text-white text-sm rounded-lg hover:bg-primary-700 focus:outline-hidden focus:ring-2 focus:ring-primary-500">
             Add
           </button>
         `;
@@ -316,8 +316,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <td colspan="${loaded.length}" class="px-4 py-2 bg-white border-b border-gray-100">
           <div class="flex items-center space-x-1 bg-gray-100 rounded-lg p-1 w-fit" role="group">
             <button class="compare-term-btn px-3 py-1 text-sm rounded-md font-medium transition-colors compare-term-active" data-term="on-demand">On-Demand</button>
-            <button class="compare-term-btn px-3 py-1 text-sm rounded-md font-medium transition-colors text-gray-600 hover:bg-white hover:shadow-sm" data-term="1yr">1-Year</button>
-            <button class="compare-term-btn px-3 py-1 text-sm rounded-md font-medium transition-colors text-gray-600 hover:bg-white hover:shadow-sm" data-term="3yr">3-Year</button>
+            <button class="compare-term-btn px-3 py-1 text-sm rounded-md font-medium transition-colors text-gray-600 hover:bg-white hover:shadow-xs" data-term="1yr">1-Year</button>
+            <button class="compare-term-btn px-3 py-1 text-sm rounded-md font-medium transition-colors text-gray-600 hover:bg-white hover:shadow-xs" data-term="3yr">3-Year</button>
           </div>
         </td>
       `;

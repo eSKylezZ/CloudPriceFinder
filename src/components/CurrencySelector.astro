@@ -9,7 +9,7 @@
     </label>
     <select 
       id="currency-selector" 
-      class="currency-selector rounded-md border border-gray-300 bg-white px-3 py-1 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+      class="currency-selector rounded-md border border-gray-300 bg-white px-3 py-1 text-sm focus:border-primary-500 focus:outline-hidden focus:ring-1 focus:ring-primary-500"
     >
       <option value="USD" selected>USD ($)</option>
       <option value="EUR">EUR (€)</option>
@@ -178,6 +178,6 @@
   }
   
   .currency-selector:focus {
-    @apply ring-2 ring-primary-500 ring-opacity-50;
+    @apply ring-2 ring-primary-500/50;
   }
 </style>

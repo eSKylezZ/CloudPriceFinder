@@ -1,7 +1,10 @@
+const tsPlugin = require('@typescript-eslint/eslint-plugin');
+const tsParser = require('@typescript-eslint/parser');
+
 module.exports = {
   extends: [
     'eslint:recommended',
-    '@typescript-eslint/recommended',
+    'plugin:@typescript-eslint/recommended',
     'plugin:astro/recommended',
   ],
   parser: '@typescript-eslint/parser',
@@ -10,6 +13,7 @@ module.exports = {
     sourceType: 'module',
     ecmaVersion: 'latest',
   },
+  plugins: ['@typescript-eslint'],
   overrides: [
     {
       files: ['*.astro'],

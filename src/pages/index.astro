@@ -4,7 +4,10 @@ import ComparisonTable from '../components/ComparisonTable.astro';
 import FilterPanel from '../components/FilterPanel.astro';
 ---
 
-<BaseLayout title="CloudPriceFinder - Multi-Cloud Instance Comparison">
+<BaseLayout
+  title="CloudPriceFinder — Compare Cloud Instance Costs"
+  description="Compare AWS, Azure, GCP, and OCI cloud compute instance costs side-by-side. On-demand and 1yr/3yr reserved pricing. Free, no ads, updated weekly."
+>
   <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-8 flex-1">
     <!-- Hero Section -->
     <div class="text-center mb-8">
@@ -20,18 +23,18 @@ import FilterPanel from '../components/FilterPanel.astro';
     <!-- Data Summary (populated client-side after index.json loads) -->
     <div id="data-summary-section" class="mb-8" aria-live="polite">
       <!-- Loading skeleton -->
-      <div id="summary-skeleton" class="bg-white rounded-lg shadow-sm border p-6 animate-pulse">
+      <div id="summary-skeleton" class="bg-white rounded-lg shadow-xs border border-gray-200 p-6 animate-pulse">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[1,2,3,4].map(() => (
             <div class="text-center space-y-2">
-              <div class="h-8 bg-gray-200 rounded w-20 mx-auto"></div>
-              <div class="h-4 bg-gray-100 rounded w-24 mx-auto"></div>
+              <div class="h-8 bg-gray-200 rounded-sm w-20 mx-auto"></div>
+              <div class="h-4 bg-gray-100 rounded-sm w-24 mx-auto"></div>
             </div>
           ))}
         </div>
       </div>
       <!-- Actual summary (rendered by JS) -->
-      <div id="data-summary" class="hidden bg-white rounded-lg shadow-sm border p-6">
+      <div id="data-summary" class="hidden bg-white rounded-lg shadow-xs border border-gray-200 p-6">
         <h2 class="text-lg font-semibold text-gray-900 mb-4">Data Overview</h2>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div class="text-center">

@@ -1,7 +1,5 @@
-requests>=2.31.0
-beautifulsoup4>=4.12.0
-python-dotenv>=1.0.0
-hcloud>=1.25.0
-hetzner>=0.8.3
-ijson>=3.2.3
-google-auth>=2.29.0
+requests>=2.32.0
+beautifulsoup4>=4.13.0
+python-dotenv>=1.1.0
+ijson>=3.3.0
+google-auth>=2.40.0

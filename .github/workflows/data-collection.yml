@@ -18,6 +18,7 @@ on:
       providers:
         description: 'Providers to fetch (space-separated, e.g. "aws gcp oci")'
         required: false
+        type: string
         default: 'aws azure gcp oci'
 
 permissions:
@@ -27,6 +28,9 @@ permissions:
 jobs:
   collect-and-commit:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write    # push updated data/ back to main
+      id-token: write    # GCP Workload Identity Federation (OIDC)
 
     steps:
       - name: Checkout repository
@@ -67,13 +71,6 @@ jobs:
       - name: Run data collection
         # GCP authentication is handled by the WIF step above (ADC).
         # fetch_gcp.py will use ADC automatically when GCP_API_KEY is absent.
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         run: |
           PROVIDERS="${{ github.event.inputs.providers || 'aws azure gcp oci' }}"
           echo "Running data collection for providers: $PROVIDERS"
