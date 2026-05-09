@@ -165,9 +165,23 @@ class CloudDataOrchestrator:
         return []
     
     def _fetch_gcp(self) -> List[Dict[str, Any]]:
-        """Fetch GCP data - placeholder for now."""
-        logger.warning("GCP fetcher not implemented yet - returning empty data")
-        return []
+        """Fetch GCP Compute Engine pricing via Cloud Billing Catalog API."""
+        try:
+            import os
+            _scripts_dir = os.path.dirname(os.path.abspath(__file__))
+            _repo_root = os.path.dirname(_scripts_dir)
+            if _repo_root not in sys.path:
+                sys.path.insert(0, _repo_root)
+            from scripts.fetch_gcp import fetch_gcp_data
+            api_key = os.environ.get("GCP_API_KEY", "").strip()
+            if not api_key:
+                logger.error("GCP_API_KEY not set — skipping GCP fetch")
+                raise RuntimeError("GCP_API_KEY environment variable is required")
+            logger.info("Fetching GCP Compute Engine pricing data (all standard regions)…")
+            return fetch_gcp_data(api_key=api_key)
+        except Exception as e:
+            logger.error(f"GCP fetch failed: {e}")
+            raise
     
     def _fetch_oci(self) -> List[Dict[str, Any]]:
         """Fetch OCI data using OCI fetcher."""
