@@ -45,10 +45,10 @@
 
 ## Stage 1 — Schema & Type Extensions
 
-- [ ] **Goal:** Extend the data model to support reserved/committed pricing before any fetcher writes the new shape.
+- [x] **Goal:** Extend the data model to support reserved/committed pricing before any fetcher writes the new shape.
 
 **Tasks**
-- [ ] In [src/types/cloud.ts](src/types/cloud.ts), add the `CommitmentPrice` interface and extend `CloudInstance`:
+- [x] In [src/types/cloud.ts](src/types/cloud.ts), add the `CommitmentPrice` interface and extend `CloudInstance`:
   ```ts
   export interface CommitmentPrice {
     term: 'on-demand' | '1yr' | '3yr';
@@ -60,18 +60,18 @@
   }
   ```
   And on `CloudInstance`: add `commitments: CommitmentPrice[]`, `gpu?: { count: number; type: string; memoryGiB: number }`, `architecture: 'x86_64' | 'arm64'`, `family: string`, `generation?: string`.
-- [ ] Mirror the schema in [scripts/utils/data_validator.py](scripts/utils/data_validator.py): add `validate_commitments()` checking `term ∈ {on-demand,1yr,3yr}`, `payment` enum, non-negative prices, monotonic savings %.
-- [ ] Update [scripts/utils/data_normalizer.py](scripts/utils/data_normalizer.py) with a `normalize_commitments(raw_commitments: list, on_demand_hourly: float) -> list` helper that computes `effectiveHourlyUSD` and `savingsVsOnDemandPct`.
-- [ ] Add a single-source-of-truth JSON Schema at `scripts/schema/instance.schema.json` that both Python and TS consumers can reference for tests.
+- [x] Mirror the schema in [scripts/utils/data_validator.py](scripts/utils/data_validator.py): add `validate_commitments()` checking `term ∈ {on-demand,1yr,3yr}`, `payment` enum, non-negative prices, monotonic savings %.
+- [x] Update [scripts/utils/data_normalizer.py](scripts/utils/data_normalizer.py) with a `normalize_commitments(raw_commitments: list, on_demand_hourly: float) -> list` helper that computes `effectiveHourlyUSD` and `savingsVsOnDemandPct`.
+- [x] Add a single-source-of-truth JSON Schema at `scripts/schema/instance.schema.json` that both Python and TS consumers can reference for tests.
 
 **Verification**
 - `npm run type-check` passes
 - `python -m unittest scripts/tests/test_data_validator.py` (write minimal test) passes with valid + invalid commitment fixtures
 
 **Definition of Done**
-- [ ] Type-check green
-- [ ] Unit test added for validator + normalizer commitment helpers
-- [ ] PR: `v3/stage-1-schema`
+- [x] Type-check green
+- [x] Unit test added for validator + normalizer commitment helpers
+- [x] PR: `v3/stage-1-schema`
 
 ---
 
