@@ -1,0 +1,5 @@
+# Cloudflare Pages _headers
+# Placeholder — Stage 9 fills in the real caching rules
+# Format:
+# /path
+#   Header-Name: value
