@@ -98,8 +98,9 @@
             Regions</th>
           <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 z-10">
             GPU</th>
-          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 z-10">
-            Compare</th>
+          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 z-10"
+            title="Select up to 4 instances to compare side-by-side">
+            Select</th>
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200" id="table-body">
@@ -127,6 +128,25 @@
       <span class="text-sm text-gray-500" id="page-info">Page 1</span>
       <button id="next-page"
         class="px-3 py-1 text-sm border border-gray-300 rounded-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
+    </div>
+  </div>
+</div>
+
+<!-- Sticky compare bar: visible when ≥1 instance is selected -->
+<div id="compare-bar" class="hidden fixed bottom-0 inset-x-0 bg-white border-t border-gray-200 shadow-2xl z-50" role="region" aria-label="Selected instances for comparison">
+  <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
+    <div class="flex items-center gap-3 min-w-0 flex-1">
+      <span class="text-sm font-semibold text-gray-800 whitespace-nowrap" id="compare-bar-count"></span>
+      <div class="flex flex-wrap gap-1.5 min-w-0" id="compare-bar-chips"></div>
+    </div>
+    <div class="flex items-center gap-3 shrink-0">
+      <button id="compare-bar-clear" class="text-sm text-gray-500 hover:text-gray-700 whitespace-nowrap focus:outline-none">
+        Clear
+      </button>
+      <a id="compare-bar-link" href="/compare"
+        class="inline-flex items-center gap-1.5 px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 whitespace-nowrap">
+        Compare
+      </a>
     </div>
   </div>
 </div>
@@ -166,6 +186,10 @@
   let currentSortDir: 'asc' | 'desc' = 'asc';
   let searchTerm = '';
   let activeCommitmentTerm: 'on-demand' | '1yr' | '3yr' = 'on-demand';
+
+  // Multi-select compare state
+  const MAX_COMPARE = 4;
+  const selectedInstances = new Map<string, V3Instance>(); // key: "provider:instanceType"
 
   // ---------------------------------------------------------------------------
   // DOM refs
@@ -253,6 +277,7 @@
       maxMemory: number;
       maxPrice: number;
       gpuOnly: boolean;
+      regions: string[];
     };
 
     // Sync commitment term from filter panel
@@ -286,6 +311,9 @@
       if (filters.architecture !== 'any' && inst.architecture !== filters.architecture)
         return false;
       if (filters.gpuOnly && !inst.gpu) return false;
+
+      // Region filter: show instance only if it's available in at least one selected region
+      if (filters.regions?.length && !filters.regions.some((r) => inst.regions?.includes(r))) return false;
 
       // Price filter uses effective price for the selected commitment term
       const effectivePrice = getEffectivePrice(inst, filters.commitmentTerm);
@@ -353,11 +381,6 @@
       oci: 'bg-purple-100 text-purple-800',
     };
     return map[provider] ?? 'bg-gray-100 text-gray-800';
-  }
-
-  // Build compare URL for a given instance
-  function compareHref(inst: V3Instance): string {
-    return `/compare?items=${inst.provider}:${encodeURIComponent(inst.instanceType)}`;
   }
 
   // ---------------------------------------------------------------------------
@@ -496,10 +519,13 @@
         ${regionCount} region${regionCount !== 1 ? 's' : ''}
       </td>
       <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">${gpuText}</td>
-      <td class="px-3 py-3 whitespace-nowrap text-sm">
-        <a href="${compareHref(inst)}"
-          class="text-primary-600 hover:text-primary-800 hover:underline font-medium text-xs"
-          title="Compare ${inst.instanceType}">Compare</a>
+      <td class="px-3 py-3 text-center">
+        <input type="checkbox"
+          class="select-row-check h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 cursor-pointer"
+          data-key="${inst.provider}:${inst.instanceType}"
+          ${selectedInstances.has(`${inst.provider}:${inst.instanceType}`) ? 'checked' : ''}
+          ${!selectedInstances.has(`${inst.provider}:${inst.instanceType}`) && selectedInstances.size >= MAX_COMPARE ? 'disabled' : ''}
+          title="Add to compare (up to ${MAX_COMPARE})" />
       </td>
     `;
 
@@ -568,6 +594,106 @@
     }
   });
 
+  // ---------------------------------------------------------------------------
+  // Multi-select: checkbox change delegation
+  // ---------------------------------------------------------------------------
+  tableBody.addEventListener('change', (e: Event) => {
+    const checkbox = (e.target as Element).closest('.select-row-check') as HTMLInputElement | null;
+    if (!checkbox) return;
+
+    const key = checkbox.dataset.key!;
+    const colonIdx = key.indexOf(':');
+    const provider = key.slice(0, colonIdx);
+    const instanceType = key.slice(colonIdx + 1);
+
+    if (checkbox.checked) {
+      if (selectedInstances.size >= MAX_COMPARE) {
+        checkbox.checked = false;
+        return;
+      }
+      const inst = allInstances.find((i) => i.provider === provider && i.instanceType === instanceType);
+      if (inst) selectedInstances.set(key, inst);
+    } else {
+      selectedInstances.delete(key);
+    }
+
+    updateCompareBar();
+    refreshCheckboxDisabledState();
+  });
+
+  function refreshCheckboxDisabledState() {
+    const isFull = selectedInstances.size >= MAX_COMPARE;
+    tableBody.querySelectorAll<HTMLInputElement>('.select-row-check').forEach((cb) => {
+      if (!cb.checked) cb.disabled = isFull;
+    });
+  }
+
+  function updateCompareBar() {
+    const bar = document.getElementById('compare-bar');
+    const countEl = document.getElementById('compare-bar-count');
+    const chipsEl = document.getElementById('compare-bar-chips');
+    const linkEl = document.getElementById('compare-bar-link') as HTMLAnchorElement | null;
+
+    if (!bar) return;
+
+    if (selectedInstances.size === 0) {
+      bar.classList.add('hidden');
+      return;
+    }
+
+    bar.classList.remove('hidden');
+
+    if (countEl) {
+      const n = selectedInstances.size;
+      countEl.textContent = `${n} instance${n !== 1 ? 's' : ''} selected`;
+    }
+
+    if (chipsEl) {
+      chipsEl.innerHTML = '';
+      selectedInstances.forEach((inst, key) => {
+        const chip = document.createElement('span');
+        chip.className = 'inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs font-medium';
+        chip.innerHTML = `
+          <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${providerColor(inst.provider)}">${inst.provider.toUpperCase()}</span>
+          <span class="font-mono text-gray-800">${inst.instanceType}</span>
+          <button class="remove-chip ml-0.5 text-gray-400 hover:text-red-500 focus:outline-none leading-none" data-key="${key}" title="Remove">×</button>
+        `;
+        chipsEl.appendChild(chip);
+      });
+
+      chipsEl.querySelectorAll<HTMLButtonElement>('.remove-chip').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const k = btn.dataset.key!;
+          selectedInstances.delete(k);
+          const cb = tableBody.querySelector<HTMLInputElement>(`.select-row-check[data-key="${k}"]`);
+          if (cb) { cb.checked = false; cb.disabled = false; }
+          updateCompareBar();
+          refreshCheckboxDisabledState();
+        });
+      });
+    }
+
+    if (linkEl) {
+      const items = [...selectedInstances.entries()].map(([key]) => {
+        const colonIdx = key.indexOf(':');
+        const prov = key.slice(0, colonIdx);
+        const itype = key.slice(colonIdx + 1);
+        return `${prov}:${encodeURIComponent(itype)}`;
+      }).join(',');
+      linkEl.href = `/compare?items=${items}`;
+    }
+  }
+
+  document.getElementById('compare-bar-clear')?.addEventListener('click', () => {
+    selectedInstances.clear();
+    tableBody.querySelectorAll<HTMLInputElement>('.select-row-check').forEach((cb) => {
+      cb.checked = false;
+      cb.disabled = false;
+    });
+    updateCompareBar();
+  });
+
+  // ---------------------------------------------------------------------------
   function renderDetail(container: HTMLElement, detail: V3InstanceFile, equivMap: Record<string, EquivRecord>) {
     const fmt = (n: number | undefined | null, d = 4) => (n != null && !isNaN(n) ? `$${n.toFixed(d)}` : '—');
     const fmtPct = (n: number | undefined | null, d = 1) => (n != null && !isNaN(n) ? `${n.toFixed(d)}%` : '—');
@@ -627,13 +753,23 @@
           </div>
         `;
       });
+
+      // Build a single URL comparing the current instance against all available equivalents
+      const allItems = [
+        `${detail.provider}:${encodeURIComponent(detail.instanceType)}`,
+        ...providerOrder
+          .filter((p) => equivEquivalents[p])
+          .map((p) => `${p}:${encodeURIComponent(equivEquivalents[p]!.family)}`),
+      ].join(',');
+      const allCompareUrl = `/compare?items=${allItems}`;
+
       equivHtml = `
         <div class="mt-4 pt-4 border-t border-gray-200">
           <h4 class="font-semibold text-gray-800 mb-2 text-sm">Closest Equivalents (by family)</h4>
           <div class="flex flex-wrap gap-4">
             ${equivCells.join('')}
           </div>
-          <p class="text-xs text-gray-400 mt-1">Matched by closest vCPU + RAM ratio. <a href="/compare?items=${detail.provider}:${encodeURIComponent(detail.instanceType)}" class="text-primary-600 hover:underline">Compare side-by-side</a></p>
+          <p class="text-xs text-gray-400 mt-1">Matched by closest vCPU + RAM ratio. <a href="${allCompareUrl}" class="text-primary-600 hover:underline">Compare all side-by-side →</a></p>
         </div>
       `;
     }
