@@ -189,20 +189,69 @@ def validate_instance_data(instance: Dict[str, Any]) -> bool:
 def validate_dataset(instances: List[Dict[str, Any]]) -> tuple[List[Dict[str, Any]], List[str]]:
     """
     Validate a complete dataset and return valid instances and errors.
-    
+
     Args:
         instances: List of instance dictionaries
-        
+
     Returns:
         tuple: (valid_instances, error_messages)
     """
     valid_instances = []
     errors = []
-    
+
     for i, instance in enumerate(instances):
         if validate_instance_data(instance):
             valid_instances.append(instance)
         else:
             errors.append(f"Instance {i}: Invalid data for {instance.get('instanceType', 'unknown')}")
-    
+
     return valid_instances, errors
+
+
+# ---------------------------------------------------------------------------
+# CLI entry point
+# ---------------------------------------------------------------------------
+
+if __name__ == "__main__":
+    import sys
+    import json as _json
+
+    if len(sys.argv) < 2:
+        print("Usage: python scripts/utils/data_validator.py <path-to-json>", file=sys.stderr)
+        sys.exit(1)
+
+    path = sys.argv[1]
+    try:
+        with open(path, encoding="utf-8") as f:
+            data = _json.load(f)
+    except Exception as exc:
+        print(f"ERROR: Could not load {path}: {exc}", file=sys.stderr)
+        sys.exit(1)
+
+    if not isinstance(data, list):
+        print("ERROR: Expected a JSON array at top level", file=sys.stderr)
+        sys.exit(1)
+
+    valid_instances, errors = validate_dataset(data)
+
+    # Also validate commitments for each instance
+    commitment_errors: List[str] = []
+    for i, inst in enumerate(data):
+        commitments = inst.get("commitments", [])
+        if commitments:
+            od_hourly = inst.get("priceUSD_hourly", 0.0)
+            ok, errs = validate_commitments(commitments, od_hourly)
+            if not ok:
+                for e in errs:
+                    commitment_errors.append(f"Instance {i} ({inst.get('instanceType', '?')}): {e}")
+
+    all_errors = errors + commitment_errors
+    if all_errors:
+        for e in all_errors[:50]:
+            print(f"ERROR: {e}", file=sys.stderr)
+        if len(all_errors) > 50:
+            print(f"... and {len(all_errors) - 50} more errors", file=sys.stderr)
+        print(f"FAILED: {len(all_errors)} error(s) in {len(data)} instances", file=sys.stderr)
+        sys.exit(1)
+
+    print(f"OK: {len(valid_instances)}/{len(data)} instances validated successfully")
