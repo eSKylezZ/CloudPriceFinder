@@ -11,16 +11,27 @@
       <div class="flex items-center space-x-4">
         <!-- Result count -->
         <div class="text-sm text-gray-500" id="result-count">Loading...</div>
-        <!-- Page size -->
-        <div class="flex items-center space-x-2">
-          <label for="page-size" class="text-sm text-gray-500">Show:</label>
-          <select id="page-size" class="text-sm border-gray-300 rounded-sm">
-            <option value="50">50</option>
-            <option value="100" selected>100</option>
-            <option value="200">200</option>
-            <option value="500">500</option>
-            <option value="all">All</option>
-          </select>
+        <!-- Page size + export -->
+        <div class="flex items-center space-x-3">
+          <div class="flex items-center space-x-2">
+            <label for="page-size" class="text-sm text-gray-500">Show:</label>
+            <select id="page-size" class="text-sm border-gray-300 rounded-sm">
+              <option value="50">50</option>
+              <option value="100" selected>100</option>
+              <option value="200">200</option>
+              <option value="500">500</option>
+              <option value="all">All</option>
+            </select>
+          </div>
+          <button id="export-csv-btn"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-40 disabled:cursor-not-allowed"
+            disabled title="Export visible results as CSV">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Export CSV
+          </button>
         </div>
       </div>
     </div>
@@ -444,6 +455,7 @@
     }
 
     if (resultCount) resultCount.textContent = `${total.toLocaleString()} instances`;
+    if (exportCsvBtn) exportCsvBtn.disabled = total === 0;
 
     const totalPages = effectivePageSize > 0 ? Math.ceil(total / effectivePageSize) : 1;
     if (pageInfo) pageInfo.textContent = `Page ${currentPage} of ${Math.max(1, totalPages)}`;
@@ -890,6 +902,86 @@
     currentPage = 1;
     sortAndRender();
   });
+
+  // ---------------------------------------------------------------------------
+  // Export CSV (Stage F) — client-side only, no dependencies
+  // ---------------------------------------------------------------------------
+  const exportCsvBtn = document.getElementById('export-csv-btn') as HTMLButtonElement | null;
+
+  function exportCSV() {
+    const rows = filteredInstances;
+    if (!rows.length) return;
+
+    const headers = [
+      'Provider', 'Instance Type', 'Family', 'Architecture',
+      'vCPU', 'RAM (GiB)', 'GPU',
+      'On-Demand $/hr',
+      '1yr Best $/hr', '1yr Savings %',
+      '3yr Best $/hr', '3yr Savings %',
+      'Spot $/hr',
+      'Regions',
+    ];
+
+    function bestCommitment(inst: V3Instance, term: '1yr' | '3yr'): { price: string; savings: string } {
+      const matches = (inst.commitments ?? []).filter((c) => c.term === term);
+      if (!matches.length) return { price: '', savings: '' };
+      const best = matches.reduce((a, b) => a.effectiveHourlyUSD < b.effectiveHourlyUSD ? a : b);
+      return {
+        price: best.effectiveHourlyUSD.toFixed(6),
+        savings: best.savingsVsOnDemandPct.toFixed(2),
+      };
+    }
+
+    function csvCell(value: string | number | undefined | null): string {
+      const s = String(value ?? '');
+      // Wrap in quotes if it contains a comma, quote, or newline
+      if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+        return `"${s.replace(/"/g, '""')}"`;
+      }
+      return s;
+    }
+
+    const lines: string[] = [headers.map(csvCell).join(',')];
+
+    for (const inst of rows) {
+      const yr1 = bestCommitment(inst, '1yr');
+      const yr3 = bestCommitment(inst, '3yr');
+      const spotMatches = (inst.commitments ?? []).filter((c) => (c.term as string) === 'spot');
+      const spotPrice = spotMatches.length
+        ? String(Math.min(...spotMatches.map((c) => c.effectiveHourlyUSD)).toFixed(6))
+        : '';
+
+      lines.push([
+        csvCell(inst.provider),
+        csvCell(inst.instanceType),
+        csvCell(inst.family),
+        csvCell(inst.architecture ?? 'x86_64'),
+        csvCell(inst.vCPU),
+        csvCell(inst.memoryGiB),
+        csvCell(inst.gpu ? `${inst.gpu.count}x ${inst.gpu.type}` : ''),
+        csvCell(inst.priceUSD_hourly != null ? inst.priceUSD_hourly.toFixed(6) : ''),
+        csvCell(yr1.price),
+        csvCell(yr1.savings),
+        csvCell(yr3.price),
+        csvCell(yr3.savings),
+        csvCell(spotPrice),
+        csvCell((inst.regions ?? []).join('|')),
+      ].join(','));
+    }
+
+    const blob = new Blob([lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const date = new Date().toISOString().slice(0, 10);
+    a.download = `cloudpricefinder-${date}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  exportCsvBtn?.addEventListener('click', exportCSV);
 
   // ---------------------------------------------------------------------------
   // Pagination controls
