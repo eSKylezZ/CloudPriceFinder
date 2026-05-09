@@ -353,12 +353,10 @@ Astro only copies files from `public/` to `dist/`. Either (a) move `data/` to `p
 ## Out of scope for v1 (deferred to v3.1+)
 
 - Spot pricing
-- Storage / database / networking pricing
+- Storage / database / networking pricing / LLM models and pricing between the the main providers that host them AWS bedrock etc...
 - Secondary providers (Hetzner, OVH, DO, Linode, Scaleway, Vultr, Contabo) — code retained, just disabled
-- AWS China / GovCloud regions
-- Email price alerts
-- User accounts, saved comparisons
-- Historical price tracking & charts
+- AWS China / GovCloud regions (Don't do this too complicated and very niche, remove azure china section)
+- Historical price tracking & charts (data cost, doesnt matter for companies to track, if costs have gone up companies will either pay, get a deal or move.)
 - CSV/PDF export
 
 ---
