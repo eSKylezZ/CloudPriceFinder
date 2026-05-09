@@ -559,7 +559,12 @@ def _get_json(session: requests.Session, url: str, params: Optional[Dict] = None
             if attempt == _MAX_RETRIES - 1:
                 raise
             wait = _RETRY_SLEEP * (2 ** attempt)
-            logger.warning(f"GET {url} failed (attempt {attempt + 1}/{_MAX_RETRIES}): {exc} — retrying in {wait:.1f}s")
+            # Log type only — exc.args may contain the fully-prepared URL including
+            # query parameters (e.g. ?key=...) which must not appear in logs.
+            logger.warning(
+                "GET %s failed (attempt %d/%d): %s — retrying in %.1fs",
+                url, attempt + 1, _MAX_RETRIES, type(exc).__name__, wait,
+            )
             time.sleep(wait)
     raise RuntimeError(f"Unreachable: all retries exhausted for {url}")
 
@@ -1354,7 +1359,7 @@ def fetch_gcp_data(
     for svc in services_data.get("services", []):
         if COMPUTE_SERVICE_NAME in svc.get("displayName", ""):
             compute_service_id = svc["name"].split("/")[-1]
-            logger.info(f"Found Compute Engine service: {svc['name']}")
+            logger.debug("Found Compute Engine service: %s", svc["name"])
             break
 
     if compute_service_id is None:
@@ -1365,7 +1370,7 @@ def fetch_gcp_data(
         compute_service_id = COMPUTE_SERVICE_ID_FALLBACK
 
     # --- Step 2: Fetch all SKUs ---
-    logger.info(f"Fetching all SKUs for service {compute_service_id}...")
+    logger.debug("Fetching all SKUs for service %s...", compute_service_id)
     all_skus: List[Dict[str, Any]] = list(_paginate_skus(session, compute_service_id, api_key=api_key))
     logger.info(f"Total SKUs fetched: {len(all_skus)}")
 
