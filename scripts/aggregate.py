@@ -223,11 +223,18 @@ def build_equivalents(
     For each (provider, family), find the closest equivalent family in every
     other provider.  Similarity is measured by the Euclidean distance in
     log2-normalised (vCPU, RAM) space on the family's median instance.
+
+    Each equivalent entry now includes `instanceType` — the instance within
+    that family whose (vCPU, RAM) is closest to the family's median — so the
+    compare page can load a specific instance file rather than a family stub.
     """
     import math
 
-    # Build representative (vCPU, RAM) per provider+family
+    # Build representative (vCPU, RAM) per provider+family and track the
+    # instance type closest to that median profile.
     rep: dict[tuple[str, str], tuple[float, float]] = {}
+    rep_instance: dict[tuple[str, str], str] = {}
+
     for provider, families in all_families.items():
         for fam_id, insts in families.items():
             vcpus = [i.get("vCPU", 0) or 0 for i in insts]
@@ -236,9 +243,21 @@ def build_equivalents(
             gib = statistics.median([g for g in gibs if g > 0] or [0])
             if vcpu > 0 and gib > 0:
                 rep[(provider, fam_id)] = (vcpu, gib)
+                candidates = [
+                    i for i in insts
+                    if (i.get("vCPU") or 0) > 0 and (i.get("memoryGiB") or 0) > 0
+                ]
+                if candidates:
+                    best = min(
+                        candidates,
+                        key=lambda i: (
+                            (math.log2((i.get("vCPU") or 1) + 1) - math.log2(vcpu + 1)) ** 2
+                            + (math.log2((i.get("memoryGiB") or 1) + 1) - math.log2(gib + 1)) ** 2
+                        ),
+                    )
+                    rep_instance[(provider, fam_id)] = best.get("instanceType", "")
 
     def log_dist(a: tuple[float, float], b: tuple[float, float]) -> float:
-        import math
         dv = math.log2(a[0] + 1) - math.log2(b[0] + 1)
         dm = math.log2(a[1] + 1) - math.log2(b[1] + 1)
         return math.sqrt(dv * dv + dm * dm)
@@ -260,13 +279,16 @@ def build_equivalents(
                     best_dist = d
                     best_fam = other_fam
             if best_fam is not None:
+                best_key = (other_prov, best_fam)
                 matches[other_prov] = {
                     "family": best_fam,
+                    "instanceType": rep_instance.get(best_key, ""),
                     "distance": round(best_dist, 4),
                 }
         equivalents[f"{prov}/{fam}"] = {
             "provider": prov,
             "family": fam,
+            "instanceType": rep_instance.get((prov, fam), ""),
             "vCPU": profile[0],
             "memoryGiB": profile[1],
             "equivalents": matches,

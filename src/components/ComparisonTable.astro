@@ -170,6 +170,7 @@
   interface EquivEntry {
     distance: number;
     family: string;
+    instanceType?: string; // representative instance within the family (added by aggregate.py)
   }
   interface EquivRecord {
     equivalents?: Record<string, EquivEntry>;
@@ -744,22 +745,27 @@
         const eq = equivEquivalents[p];
         if (!eq) return `<div class="text-xs text-gray-400">${p.toUpperCase()}: —</div>`;
         const distLabel = eq.distance < 0.1 ? 'Very close' : eq.distance < 0.5 ? 'Close' : 'Approximate';
-        const compareUrl = `/compare?items=${detail.provider}:${encodeURIComponent(detail.instanceType)},${p}:${encodeURIComponent(eq.family)}`;
+        const eqId = eq.instanceType || eq.family;
+        const compareUrl = `/compare?items=${detail.provider}:${encodeURIComponent(detail.instanceType)},${p}:${encodeURIComponent(eqId)}`;
         return `
           <div class="flex items-center space-x-1">
             <span class="text-xs font-medium text-gray-600 uppercase">${p}:</span>
-            <a href="${compareUrl}" class="text-xs text-primary-600 hover:underline font-mono">${eq.family}</a>
+            <a href="${compareUrl}" class="text-xs text-primary-600 hover:underline font-mono">${eqId}</a>
             <span class="text-xs text-gray-400">(${distLabel})</span>
           </div>
         `;
       });
 
-      // Build a single URL comparing the current instance against all available equivalents
+      // Build a single URL comparing the current instance against all available equivalents.
+      // Prefer instanceType (specific instance) over family (family stub) for each equivalent.
       const allItems = [
         `${detail.provider}:${encodeURIComponent(detail.instanceType)}`,
         ...providerOrder
           .filter((p) => equivEquivalents[p])
-          .map((p) => `${p}:${encodeURIComponent(equivEquivalents[p]!.family)}`),
+          .map((p) => {
+            const eq = equivEquivalents[p]!;
+            return `${p}:${encodeURIComponent(eq.instanceType || eq.family)}`;
+          }),
       ].join(',');
       const allCompareUrl = `/compare?items=${allItems}`;
 
