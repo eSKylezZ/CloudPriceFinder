@@ -113,14 +113,14 @@
 
 ## Stage 3 — Azure Fetcher Reservation Extension
 
-- [ ] **Goal:** [scripts/fetch_azure.py](scripts/fetch_azure.py) currently captures `Consumption` rows; extend to also capture `Reservation` rows and merge them as commitments on the matching VM SKU.
+- [x] **Goal:** [scripts/fetch_azure.py](scripts/fetch_azure.py) currently captures `Consumption` rows; extend to also capture `Reservation` rows and merge them as commitments on the matching VM SKU.
 
 **Tasks**
-- [ ] In `fetch_azure.py`, when paging through the retail prices API for VM service, no longer filter out `type: 'Reservation'`. Instead, group by `armSkuName` + `armRegionName`.
-- [ ] Build a commitment from each Reservation row using `reservationTerm` (`1 Year` or `3 Years`) and the price as `effectiveHourlyUSD` (Azure already amortizes).
-- [ ] Set `payment: 'all-upfront'` for Reservation (Azure's retail API only exposes the upfront-equivalent hourly).
-- [ ] Add a `DevTestConsumption` filter (skip — that's not standard pricing).
-- [ ] Confirm China region rows still load (the existing static-data fallback is OK).
+- [x] In `fetch_azure.py`, when paging through the retail prices API for VM service, no longer filter out `type: 'Reservation'`. Instead, group by `armSkuName` + `armRegionName`.
+- [x] Build a commitment from each Reservation row using `reservationTerm` (`1 Year` or `3 Years`) and the price as `effectiveHourlyUSD` (Azure already amortizes).
+- [x] Set `payment: 'all-upfront'` for Reservation (Azure's retail API only exposes the upfront-equivalent hourly).
+- [x] Add a `DevTestConsumption` filter (skip — that's not standard pricing).
+- [x] Confirm China region rows still load (the existing static-data fallback is OK).
 
 **Verification**
 - `python scripts/fetch_azure.py` produces `data/providers/azure.raw.json`
@@ -128,8 +128,8 @@
 - `python scripts/utils/data_validator.py data/providers/azure.raw.json` passes
 
 **Definition of Done**
-- [ ] No regression: total VM count ≥ previous run
-- [ ] PR: `v3/stage-3-azure-reservations`
+- [x] No regression: total VM count ≥ previous run
+- [x] PR: `v3/stage-3-azure-reservations`
 
 ---
 
