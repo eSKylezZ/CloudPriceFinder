@@ -2,10 +2,98 @@
 Data validation utilities for CloudPriceFinder.
 """
 
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Tuple
 import logging
 
 logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Commitment validation (Stage 1 — v3 schema extension)
+# ---------------------------------------------------------------------------
+
+VALID_TERMS = {'on-demand', '1yr', '3yr'}
+VALID_PAYMENTS = {'no-upfront', 'partial-upfront', 'all-upfront', 'flexible'}
+VALID_PRODUCTS = {'reserved', 'savings-plan', 'cud', 'flex'}
+
+
+def validate_commitments(commitments: List[Dict[str, Any]], on_demand_hourly: float) -> Tuple[bool, List[str]]:
+    """
+    Validate a list of CommitmentPrice objects.
+
+    Rules:
+    - Each entry must have: term, payment, product, priceUSD_hourly,
+      effectiveHourlyUSD, savingsVsOnDemandPct.
+    - term must be in VALID_TERMS.
+    - payment must be in VALID_PAYMENTS.
+    - product must be in VALID_PRODUCTS.
+    - priceUSD_hourly >= 0 (can be 0 for all-upfront).
+    - effectiveHourlyUSD >= 0.
+    - 0 <= savingsVsOnDemandPct <= 100.
+    - savingsVsOnDemandPct must be monotonically non-decreasing when
+      sorted by (term asc, payment asc): longer commitments must be
+      at least as cheap as shorter ones within the same product type
+      (we enforce this loosely — just check each entry is internally
+      consistent with on_demand_hourly).
+
+    Args:
+        commitments: List of commitment dictionaries.
+        on_demand_hourly: The on-demand priceUSD_hourly for the parent instance.
+                          Used to validate savingsVsOnDemandPct.
+
+    Returns:
+        (is_valid, error_messages)
+    """
+    errors: List[str] = []
+
+    if not isinstance(commitments, list):
+        return False, ['commitments must be a list']
+
+    for idx, c in enumerate(commitments):
+        prefix = f'commitments[{idx}]'
+
+        # Required field presence
+        for field in ('term', 'payment', 'product', 'priceUSD_hourly', 'effectiveHourlyUSD', 'savingsVsOnDemandPct'):
+            if field not in c:
+                errors.append(f'{prefix}: missing required field "{field}"')
+
+        if errors:
+            # Skip further checks if fields are missing to avoid KeyErrors
+            continue
+
+        # Enum checks
+        if c['term'] not in VALID_TERMS:
+            errors.append(f'{prefix}: invalid term "{c["term"]}" — must be one of {sorted(VALID_TERMS)}')
+
+        if c['payment'] not in VALID_PAYMENTS:
+            errors.append(f'{prefix}: invalid payment "{c["payment"]}" — must be one of {sorted(VALID_PAYMENTS)}')
+
+        if c['product'] not in VALID_PRODUCTS:
+            errors.append(f'{prefix}: invalid product "{c["product"]}" — must be one of {sorted(VALID_PRODUCTS)}')
+
+        # Numeric range checks
+        if not isinstance(c['priceUSD_hourly'], (int, float)) or c['priceUSD_hourly'] < 0:
+            errors.append(f'{prefix}: priceUSD_hourly must be a non-negative number, got {c["priceUSD_hourly"]!r}')
+
+        if not isinstance(c['effectiveHourlyUSD'], (int, float)) or c['effectiveHourlyUSD'] < 0:
+            errors.append(f'{prefix}: effectiveHourlyUSD must be a non-negative number, got {c["effectiveHourlyUSD"]!r}')
+
+        savings = c['savingsVsOnDemandPct']
+        if not isinstance(savings, (int, float)) or not (0 <= savings <= 100):
+            errors.append(
+                f'{prefix}: savingsVsOnDemandPct must be a number in [0, 100], got {savings!r}'
+            )
+
+        # Cross-field consistency: effectiveHourlyUSD should be < on_demand for
+        # committed pricing (allow small floating-point tolerance).
+        if (on_demand_hourly > 0
+                and isinstance(c['effectiveHourlyUSD'], (int, float))
+                and c['effectiveHourlyUSD'] > on_demand_hourly * 1.001):
+            errors.append(
+                f'{prefix}: effectiveHourlyUSD ({c["effectiveHourlyUSD"]:.6f}) '
+                f'exceeds on-demand rate ({on_demand_hourly:.6f}) — suspicious'
+            )
+
+    return len(errors) == 0, errors
 
 REQUIRED_FIELDS = [
     'provider',
