@@ -1,7 +1,7 @@
 {
   "name": "cloudpricefinder",
   "version": "3.0.0",
-  "description": "CloudPriceFinder \u00e2\u20ac\u201d free, open-source cloud instance cost comparison for AWS, Azure, GCP, and OCI",
+  "description": "CloudPriceFinder — free, open-source cloud instance cost comparison for AWS, Azure, GCP, and OCI",
   "type": "module",
   "scripts": {
     "dev": "astro dev",
@@ -32,7 +32,7 @@
     "prettier": "^3.8.3",
     "prettier-plugin-astro": "^0.14.1",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.5"
+    "vitest": "^3.2.4"
   },
   "keywords": [
     "cloud",
