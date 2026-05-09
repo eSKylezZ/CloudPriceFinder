@@ -155,7 +155,7 @@
 
 ## Stage 5 — GCP Fetcher (NEW)
 
-- [ ] **Goal:** Replace the 17-line placeholder [scripts/fetch_google.py](scripts/fetch_google.py) with a real fetcher using the [Cloud Billing Catalog API](https://cloud.google.com/billing/v1/how-tos/catalog-api).
+- [x] **Goal:** Replace the 17-line placeholder [scripts/fetch_google.py](scripts/fetch_google.py) with a real fetcher using the [Cloud Billing Catalog API](https://cloud.google.com/billing/v1/how-tos/catalog-api).
 
 **Setup (user action, then agent uses)**
 - [ ] User: create a GCP API key (no auth config needed, just a plain key) at https://console.cloud.google.com/apis/credentials
@@ -163,14 +163,14 @@
 - [ ] User: enable the Cloud Billing API on the project that owns the key
 
 **Tasks**
-- [ ] Rename `scripts/fetch_google.py` → `scripts/fetch_gcp.py`. Update orchestrator's PROVIDER_CONFIG accordingly.
-- [ ] Implement against `https://cloudbilling.googleapis.com/v1/services?key={GCP_API_KEY}` to enumerate services, then `/v1/services/{serviceId}/skus` for the Compute Engine service (serviceId is typically `6F81-5844-456A`; resolve dynamically by `displayName` match for safety).
-- [ ] Each SKU has a `pricingInfo[].pricingExpression.tieredRates[]`. For Compute Engine VMs:
+- [x] Rename `scripts/fetch_google.py` → `scripts/fetch_gcp.py`. Update orchestrator's PROVIDER_CONFIG accordingly.
+- [x] Implement against `https://cloudbilling.googleapis.com/v1/services?key={GCP_API_KEY}` to enumerate services, then `/v1/services/{serviceId}/skus` for the Compute Engine service (serviceId is typically `6F81-5844-456A`; resolve dynamically by `displayName` match for safety).
+- [x] Each SKU has a `pricingInfo[].pricingExpression.tieredRates[]`. For Compute Engine VMs:
   - On-demand `Resource: Compute` SKUs → `priceUSD_hourly`
   - SKUs with `category.usageType: 'Commit1Yr'` and `'Commit3Yr'` → `commitments[]` entries with `product: 'cud'`
-- [ ] Group by machine type (e.g. `n2-standard-2`, `c3-highmem-4`). Note that GCP prices CPU and RAM separately for some families — sum them per machine type using the [machine-type spec table](https://cloud.google.com/compute/docs/machine-resource).
-- [ ] For GPU SKUs (`t4`, `a100`, `h100`, etc.), attach to the host machine type as `gpu` field. Document approach.
-- [ ] Output `data/providers/gcp.raw.json`.
+- [x] Group by machine type (e.g. `n2-standard-2`, `c3-highmem-4`). Note that GCP prices CPU and RAM separately for some families — sum them per machine type using the [machine-type spec table](https://cloud.google.com/compute/docs/machine-resource).
+- [x] For GPU SKUs (`t4`, `a100`, `h100`, etc.), attach to the host machine type as `gpu` field. Document approach.
+- [x] Output `data/providers/gcp.raw.json`.
 
 **Verification**
 - `GCP_API_KEY=... python scripts/fetch_gcp.py` produces ≥ 100 machine types across ≥ 30 regions
@@ -178,8 +178,8 @@
 - `data_validator` passes
 
 **Definition of Done**
-- [ ] No API key in source code; only env var
-- [ ] PR: `v3/stage-5-gcp-fetcher`
+- [x] No API key in source code; only env var
+- [x] PR: `v3/stage-5-gcp-fetcher`
 
 ---
 
