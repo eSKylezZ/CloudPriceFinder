@@ -165,7 +165,13 @@ class CloudDataOrchestrator:
         return []
     
     def _fetch_gcp(self) -> List[Dict[str, Any]]:
-        """Fetch GCP Compute Engine pricing via Cloud Billing Catalog API."""
+        """Fetch GCP Compute Engine pricing via Cloud Billing Catalog API.
+
+        Authentication (in priority order):
+          1. GCP_API_KEY env var — used when set (local dev convenience).
+          2. Application Default Credentials (ADC) — used in CI after
+             google-github-actions/auth@v2 sets up Workload Identity Federation.
+        """
         try:
             import os
             _scripts_dir = os.path.dirname(os.path.abspath(__file__))
@@ -173,10 +179,11 @@ class CloudDataOrchestrator:
             if _repo_root not in sys.path:
                 sys.path.insert(0, _repo_root)
             from scripts.fetch_gcp import fetch_gcp_data
-            api_key = os.environ.get("GCP_API_KEY", "").strip()
-            if not api_key:
-                logger.error("GCP_API_KEY not set — skipping GCP fetch")
-                raise RuntimeError("GCP_API_KEY environment variable is required")
+            api_key = os.environ.get("GCP_API_KEY", "").strip() or None
+            if api_key:
+                logger.info("GCP_API_KEY found — using API key auth.")
+            else:
+                logger.info("GCP_API_KEY not set — will attempt ADC (Workload Identity / gcloud).")
             logger.info("Fetching GCP Compute Engine pricing data (all standard regions)…")
             return fetch_gcp_data(api_key=api_key)
         except Exception as e:
@@ -488,12 +495,37 @@ class CloudDataOrchestrator:
             print(f"\n❌ FATAL ERROR: {e}")
             return False
 
-async def main():
+async def main(enabled_providers: Optional[List[str]] = None):
     """Main function."""
+    # Override PROVIDER_CONFIG if specific providers were requested via CLI
+    if enabled_providers is not None:
+        for provider in PROVIDER_CONFIG:
+            PROVIDER_CONFIG[provider]['enabled'] = provider in enabled_providers
+        unknown = [p for p in enabled_providers if p not in PROVIDER_CONFIG]
+        if unknown:
+            logger.warning(f"Unknown providers requested (will be ignored): {unknown}")
+
     orchestrator = CloudDataOrchestrator()
     success = await orchestrator.run()
     return 0 if success else 1
 
 if __name__ == "__main__":
-    exit_code = asyncio.run(main())
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="CloudPriceFinder Data Orchestrator"
+    )
+    parser.add_argument(
+        "--providers",
+        nargs="+",
+        metavar="PROVIDER",
+        help=(
+            "Space-separated list of providers to fetch (e.g. --providers aws gcp oci). "
+            "Overrides the PROVIDER_CONFIG enabled flags at runtime. "
+            "All other providers are disabled for this run."
+        ),
+    )
+    args = parser.parse_args()
+
+    exit_code = asyncio.run(main(enabled_providers=args.providers))
     sys.exit(exit_code)

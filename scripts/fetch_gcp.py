@@ -2,8 +2,15 @@
 """
 GCP Compute Engine pricing fetcher for CloudPriceFinder v3.
 
-Uses the Cloud Billing Catalog API (public endpoint, API key required).
-API key must be supplied via GCP_API_KEY environment variable.
+Uses the Cloud Billing Catalog API.
+
+Authentication (in priority order):
+  1. Workload Identity Federation / Application Default Credentials (ADC) —
+     preferred in CI.  The google-github-actions/auth@v2 action sets up ADC
+     automatically when using OIDC; no long-lived key is needed.
+     Requires the ``google-auth`` and ``google-auth-httplib2`` packages.
+  2. API key via GCP_API_KEY environment variable — still supported for local
+     development convenience.
 
 GCP pricing model:
   - CPU and RAM are priced as separate SKUs for most machine families.
@@ -19,11 +26,16 @@ Out of scope for v1:
   - GPU-only A3/G2/H3 SKUs that are not yet generally available in all regions
 
 Usage:
+    # ADC (CI / Workload Identity):
+    python scripts/fetch_gcp.py [--output PATH]
+
+    # API key (local dev):
     GCP_API_KEY=... python scripts/fetch_gcp.py [--output PATH]
 
 Requirements:
-  - GCP Cloud Billing API enabled on the GCP project that owns the key.
-  - API key: https://console.cloud.google.com/apis/credentials
+  - Cloud Billing API enabled on your GCP project.
+  - Either ADC configured (e.g. via gcloud auth application-default login) or
+    GCP_API_KEY set to an API key with the Cloud Billing API scope.
 """
 
 from __future__ import annotations
@@ -501,9 +513,38 @@ _MAX_RETRIES = 4
 _RETRY_SLEEP = 2.0
 
 
-def _make_session() -> requests.Session:
+def _get_adc_credentials():
+    """
+    Return google.oauth2 credentials from Application Default Credentials, or
+    None if the google-auth library is not installed or ADC is not configured.
+    """
+    try:
+        import google.auth
+        import google.auth.transport.requests as g_transport
+        scopes = ["https://www.googleapis.com/auth/cloud-billing.readonly"]
+        credentials, _ = google.auth.default(scopes=scopes)
+        # Force a token refresh so we have a valid access_token right away.
+        credentials.refresh(g_transport.Request())
+        return credentials
+    except Exception as exc:
+        logger.debug(f"ADC not available: {exc}")
+        return None
+
+
+def _make_session(credentials=None) -> requests.Session:
+    """
+    Build an HTTP session.  If ``credentials`` are provided (google-auth
+    credentials object), attach a bearer token Authorization header.
+    """
     s = requests.Session()
     s.headers.update(_DEFAULT_HEADERS)
+    if credentials is not None:
+        try:
+            import google.auth.transport.requests as g_transport
+            credentials.refresh(g_transport.Request())
+            s.headers["Authorization"] = f"Bearer {credentials.token}"
+        except Exception as exc:
+            logger.warning(f"Could not attach ADC bearer token: {exc}")
     return s
 
 
@@ -529,15 +570,21 @@ def _get_json(session: requests.Session, url: str, params: Optional[Dict] = None
 def _paginate_skus(
     session: requests.Session,
     service_id: str,
-    api_key: str,
+    api_key: Optional[str] = None,
 ) -> Generator[Dict[str, Any], None, None]:
-    """Yield every SKU for the given service, handling pagination."""
+    """Yield every SKU for the given service, handling pagination.
+
+    When ``api_key`` is None, the session is expected to carry a bearer-token
+    Authorization header (ADC / Workload Identity).
+    """
     url = f"{BILLING_BASE}/services/{service_id}/skus"
     page_token: Optional[str] = None
     page_num = 0
 
     while True:
-        params: Dict[str, Any] = {"key": api_key, "pageSize": 5000}
+        params: Dict[str, Any] = {"pageSize": 5000}
+        if api_key:
+            params["key"] = api_key
         if page_token:
             params["pageToken"] = page_token
 
@@ -1251,28 +1298,50 @@ def build_instances(
 # ---------------------------------------------------------------------------
 
 def fetch_gcp_data(
-    api_key: str,
+    api_key: Optional[str] = None,
     target_regions: Optional[List[str]] = None,
 ) -> List[Dict[str, Any]]:
     """
     Fetch GCP Compute Engine pricing and return a list of CloudInstance dicts.
 
+    Authentication (in priority order):
+      1. If ``api_key`` is provided, it is sent as a ``key`` query parameter.
+      2. If ``api_key`` is None, Application Default Credentials (ADC) are used
+         to obtain a bearer token (requires the ``google-auth`` package and
+         valid ADC — e.g. set up by google-github-actions/auth@v2 in CI).
+
     Args:
-        api_key: GCP API key with Cloud Billing API enabled.
+        api_key: Optional GCP API key.  Pass None to use ADC.
         target_regions: Optional list of GCP region codes to include.
                         Defaults to all standard commercial regions.
 
     Returns:
         List of CloudInstance dicts.
     """
-    session = _make_session()
+    credentials = None
+    if not api_key:
+        logger.info("No GCP_API_KEY set — attempting Application Default Credentials (ADC)...")
+        credentials = _get_adc_credentials()
+        if credentials is None:
+            raise RuntimeError(
+                "GCP authentication failed: neither GCP_API_KEY nor working ADC found. "
+                "Set GCP_API_KEY or configure ADC (gcloud auth application-default login)."
+            )
+        logger.info("ADC credentials obtained successfully.")
+    else:
+        logger.info("Using GCP_API_KEY for authentication.")
+
+    session = _make_session(credentials=credentials)
 
     # --- Step 1: Resolve the Compute Engine service ID ---
     logger.info("Resolving Compute Engine service ID from Billing API...")
+    services_params: Dict[str, Any] = {"pageSize": 500}
+    if api_key:
+        services_params["key"] = api_key
     services_data = _get_json(
         session,
         f"{BILLING_BASE}/services",
-        params={"key": api_key, "pageSize": 500},
+        params=services_params,
     )
     compute_service_id: Optional[str] = None
     for svc in services_data.get("services", []):
@@ -1290,7 +1359,7 @@ def fetch_gcp_data(
 
     # --- Step 2: Fetch all SKUs ---
     logger.info(f"Fetching all SKUs for service {compute_service_id}...")
-    all_skus: List[Dict[str, Any]] = list(_paginate_skus(session, compute_service_id, api_key))
+    all_skus: List[Dict[str, Any]] = list(_paginate_skus(session, compute_service_id, api_key=api_key))
     logger.info(f"Total SKUs fetched: {len(all_skus)}")
 
     # Filter to only VM instance resource SKUs in the Compute family with
@@ -1373,29 +1442,28 @@ def main(argv: Optional[List[str]] = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    # Load API key from environment (never from source code)
-    api_key = os.environ.get("GCP_API_KEY", "").strip()
+    # Load API key from environment or .env file (local dev only).
+    # In CI the WIF / ADC path is used automatically when GCP_API_KEY is absent.
+    api_key: Optional[str] = os.environ.get("GCP_API_KEY", "").strip() or None
     if not api_key:
-        # Try loading from .env file
         env_path = Path(__file__).resolve().parent.parent / ".env"
         if env_path.exists():
             with open(env_path) as f:
                 for line in f:
                     line = line.strip()
                     if line.startswith("GCP_API_KEY="):
-                        api_key = line.split("=", 1)[1].strip().strip('"').strip("'")
+                        api_key = line.split("=", 1)[1].strip().strip('"').strip("'") or None
                         break
 
-    if not api_key:
+    if api_key:
+        print("Using GCP_API_KEY for authentication.", flush=True)
+    else:
         print(
-            "ERROR: GCP_API_KEY environment variable is not set.\n"
-            "Set it with: export GCP_API_KEY=<your-key>\n"
-            "Or add GCP_API_KEY=<key> to your .env file.\n"
-            "Get a key at: https://console.cloud.google.com/apis/credentials\n"
-            "Enable: Cloud Billing API",
-            file=sys.stderr,
+            "GCP_API_KEY not set — will attempt Application Default Credentials (ADC).\n"
+            "For local dev: gcloud auth application-default login\n"
+            "Or set GCP_API_KEY=<key> (https://console.cloud.google.com/apis/credentials)",
+            flush=True,
         )
-        return 1
 
     target_regions = args.regions if args.regions else None
     if target_regions:
