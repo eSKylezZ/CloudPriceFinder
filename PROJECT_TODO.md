@@ -135,20 +135,21 @@
 
 ## Stage 4 — OCI Fetcher Verification & Extension
 
-- [ ] **Goal:** Verify [scripts/fetch_oci.py](scripts/fetch_oci.py) still works against `apexapps.oracle.com` cetools API, and capture commitment data where exposed.
+- [x] **Goal:** Verify [scripts/fetch_oci.py](scripts/fetch_oci.py) still works against `apexapps.oracle.com` cetools API, and capture commitment data where exposed.
 
 **Tasks**
-- [ ] Run `python scripts/fetch_oci.py` and confirm a non-empty result. If the API returns 403, add the existing Mozilla User-Agent header (already there at `fetch_oci.py:25`) and retry.
-- [ ] OCI's pricing API exposes `pay_as_you_go`, `monthly_flex`, and `annual_flex` price models per part number. Capture `monthly_flex` (≈1mo commitment, treat as out of scope for v1) and `annual_flex` (treat as `1yr`/`flexible` commitment).
-- [ ] Document the OCI commitment caveat clearly in the output (`raw.note` field): "Commitment pricing on OCI is primarily handled via Universal Credits at account level; per-shape commitment data shown is the publicly listed annual-flex rate."
+- [x] Run `python scripts/fetch_oci.py` and confirm a non-empty result. If the API returns 403, add the existing Mozilla User-Agent header (already there at `fetch_oci.py:25`) and retry.
+- [x] OCI's pricing API exposes `pay_as_you_go`, `monthly_flex`, and `annual_flex` price models per part number. Capture `monthly_flex` (≈1mo commitment, treat as out of scope for v1) and `annual_flex` (treat as `1yr`/`flexible` commitment).
+  - **CAVEAT (discovered during execution):** The cetools public API (`apexapps.oracle.com/pls/apex/cetools/api/v1/products/`) returns **only `PAY_AS_YOU_GO`** pricing models across all 620 items. No `ANNUAL_FLEX`, `MONTHLY_FLEX`, or any other commitment model is exposed per-shape. All pricing models present in the API: `['PAY_AS_YOU_GO']`. OCI commitment discounts are handled via Universal Credits at account level and are NOT published per-shape. DoD clause applied: shipping on-demand-only.
+- [x] Document the OCI commitment caveat clearly in the output (`raw.note` field): "Commitment pricing on OCI is primarily handled via Universal Credits at account level; per-shape commitment data shown is the publicly listed annual-flex rate."
 
 **Verification**
-- `data/providers/oci.raw.json` has ≥ 20 shapes
-- At least 5 shapes have a `1yr` commitment entry
+- `data/providers/oci.raw.json` has ≥ 20 shapes — **PASSED: 94 shapes**
+- At least 5 shapes have a `1yr` commitment entry — **NOT MET: 0 entries (DoD override applied — data genuinely unavailable, not fabricated)**
 
 **Definition of Done**
-- [ ] If annual-flex data is genuinely unavailable, document this and ship on-demand-only for OCI; do not fabricate data.
-- [ ] PR: `v3/stage-4-oci-commitments`
+- [x] If annual-flex data is genuinely unavailable, document this and ship on-demand-only for OCI; do not fabricate data.
+- [x] PR: `v3/stage-4-oci-commitments`
 
 ---
 
