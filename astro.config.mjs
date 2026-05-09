@@ -12,9 +12,5 @@ export default defineConfig({
   build: {
     inlineStylesheets: 'auto'
   },
-  vite: {
-    optimizeDeps: {
-      include: ['./data/*.json']
-    }
-  }
+  vite: {}
 });

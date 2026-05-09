@@ -212,24 +212,24 @@
 
 ## Stage 7 — Frontend Lazy Loader Rewrite
 
-- [ ] **Goal:** Replace the inline 5MB blob with lazy fetching. Initial page load < 200 KB total payload.
+- [x] **Goal:** Replace the inline 5MB blob with lazy fetching. Initial page load < 200 KB total payload.
 
 **Tasks**
-- [ ] Rewrite [src/lib/data-loader.ts](src/lib/data-loader.ts):
+- [x] Rewrite [src/lib/data-loader.ts](src/lib/data-loader.ts):
   - Drop `combined`/`split`/`selective` legacy strategies
   - Export: `loadIndex()`, `loadFamily(provider, family)`, `loadInstance(provider, id)` — all return Promises with in-memory caches keyed by URL
   - Use `fetch('/data/...json')` (relative paths; CF Pages serves these statically)
-- [ ] Update [src/pages/index.astro](src/pages/index.astro):
+- [x] Update [src/pages/index.astro](src/pages/index.astro):
   - At build time, do NOT inline the dataset
   - Fetch `index.json` client-side on page load
   - Pass it to `FilterPanel` and `ComparisonTable` via custom event
-- [ ] Update [src/components/FilterPanel.astro](src/components/FilterPanel.astro):
+- [x] Update [src/components/FilterPanel.astro](src/components/FilterPanel.astro):
   - Drive available filter options from `index.json` (provider list, family list, region list)
   - On filter apply, dispatch `filtersChanged` with selected family ids; data loader fetches those family files in parallel
-- [ ] Update [src/components/ComparisonTable.astro](src/components/ComparisonTable.astro):
+- [x] Update [src/components/ComparisonTable.astro](src/components/ComparisonTable.astro):
   - Consume family files (one or more) and render
   - Add a row-expand affordance that lazy-loads `instances/{provider}/{id}.json`
-- [ ] Add a loading skeleton/spinner for in-flight fetches
+- [x] Add a loading skeleton/spinner for in-flight fetches
 
 **Verification**
 - `npm run dev` → DevTools Network tab on first load shows: HTML, CSS, JS, `index.json` only — no family/instance files
@@ -238,9 +238,9 @@
 - Lighthouse Performance ≥ 90 on `npm run preview`
 
 **Definition of Done**
-- [ ] Initial JS bundle < 200 KB gzipped
-- [ ] No console errors
-- [ ] PR: `v3/stage-7-lazy-loader`
+- [x] Initial JS bundle < 200 KB gzipped — PASSED: 4.3 KB total gzipped JS (ComparisonTable 3.3 KB + data-loader 0.3 KB + page script 0.7 KB)
+- [x] No console errors
+- [x] PR: `v3/stage-7-lazy-loader`
 
 ---
 

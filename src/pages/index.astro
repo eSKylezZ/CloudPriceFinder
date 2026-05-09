@@ -2,19 +2,9 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ComparisonTable from '../components/ComparisonTable.astro';
 import FilterPanel from '../components/FilterPanel.astro';
-import DataSummary from '../components/DataSummary.astro';
-import { loadInstanceData, loadSummaryData } from '../lib/data-loader';
-
-// Load data at build time using split strategy for better performance
-const allInstances = await loadInstanceData({ mode: 'split' });
-const summary = await loadSummaryData();
-
-// For initial page load, show only the first 100 most cost-effective instances
-// This dramatically reduces DOM size and improves Largest Contentful Paint
-const instances = allInstances.slice(0, 100);
 ---
 
-<BaseLayout title="CloudPriceFinder.com - Multi-Cloud Instance Comparison">
+<BaseLayout title="CloudPriceFinder - Multi-Cloud Instance Comparison">
   <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-8 flex-1">
     <!-- Hero Section -->
     <div class="text-center mb-8">
@@ -22,30 +12,154 @@ const instances = allInstances.slice(0, 100);
         Multi-Cloud Instance Comparison
       </h1>
       <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-        Compare cloud instance costs and specifications across AWS, Azure, Google Cloud, 
-        Hetzner, Oracle Cloud, and OVH. Find the best value for your workload.
+        Compare cloud instance costs and specifications across AWS, Azure, Google Cloud,
+        and Oracle Cloud. Find the best value for your workload.
       </p>
     </div>
 
-    <!-- Data Summary -->
-    <DataSummary summary={summary} />
+    <!-- Data Summary (populated client-side after index.json loads) -->
+    <div id="data-summary-section" class="mb-8" aria-live="polite">
+      <!-- Loading skeleton -->
+      <div id="summary-skeleton" class="bg-white rounded-lg shadow-sm border p-6 animate-pulse">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[1,2,3,4].map(() => (
+            <div class="text-center space-y-2">
+              <div class="h-8 bg-gray-200 rounded w-20 mx-auto"></div>
+              <div class="h-4 bg-gray-100 rounded w-24 mx-auto"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <!-- Actual summary (rendered by JS) -->
+      <div id="data-summary" class="hidden bg-white rounded-lg shadow-sm border p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Data Overview</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="text-center">
+            <div class="text-2xl font-bold text-primary-600" id="stat-instances">-</div>
+            <div class="text-sm text-gray-500">Total Instances</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-primary-600" id="stat-providers">-</div>
+            <div class="text-sm text-gray-500">Providers</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-primary-600" id="stat-families">-</div>
+            <div class="text-sm text-gray-500">Instance Families</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-primary-600" id="stat-updated">-</div>
+            <div class="text-sm text-gray-500">Last Updated</div>
+          </div>
+        </div>
+        <div class="mt-4 pt-4 border-t border-gray-200">
+          <div class="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p class="text-xs text-blue-800">
+              <span class="font-medium">Note:</span> Pricing is fetched weekly from public provider APIs.
+              Always verify with the provider before purchasing. We are not affiliated with AWS, Azure, GCP, or OCI.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Main Content -->
     <div class="grid grid-cols-1 xl:grid-cols-5 2xl:grid-cols-6 gap-6 lg:gap-8">
       <!-- Filters Sidebar -->
       <div class="xl:col-span-1 2xl:col-span-1">
-        <FilterPanel instances={allInstances} />
+        <FilterPanel />
       </div>
 
       <!-- Comparison Table -->
       <div class="xl:col-span-4 2xl:col-span-5">
-        <ComparisonTable instances={instances} />
+        <ComparisonTable />
       </div>
     </div>
   </div>
-  
-  <!-- Pass full dataset to JavaScript for dynamic loading -->
-  <script define:vars={{ allInstances }}>
-    window.fullInstanceData = allInstances;
+
+  <script>
+    import { loadIndex, loadFamilies } from '../lib/data-loader';
+    import type { V3Index } from '../types';
+
+    // -------------------------------------------------------------------------
+    // Bootstrap: load index.json, populate filter panel, then load initial data
+    // -------------------------------------------------------------------------
+    (async () => {
+      let index: V3Index;
+
+      try {
+        index = await loadIndex();
+      } catch (err) {
+        console.error('Failed to load index.json:', err);
+        const skeleton = document.getElementById('summary-skeleton');
+        if (skeleton) {
+          skeleton.innerHTML = `<p class="text-red-600 text-sm">Failed to load data. Please refresh.</p>`;
+        }
+        return;
+      }
+
+      // -----------------------------------------------------------------------
+      // Populate data summary
+      // -----------------------------------------------------------------------
+      const totalInstances = index.providers.reduce((s, p) => s + p.instanceCount, 0);
+      const totalFamilies = index.providers.reduce((s, p) => s + p.familyCount, 0);
+
+      const el = (id: string) => document.getElementById(id);
+      const statInstances = el('stat-instances');
+      const statProviders = el('stat-providers');
+      const statFamilies = el('stat-families');
+      const statUpdated = el('stat-updated');
+
+      if (statInstances) statInstances.textContent = totalInstances.toLocaleString();
+      if (statProviders) statProviders.textContent = String(index.providers.length);
+      if (statFamilies) statFamilies.textContent = String(totalFamilies);
+      if (statUpdated) {
+        try {
+          statUpdated.textContent = new Intl.DateTimeFormat('en-US', {
+            dateStyle: 'medium',
+          }).format(new Date(index.lastUpdated));
+        } catch {
+          statUpdated.textContent = index.lastUpdated.split('T')[0];
+        }
+      }
+
+      const skeleton = document.getElementById('summary-skeleton');
+      const summary = document.getElementById('data-summary');
+      if (skeleton) skeleton.classList.add('hidden');
+      if (summary) summary.classList.remove('hidden');
+
+      // -----------------------------------------------------------------------
+      // Broadcast index to filter panel and table
+      // -----------------------------------------------------------------------
+      window.dispatchEvent(new CustomEvent('indexLoaded', { detail: { index } }));
+
+      // -----------------------------------------------------------------------
+      // Default load: all families from all providers in parallel
+      // -----------------------------------------------------------------------
+      await loadDefaultData(index);
+    })();
+
+    async function loadDefaultData(index: V3Index) {
+      const allInstances: unknown[] = [];
+      const loadPromises = index.providers.map(async (provider) => {
+        const familyIds = provider.families.map((f) => f.id);
+        try {
+          const instances = await loadFamilies(provider.id, familyIds);
+          allInstances.push(...instances);
+        } catch (err) {
+          console.warn(`Failed to load families for ${provider.id}:`, err);
+        }
+      });
+
+      // Show table loading indicator while fetching
+      window.dispatchEvent(new CustomEvent('dataLoading', { detail: { loading: true } }));
+
+      await Promise.all(loadPromises);
+
+      window.dispatchEvent(
+        new CustomEvent('dataLoaded', {
+          detail: { instances: allInstances },
+        })
+      );
+    }
   </script>
 </BaseLayout>
