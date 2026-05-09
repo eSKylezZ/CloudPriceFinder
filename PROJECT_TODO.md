@@ -272,7 +272,7 @@
 - [ ] **Goal:** Get the site live on a Cloudflare Pages free-tier URL with proper caching.
 
 **Tasks (user actions noted)**
-- [ ] User: in Cloudflare dashboard, create a new Pages project, connect to this GitHub repo, set production branch to `main`, framework preset Astro, build command `npm run build`, output dir `dist`, Node version `20`.
+- [ ] Website is already setup here https://cloudpricefinder.com/, make prod changes and well push it to main later. 
 - [ ] Add a `_headers` file at repo root:
   ```
   /data/index.json
