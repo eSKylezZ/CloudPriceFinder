@@ -146,7 +146,6 @@ export interface CloudInstance {
   };
   
   // Provider-specific data
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   raw?: Record<string, unknown>;
 }
 

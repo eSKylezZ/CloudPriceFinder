@@ -12,7 +12,7 @@
     "fetch-hetzner": "python3 scripts/fetch_hetzner.py",
     "clean": "rm -rf dist .astro data/*.json",
     "type-check": "astro check",
-    "lint": "eslint src --ext .js,.ts,.astro",
+    "lint": "eslint src",
     "format": "prettier --write src",
     "test": "vitest",
     "test:ui": "vitest --ui"
@@ -30,10 +30,10 @@
     "lightningcss-win32-x64-msvc": "^1.32.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^7.18.0",
-    "@typescript-eslint/parser": "^7.18.0",
-    "eslint": "^8.57.1",
-    "eslint-plugin-astro": "^0.34.0",
+    "@typescript-eslint/eslint-plugin": "^8.59.2",
+    "@typescript-eslint/parser": "^8.59.2",
+    "eslint": "^9.39.4",
+    "eslint-plugin-astro": "^1.7.0",
     "prettier": "^3.8.3",
     "prettier-plugin-astro": "^0.14.0",
     "typescript": "^5.9.3",
