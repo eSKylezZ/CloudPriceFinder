@@ -1,12 +1,12 @@
 ---
-// ComparisonTable v3: no build-time data. Renders instances loaded client-side
-// from /data/families/* files. Supports row-expand to lazy-load instance detail.
+// ComparisonTable v3 (Stage 8): commitment toggle, normalized metrics columns,
+// equivalents row, row-expand for instance detail lazy-load.
 ---
 
 <div class="bg-white rounded-lg shadow-sm border">
   <!-- Table Header -->
   <div class="px-6 py-4 border-b border-gray-200">
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center justify-between mb-3">
       <h2 class="text-lg font-semibold text-gray-900">Instance Comparison</h2>
       <div class="flex items-center space-x-4">
         <!-- Result count -->
@@ -23,6 +23,16 @@
           </select>
         </div>
       </div>
+    </div>
+
+    <!-- Commitment toggle (Stage 8) — DOM-only, no extra fetch -->
+    <div class="flex items-center space-x-1 mb-3 bg-gray-100 rounded-lg p-1 w-fit" role="group" aria-label="Pricing term">
+      <button class="commitment-btn px-3 py-1 text-sm rounded-md font-medium transition-colors commitment-active"
+        data-term="on-demand">On-Demand</button>
+      <button class="commitment-btn px-3 py-1 text-sm rounded-md font-medium transition-colors text-gray-600 hover:bg-white hover:shadow-sm"
+        data-term="1yr">1-Year</button>
+      <button class="commitment-btn px-3 py-1 text-sm rounded-md font-medium transition-colors text-gray-600 hover:bg-white hover:shadow-sm"
+        data-term="3yr">3-Year</button>
     </div>
 
     <!-- Search -->
@@ -79,10 +89,17 @@
             data-sort="priceUSD_hourly" id="price-col-header">On-Demand/hr</th>
           <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 z-10">
             Savings</th>
+          <!-- Normalized metrics (Stage 8) -->
+          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 cursor-pointer hover:bg-gray-100 z-10"
+            data-sort="pricePerVCPU" title="On-demand $/vCPU/hr (lower = better value)">$/vCPU/hr</th>
+          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 cursor-pointer hover:bg-gray-100 z-10"
+            data-sort="pricePerGiB" title="On-demand $/GiB-RAM/hr (lower = better value)">$/GiB/hr</th>
           <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 z-10">
             Regions</th>
           <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 z-10">
             GPU</th>
+          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 z-10">
+            Compare</th>
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200" id="table-body">
@@ -113,6 +130,15 @@
     </div>
   </div>
 </div>
+
+<style>
+  .commitment-active {
+    background-color: white;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    color: #1d4ed8; /* blue-700 */
+    font-weight: 600;
+  }
+</style>
 
 <script>
   import type { V3Instance, V3InstanceFile } from '../types';
@@ -146,6 +172,40 @@
   const priceColHeader = document.getElementById('price-col-header') as HTMLElement;
 
   // ---------------------------------------------------------------------------
+  // Commitment toggle (Stage 8) — DOM-only price recompute, no network request
+  // ---------------------------------------------------------------------------
+  document.querySelectorAll<HTMLButtonElement>('.commitment-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const term = btn.dataset.term as 'on-demand' | '1yr' | '3yr';
+      if (term === activeCommitmentTerm) return;
+
+      // Update active styling
+      document.querySelectorAll('.commitment-btn').forEach((b) => {
+        b.classList.remove('commitment-active');
+        b.classList.add('text-gray-600');
+      });
+      btn.classList.add('commitment-active');
+      btn.classList.remove('text-gray-600');
+
+      activeCommitmentTerm = term;
+
+      // Update price column header label
+      if (priceColHeader) {
+        priceColHeader.textContent =
+          term === 'on-demand' ? 'On-Demand/hr' :
+          term === '1yr' ? '1-Yr Effective/hr' : '3-Yr Effective/hr';
+      }
+
+      // Also sync the filter panel commitment radio if present
+      const radio = document.querySelector<HTMLInputElement>(`input[name="commitmentTerm"][value="${term}"]`);
+      if (radio) radio.checked = true;
+
+      // Rerender — no network, uses already-loaded commitment data
+      sortAndRender();
+    });
+  });
+
+  // ---------------------------------------------------------------------------
   // Event: data is loading
   // ---------------------------------------------------------------------------
   window.addEventListener('dataLoading', () => {
@@ -168,7 +228,7 @@
   });
 
   // ---------------------------------------------------------------------------
-  // Event: filters changed
+  // Event: filters changed (from FilterPanel)
   // ---------------------------------------------------------------------------
   window.addEventListener('filtersChanged', (event: Event) => {
     const filters = (event as CustomEvent).detail as {
@@ -184,16 +244,22 @@
       gpuOnly: boolean;
     };
 
-    activeCommitmentTerm = filters.commitmentTerm;
-
-    // Update price column header label
-    if (priceColHeader) {
-      priceColHeader.textContent =
-        filters.commitmentTerm === 'on-demand'
-          ? 'On-Demand/hr'
-          : filters.commitmentTerm === '1yr'
-          ? '1-Yr Effective/hr'
-          : '3-Yr Effective/hr';
+    // Sync commitment term from filter panel
+    if (filters.commitmentTerm !== activeCommitmentTerm) {
+      activeCommitmentTerm = filters.commitmentTerm;
+      document.querySelectorAll<HTMLButtonElement>('.commitment-btn').forEach((b) => {
+        b.classList.remove('commitment-active');
+        b.classList.add('text-gray-600');
+        if (b.dataset.term === filters.commitmentTerm) {
+          b.classList.add('commitment-active');
+          b.classList.remove('text-gray-600');
+        }
+      });
+      if (priceColHeader) {
+        priceColHeader.textContent =
+          filters.commitmentTerm === 'on-demand' ? 'On-Demand/hr' :
+          filters.commitmentTerm === '1yr' ? '1-Yr Effective/hr' : '3-Yr Effective/hr';
+      }
     }
 
     // Filter
@@ -238,8 +304,25 @@
     return Math.min(...matches.map((c) => c.effectiveHourlyUSD));
   }
 
-  function formatUSD(n: number): string {
+  function formatUSD(n: number, decimals = 4): string {
+    return `$${n.toFixed(decimals)}`;
+  }
+
+  function formatSmall(n: number): string {
+    // For very small per-vCPU prices, use more decimal places
+    if (n < 0.001) return `$${n.toFixed(6)}`;
+    if (n < 0.01) return `$${n.toFixed(5)}`;
     return `$${n.toFixed(4)}`;
+  }
+
+  function pricePerVCPU(inst: V3Instance, term: 'on-demand' | '1yr' | '3yr'): number {
+    if (!inst.vCPU || inst.vCPU === 0) return Infinity;
+    return getEffectivePrice(inst, term) / inst.vCPU;
+  }
+
+  function pricePerGiB(inst: V3Instance, term: 'on-demand' | '1yr' | '3yr'): number {
+    if (!inst.memoryGiB || inst.memoryGiB === 0) return Infinity;
+    return getEffectivePrice(inst, term) / inst.memoryGiB;
   }
 
   function bestSavings(inst: V3Instance, term: 'on-demand' | '1yr' | '3yr'): string {
@@ -260,6 +343,11 @@
     return map[provider] ?? 'bg-gray-100 text-gray-800';
   }
 
+  // Build compare URL for a given instance
+  function compareHref(inst: V3Instance): string {
+    return `/compare?items=${inst.provider}:${encodeURIComponent(inst.instanceType)}`;
+  }
+
   // ---------------------------------------------------------------------------
   // Sort
   // ---------------------------------------------------------------------------
@@ -270,6 +358,12 @@
       if (currentSortField === 'priceUSD_hourly') {
         av = getEffectivePrice(a, activeCommitmentTerm);
         bv = getEffectivePrice(b, activeCommitmentTerm);
+      } else if (currentSortField === 'pricePerVCPU') {
+        av = pricePerVCPU(a, activeCommitmentTerm);
+        bv = pricePerVCPU(b, activeCommitmentTerm);
+      } else if (currentSortField === 'pricePerGiB') {
+        av = pricePerGiB(a, activeCommitmentTerm);
+        bv = pricePerGiB(b, activeCommitmentTerm);
       } else if (currentSortField === 'provider') {
         av = a.provider;
         bv = b.provider;
@@ -331,7 +425,7 @@
   }
 
   // ---------------------------------------------------------------------------
-  // Row builder
+  // Row builder (Stage 8: adds $/vCPU, $/GiB columns and Compare link)
   // ---------------------------------------------------------------------------
   function buildRow(inst: V3Instance): HTMLTableRowElement {
     const tr = document.createElement('tr');
@@ -341,6 +435,8 @@
     const savings = bestSavings(inst, activeCommitmentTerm);
     const regionCount = inst.regions?.length ?? 0;
     const gpuText = inst.gpu ? `${inst.gpu.count}x ${inst.gpu.type}` : '-';
+    const pvcpu = pricePerVCPU(inst, activeCommitmentTerm);
+    const pgib = pricePerGiB(inst, activeCommitmentTerm);
 
     tr.innerHTML = `
       <td class="w-6 px-2 py-3 text-center">
@@ -378,18 +474,42 @@
       <td class="px-3 py-3 whitespace-nowrap text-sm ${savings !== '-' ? 'text-green-700 font-medium' : 'text-gray-400'}">
         ${savings !== '-' ? `Save ${savings}` : '-'}
       </td>
+      <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-700">
+        ${isFinite(pvcpu) ? formatSmall(pvcpu) : '-'}
+      </td>
+      <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-700">
+        ${isFinite(pgib) ? formatSmall(pgib) : '-'}
+      </td>
       <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
         ${regionCount} region${regionCount !== 1 ? 's' : ''}
       </td>
       <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">${gpuText}</td>
+      <td class="px-3 py-3 whitespace-nowrap text-sm">
+        <a href="${compareHref(inst)}"
+          class="text-primary-600 hover:text-primary-800 hover:underline font-medium text-xs"
+          title="Compare ${inst.instanceType}">Compare</a>
+      </td>
     `;
 
     return tr;
   }
 
   // ---------------------------------------------------------------------------
-  // Row expand: lazy-load instance detail
+  // Row expand: lazy-load instance detail + equivalents (Stage 8)
   // ---------------------------------------------------------------------------
+  let equivalentsData: Record<string, any> | null = null;
+
+  async function loadEquivalents(): Promise<Record<string, any>> {
+    if (equivalentsData) return equivalentsData;
+    try {
+      const res = await fetch('/data/equivalents.json');
+      if (res.ok) equivalentsData = await res.json();
+    } catch {
+      equivalentsData = {};
+    }
+    return equivalentsData ?? {};
+  }
+
   tableBody.addEventListener('click', async (e: MouseEvent) => {
     const btn = (e.target as Element).closest('.expand-btn') as HTMLButtonElement | null;
     if (!btn) return;
@@ -416,15 +536,18 @@
     detailRow.className = 'detail-row bg-gray-50';
     detailRow.innerHTML = `
       <td></td>
-      <td colspan="9" class="px-6 py-4">
+      <td colspan="12" class="px-6 py-4">
         <div class="detail-content text-sm text-gray-500 italic">Loading detail...</div>
       </td>
     `;
     tr.insertAdjacentElement('afterend', detailRow);
 
     try {
-      const detail: V3InstanceFile = await loadInstance(provider, instanceId);
-      renderDetail(detailRow.querySelector('.detail-content') as HTMLElement, detail);
+      const [detail, equivMap] = await Promise.all([
+        loadInstance(provider, instanceId) as Promise<V3InstanceFile>,
+        loadEquivalents(),
+      ]);
+      renderDetail(detailRow.querySelector('.detail-content') as HTMLElement, detail, equivMap);
     } catch (err) {
       const dc = detailRow.querySelector('.detail-content') as HTMLElement;
       if (dc) dc.textContent = `Failed to load detail: ${err}`;
@@ -433,7 +556,7 @@
     }
   });
 
-  function renderDetail(container: HTMLElement, detail: V3InstanceFile) {
+  function renderDetail(container: HTMLElement, detail: V3InstanceFile, equivMap: Record<string, any>) {
     const commitmentRows = (detail.commitments ?? [])
       .sort((a, b) => {
         const termOrder: Record<string, number> = { '1yr': 0, '3yr': 1 };
@@ -469,6 +592,36 @@
           .join('')
       : '';
 
+    // Equivalents row (Stage 8) — look up by "{provider}/{family}"
+    const equivKey = `${detail.provider}/${detail.family}`;
+    const equivEntry = equivMap[equivKey];
+    let equivHtml = '';
+    if (equivEntry?.equivalents) {
+      const providerOrder = ['aws', 'azure', 'gcp', 'oci'].filter((p) => p !== detail.provider);
+      const equivCells = providerOrder.map((p) => {
+        const eq = equivEntry.equivalents[p];
+        if (!eq) return `<div class="text-xs text-gray-400">${p.toUpperCase()}: —</div>`;
+        const distLabel = eq.distance < 0.1 ? 'Very close' : eq.distance < 0.5 ? 'Close' : 'Approximate';
+        const compareUrl = `/compare?items=${detail.provider}:${encodeURIComponent(detail.instanceType)},${p}:${encodeURIComponent(eq.family)}`;
+        return `
+          <div class="flex items-center space-x-1">
+            <span class="text-xs font-medium text-gray-600 uppercase">${p}:</span>
+            <a href="${compareUrl}" class="text-xs text-primary-600 hover:underline font-mono">${eq.family}</a>
+            <span class="text-xs text-gray-400">(${distLabel})</span>
+          </div>
+        `;
+      });
+      equivHtml = `
+        <div class="mt-4 pt-4 border-t border-gray-200">
+          <h4 class="font-semibold text-gray-800 mb-2 text-sm">Closest Equivalents (by family)</h4>
+          <div class="flex flex-wrap gap-4">
+            ${equivCells.join('')}
+          </div>
+          <p class="text-xs text-gray-400 mt-1">Matched by closest vCPU + RAM ratio. <a href="/compare?items=${detail.provider}:${encodeURIComponent(detail.instanceType)}" class="text-primary-600 hover:underline">Compare side-by-side</a></p>
+        </div>
+      `;
+    }
+
     container.innerHTML = `
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
@@ -485,6 +638,8 @@
               ${detail.networkPerformance ? `<tr><td class="pr-4 py-0.5 text-gray-500">Network</td><td class="text-gray-800">${detail.networkPerformance}</td></tr>` : ''}
               ${detail.gpu ? `<tr><td class="pr-4 py-0.5 text-gray-500">GPU</td><td class="text-gray-800">${detail.gpu.count}x ${detail.gpu.type} (${detail.gpu.memoryGiB} GiB)</td></tr>` : ''}
               <tr><td class="pr-4 py-0.5 text-gray-500">On-Demand</td><td class="text-gray-800 font-medium">$${detail.priceUSD_hourly.toFixed(4)}/hr</td></tr>
+              <tr><td class="pr-4 py-0.5 text-gray-500">$/vCPU/hr</td><td class="text-gray-800">$${(detail.priceUSD_hourly / (detail.vCPU || 1)).toFixed(5)}</td></tr>
+              <tr><td class="pr-4 py-0.5 text-gray-500">$/GiB/hr</td><td class="text-gray-800">$${(detail.priceUSD_hourly / (detail.memoryGiB || 1)).toFixed(5)}</td></tr>
               <tr><td class="pr-4 py-0.5 text-gray-500">Regions</td><td class="text-gray-800">${(detail.regions ?? []).length} available</td></tr>
               <tr><td class="pr-4 py-0.5 text-gray-500">Updated</td><td class="text-gray-500">${detail.lastUpdated?.split('T')[0] ?? '-'}</td></tr>
             </tbody>
@@ -525,6 +680,8 @@
         </table>
       </div>
       ` : ''}
+
+      ${equivHtml}
     `;
   }
 

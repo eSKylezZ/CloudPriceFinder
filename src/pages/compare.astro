@@ -1,0 +1,514 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Side-by-Side Compare — CloudPriceFinder"
+  description="Compare cloud instances side-by-side across AWS, Azure, GCP, and OCI. View vCPU, memory, GPU, pricing and commitment options in one view."
+>
+  <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-8 flex-1">
+
+    <!-- Page header -->
+    <div class="mb-6">
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">Side-by-Side Comparison</h1>
+      <p class="text-gray-600">
+        Compare up to 4 instances across providers. Use the search boxes to add instances, or
+        follow a <span class="font-mono text-sm bg-gray-100 px-1 rounded">?items=aws:m7i.xlarge,azure:Standard_D4s_v5</span> deep-link.
+      </p>
+    </div>
+
+    <!-- Instance picker -->
+    <div class="bg-white rounded-lg shadow-sm border p-4 mb-6">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-sm font-semibold text-gray-700 uppercase tracking-wider">Instances to compare (max 4)</h2>
+        <a href="/" class="text-sm text-primary-600 hover:underline">Back to table</a>
+      </div>
+      <div class="flex flex-wrap gap-3 items-end" id="picker-row">
+        <!-- Slots rendered by JS -->
+      </div>
+    </div>
+
+    <!-- Loading state -->
+    <div id="compare-loading" class="hidden p-8 text-center">
+      <svg class="animate-spin mx-auto h-8 w-8 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+        </path>
+      </svg>
+      <p class="text-gray-500 text-sm mt-3">Loading instance data...</p>
+    </div>
+
+    <!-- Error state -->
+    <div id="compare-error" class="hidden bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm"></div>
+
+    <!-- Empty state -->
+    <div id="compare-empty" class="bg-gray-50 border border-dashed border-gray-300 rounded-lg p-12 text-center">
+      <svg class="mx-auto h-12 w-12 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+      </svg>
+      <p class="text-gray-500 font-medium">Search for instances above to begin comparing</p>
+      <p class="text-gray-400 text-sm mt-1">Or use a deep link like <span class="font-mono bg-white border border-gray-200 px-1 rounded text-xs">/compare?items=aws:m7i.xlarge,azure:Standard_D4s_v5</span></p>
+    </div>
+
+    <!-- Comparison table -->
+    <div id="compare-table-wrapper" class="hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm border-collapse" id="compare-table">
+          <thead id="compare-thead"></thead>
+          <tbody id="compare-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    import { loadInstance } from '../lib/data-loader';
+    import type { V3InstanceFile } from '../types';
+
+    // -------------------------------------------------------------------------
+    // Types
+    // -------------------------------------------------------------------------
+    interface PickedInstance {
+      provider: string;
+      instanceType: string;
+      detail: V3InstanceFile | null;
+      error?: string;
+    }
+
+    // -------------------------------------------------------------------------
+    // State
+    // -------------------------------------------------------------------------
+    const MAX_ITEMS = 4;
+    let pickedItems: PickedInstance[] = [];
+    let activeCommitmentTerm: 'on-demand' | '1yr' | '3yr' = 'on-demand';
+
+    // -------------------------------------------------------------------------
+    // DOM refs
+    // -------------------------------------------------------------------------
+    const pickerRow = document.getElementById('picker-row') as HTMLDivElement;
+    const compareLoading = document.getElementById('compare-loading') as HTMLDivElement;
+    const compareError = document.getElementById('compare-error') as HTMLDivElement;
+    const compareEmpty = document.getElementById('compare-empty') as HTMLDivElement;
+    const compareTableWrapper = document.getElementById('compare-table-wrapper') as HTMLDivElement;
+    const compareThead = document.getElementById('compare-thead') as HTMLTableSectionElement;
+    const compareTbody = document.getElementById('compare-tbody') as HTMLTableSectionElement;
+
+    // -------------------------------------------------------------------------
+    // Parse deep-link items from query string
+    // -------------------------------------------------------------------------
+    function parseItemsParam(): PickedInstance[] {
+      const params = new URLSearchParams(window.location.search);
+      const raw = params.get('items') ?? '';
+      if (!raw) return [];
+      return raw
+        .split(',')
+        .slice(0, MAX_ITEMS)
+        .map((part) => {
+          const colonIdx = part.indexOf(':');
+          if (colonIdx < 1) return null;
+          const provider = part.slice(0, colonIdx).trim().toLowerCase();
+          const instanceType = decodeURIComponent(part.slice(colonIdx + 1).trim());
+          if (!provider || !instanceType) return null;
+          return { provider, instanceType, detail: null };
+        })
+        .filter(Boolean) as PickedInstance[];
+    }
+
+    // -------------------------------------------------------------------------
+    // Update URL without reloading
+    // -------------------------------------------------------------------------
+    function updateURL() {
+      const items = pickedItems
+        .map((p) => `${p.provider}:${encodeURIComponent(p.instanceType)}`)
+        .join(',');
+      const url = items ? `${window.location.pathname}?items=${items}` : window.location.pathname;
+      window.history.replaceState({}, '', url);
+    }
+
+    // -------------------------------------------------------------------------
+    // Render the picker slots
+    // -------------------------------------------------------------------------
+    function renderPicker() {
+      pickerRow.innerHTML = '';
+
+      pickedItems.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = 'flex items-center space-x-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2';
+        const providerColor: Record<string, string> = {
+          aws: 'bg-orange-100 text-orange-800',
+          azure: 'bg-blue-100 text-blue-800',
+          gcp: 'bg-green-100 text-green-800',
+          oci: 'bg-purple-100 text-purple-800',
+        };
+        div.innerHTML = `
+          <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${providerColor[item.provider] ?? 'bg-gray-100 text-gray-700'}">
+            ${item.provider.toUpperCase()}
+          </span>
+          <span class="text-sm font-mono text-gray-800">${item.instanceType}</span>
+          ${item.error ? `<span class="text-xs text-red-600" title="${item.error}">!</span>` : ''}
+          <button class="remove-item-btn text-gray-400 hover:text-red-500 focus:outline-none"
+            data-idx="${idx}" title="Remove">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        `;
+        pickerRow.appendChild(div);
+      });
+
+      // Add-instance slot (if room remains)
+      if (pickedItems.length < MAX_ITEMS) {
+        const addDiv = document.createElement('div');
+        addDiv.className = 'flex items-center space-x-2';
+        addDiv.innerHTML = `
+          <div class="relative">
+            <input type="text" id="add-instance-input"
+              placeholder="e.g. aws:m7i.xlarge"
+              class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 w-52"
+              autocomplete="off" spellcheck="false" />
+          </div>
+          <button id="add-instance-btn"
+            class="px-3 py-2 bg-primary-600 text-white text-sm rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500">
+            Add
+          </button>
+        `;
+        pickerRow.appendChild(addDiv);
+
+        // Wire up add
+        const input = document.getElementById('add-instance-input') as HTMLInputElement;
+        const btn = document.getElementById('add-instance-btn') as HTMLButtonElement;
+
+        const doAdd = async () => {
+          const val = input.value.trim();
+          if (!val) return;
+          const colonIdx = val.indexOf(':');
+          if (colonIdx < 1) {
+            showError('Format: provider:instanceType (e.g. aws:m7i.xlarge)');
+            return;
+          }
+          const provider = val.slice(0, colonIdx).toLowerCase();
+          const instanceType = val.slice(colonIdx + 1).trim();
+          await addItem(provider, instanceType);
+          input.value = '';
+        };
+
+        btn.addEventListener('click', doAdd);
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') doAdd();
+        });
+      }
+
+      // Wire up remove buttons
+      pickerRow.querySelectorAll('.remove-item-btn').forEach((b) => {
+        b.addEventListener('click', () => {
+          const idx = parseInt((b as HTMLButtonElement).dataset.idx ?? '0', 10);
+          pickedItems.splice(idx, 1);
+          updateURL();
+          renderPicker();
+          renderCompareTable();
+        });
+      });
+    }
+
+    // -------------------------------------------------------------------------
+    // Add an item
+    // -------------------------------------------------------------------------
+    async function addItem(provider: string, instanceType: string) {
+      if (pickedItems.length >= MAX_ITEMS) return;
+      // De-duplicate
+      if (pickedItems.some((p) => p.provider === provider && p.instanceType === instanceType)) return;
+
+      const item: PickedInstance = { provider, instanceType, detail: null };
+      pickedItems.push(item);
+      updateURL();
+      renderPicker();
+
+      compareLoading.classList.remove('hidden');
+      compareEmpty.classList.add('hidden');
+      compareTableWrapper.classList.add('hidden');
+
+      try {
+        item.detail = await loadInstance(provider, instanceType) as V3InstanceFile;
+      } catch (err) {
+        item.error = String(err);
+        showError(`Could not load ${provider}:${instanceType}. Check that the instance type is correct.`);
+      }
+
+      compareLoading.classList.add('hidden');
+      renderPicker();
+      renderCompareTable();
+    }
+
+    // -------------------------------------------------------------------------
+    // Show/hide error banner
+    // -------------------------------------------------------------------------
+    function showError(msg: string) {
+      compareError.textContent = msg;
+      compareError.classList.remove('hidden');
+      setTimeout(() => compareError.classList.add('hidden'), 6000);
+    }
+
+    // -------------------------------------------------------------------------
+    // Render the comparison table
+    // -------------------------------------------------------------------------
+    function formatUSD(n: number | undefined | null, d = 4): string {
+      if (n == null || !isFinite(n)) return '-';
+      return `$${n.toFixed(d)}`;
+    }
+
+    function getEffectivePrice(detail: V3InstanceFile, term: 'on-demand' | '1yr' | '3yr'): number | null {
+      if (term === 'on-demand') return detail.priceUSD_hourly ?? null;
+      const matches = (detail.commitments ?? []).filter((c) => c.term === term);
+      if (!matches.length) return null;
+      return Math.min(...matches.map((c) => c.effectiveHourlyUSD));
+    }
+
+    function bestSavingsPct(detail: V3InstanceFile, term: 'on-demand' | '1yr' | '3yr'): number | null {
+      if (term === 'on-demand') return null;
+      const matches = (detail.commitments ?? []).filter((c) => c.term === term);
+      if (!matches.length) return null;
+      return Math.max(...matches.map((c) => c.savingsVsOnDemandPct));
+    }
+
+    const providerBadge: Record<string, string> = {
+      aws: 'bg-orange-100 text-orange-800',
+      azure: 'bg-blue-100 text-blue-800',
+      gcp: 'bg-green-100 text-green-800',
+      oci: 'bg-purple-100 text-purple-800',
+    };
+
+    function renderCompareTable() {
+      const loaded = pickedItems.filter((p) => p.detail !== null);
+
+      if (loaded.length === 0) {
+        compareTableWrapper.classList.add('hidden');
+        compareEmpty.classList.remove('hidden');
+        return;
+      }
+
+      compareEmpty.classList.add('hidden');
+      compareTableWrapper.classList.remove('hidden');
+
+      // ---- Header row ----
+      compareThead.innerHTML = '';
+      const htr = document.createElement('tr');
+      htr.innerHTML = `<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50 border-b border-gray-200 w-40">Metric</th>`;
+      loaded.forEach((item) => {
+        htr.innerHTML += `
+          <th class="px-4 py-3 text-left text-xs font-medium bg-gray-50 border-b border-gray-200">
+            <div class="flex items-center space-x-2">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${providerBadge[item.provider] ?? 'bg-gray-100 text-gray-700'}">
+                ${item.provider.toUpperCase()}
+              </span>
+              <span class="font-mono text-gray-800 text-sm">${item.instanceType}</span>
+            </div>
+          </th>`;
+      });
+      compareThead.appendChild(htr);
+
+      // ---- Commitment toggle in the compare table ----
+      const toggleRow = document.createElement('tr');
+      toggleRow.innerHTML = `
+        <td class="px-4 py-2 bg-white border-b border-gray-100 text-xs text-gray-500 font-medium uppercase tracking-wider">Pricing term</td>
+        <td colspan="${loaded.length}" class="px-4 py-2 bg-white border-b border-gray-100">
+          <div class="flex items-center space-x-1 bg-gray-100 rounded-lg p-1 w-fit" role="group">
+            <button class="compare-term-btn px-3 py-1 text-sm rounded-md font-medium transition-colors compare-term-active" data-term="on-demand">On-Demand</button>
+            <button class="compare-term-btn px-3 py-1 text-sm rounded-md font-medium transition-colors text-gray-600 hover:bg-white hover:shadow-sm" data-term="1yr">1-Year</button>
+            <button class="compare-term-btn px-3 py-1 text-sm rounded-md font-medium transition-colors text-gray-600 hover:bg-white hover:shadow-sm" data-term="3yr">3-Year</button>
+          </div>
+        </td>
+      `;
+      compareTbody.innerHTML = '';
+      compareTbody.appendChild(toggleRow);
+
+      // Wire toggle
+      compareTbody.querySelectorAll<HTMLButtonElement>('.compare-term-btn').forEach((btn) => {
+        const termVal = btn.dataset.term as 'on-demand' | '1yr' | '3yr';
+        if (termVal === activeCommitmentTerm) {
+          btn.classList.add('compare-term-active');
+          btn.classList.remove('text-gray-600');
+        }
+        btn.addEventListener('click', () => {
+          activeCommitmentTerm = termVal;
+          // Re-render table preserving existing picked items
+          renderCompareTable();
+        });
+      });
+
+      // ---- Data rows ----
+      interface Row {
+        label: string;
+        render: (d: V3InstanceFile) => string;
+        highlight?: 'lower' | 'higher';
+      }
+
+      function mkRow(r: Row): Row { return r; }
+
+      const rows: Row[] = ([
+        mkRow({ label: 'vCPU', render: (d: V3InstanceFile) => String(d.vCPU ?? '-'), highlight: 'higher' }),
+        mkRow({ label: 'Memory', render: (d: V3InstanceFile) => d.memoryGiB != null ? `${d.memoryGiB} GiB` : '-', highlight: 'higher' }),
+        mkRow({ label: 'Architecture', render: (d: V3InstanceFile) => d.architecture ?? '-' }),
+        mkRow({ label: 'GPU', render: (d: V3InstanceFile) => d.gpu ? `${d.gpu.count}x ${d.gpu.type} (${d.gpu.memoryGiB} GiB)` : '-' }),
+        mkRow({ label: 'Storage', render: (d: V3InstanceFile) => d.diskSizeGB ? `${d.diskSizeGB} GB ${d.diskType ?? ''}`.trim() : '-' }),
+        mkRow({ label: 'Network', render: (d: V3InstanceFile) => d.networkPerformance ?? '-' }),
+        mkRow({
+          label: activeCommitmentTerm === 'on-demand' ? '$/hr (On-Demand)' :
+                  activeCommitmentTerm === '1yr' ? '$/hr (1-Year effective)' : '$/hr (3-Year effective)',
+          render: (d: V3InstanceFile) => {
+            const p = getEffectivePrice(d, activeCommitmentTerm);
+            return p != null ? formatUSD(p) : '-';
+          },
+          highlight: 'lower',
+        }),
+        mkRow({
+          label: activeCommitmentTerm !== 'on-demand' ? 'Savings vs On-Demand' : '',
+          render: (d: V3InstanceFile) => {
+            if (activeCommitmentTerm === 'on-demand') return '';
+            const pct = bestSavingsPct(d, activeCommitmentTerm);
+            return pct != null ? `${pct.toFixed(1)}%` : '-';
+          },
+          highlight: 'higher',
+        }),
+        mkRow({
+          label: '$/vCPU/hr',
+          render: (d: V3InstanceFile) => {
+            const p = getEffectivePrice(d, activeCommitmentTerm);
+            if (p == null || !d.vCPU) return '-';
+            const v = p / d.vCPU;
+            return v < 0.001 ? `$${v.toFixed(6)}` : v < 0.01 ? `$${v.toFixed(5)}` : `$${v.toFixed(4)}`;
+          },
+          highlight: 'lower',
+        }),
+        mkRow({
+          label: '$/GiB-RAM/hr',
+          render: (d: V3InstanceFile) => {
+            const p = getEffectivePrice(d, activeCommitmentTerm);
+            if (p == null || !d.memoryGiB) return '-';
+            const v = p / d.memoryGiB;
+            return v < 0.001 ? `$${v.toFixed(6)}` : v < 0.01 ? `$${v.toFixed(5)}` : `$${v.toFixed(4)}`;
+          },
+          highlight: 'lower',
+        }),
+        mkRow({ label: 'On-Demand/mo', render: (d: V3InstanceFile) => d.priceUSD_monthly != null ? formatUSD(d.priceUSD_monthly, 2) : '-', highlight: 'lower' }),
+        mkRow({ label: 'Regions', render: (d: V3InstanceFile) => `${(d.regions ?? []).length}`, highlight: 'higher' }),
+      ] as Row[]).filter((r) => r.label !== '');
+
+      rows.forEach((rowDef, rowIdx) => {
+        // Compute values for highlight logic
+        const values = loaded.map((item) => {
+          if (!item.detail) return null;
+          const text = rowDef.render(item.detail);
+          const num = parseFloat(text.replace(/[$,%]/g, ''));
+          return { text, num: isNaN(num) ? null : num };
+        });
+
+        let bestNum: number | null = null;
+        if (rowDef.highlight) {
+          const nums = values.map((v) => v?.num).filter((n): n is number => n != null);
+          if (nums.length > 0) {
+            bestNum = rowDef.highlight === 'lower' ? Math.min(...nums) : Math.max(...nums);
+          }
+        }
+
+        const tr = document.createElement('tr');
+        tr.className = rowIdx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50';
+
+        let cells = `<td class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-100 whitespace-nowrap">${rowDef.label}</td>`;
+        loaded.forEach((_item, colIdx) => {
+          const val = values[colIdx];
+          const isHighlight = bestNum != null && val?.num != null && val.num === bestNum;
+          const cellClass = isHighlight
+            ? 'bg-green-50 text-green-800 font-semibold'
+            : 'text-gray-800';
+          cells += `<td class="px-4 py-3 text-sm ${cellClass} border-b border-gray-100">${val?.text ?? '-'}</td>`;
+        });
+        tr.innerHTML = cells;
+        compareTbody.appendChild(tr);
+      });
+
+      // ---- 1yr commitment options ----
+      if (activeCommitmentTerm !== 'on-demand') {
+        const spacer = document.createElement('tr');
+        spacer.innerHTML = `<td colspan="${loaded.length + 1}" class="pt-4 pb-1 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider bg-white border-b border-gray-200">Commitment Detail</td>`;
+        compareTbody.appendChild(spacer);
+
+        loaded.forEach((item) => {
+          if (!item.detail) return;
+          const matches = (item.detail.commitments ?? [])
+            .filter((c) => c.term === activeCommitmentTerm)
+            .sort((a, b) => a.effectiveHourlyUSD - b.effectiveHourlyUSD);
+          if (matches.length === 0) return;
+
+          const tr2 = document.createElement('tr');
+          tr2.className = 'bg-white';
+          let cells2 = `<td class="px-4 py-2 text-xs font-medium text-gray-400 align-top border-b border-gray-100 whitespace-nowrap">${item.provider.toUpperCase()}: ${item.instanceType}</td>`;
+          // Fill empty cells for other columns
+          for (let i = 0; i < loaded.length; i++) {
+            if (loaded[i] !== item) {
+              cells2 += `<td class="border-b border-gray-100"></td>`;
+            } else {
+              cells2 += `<td class="px-4 py-2 text-xs border-b border-gray-100">
+                <table class="min-w-full text-xs">
+                  <thead><tr class="text-gray-400 border-b"><th class="pr-3 pb-1 text-left">Payment</th><th class="pr-3 pb-1 text-left">Type</th><th class="pr-3 pb-1 text-left">Effective/hr</th><th class="pb-1 text-left">Save</th></tr></thead>
+                  <tbody>${matches.map((c) => `
+                    <tr>
+                      <td class="pr-3 py-0.5 text-gray-600">${c.payment}</td>
+                      <td class="pr-3 py-0.5 text-gray-600">${c.product}</td>
+                      <td class="pr-3 py-0.5 font-medium text-gray-900">$${c.effectiveHourlyUSD.toFixed(4)}</td>
+                      <td class="text-green-700">${c.savingsVsOnDemandPct.toFixed(1)}%</td>
+                    </tr>
+                  `).join('')}</tbody>
+                </table>
+              </td>`;
+            }
+          }
+          tr2.innerHTML = cells2;
+          compareTbody.appendChild(tr2);
+        });
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // Style for active commitment term button
+    // -------------------------------------------------------------------------
+    // Dynamically inject shared compare-term-active style
+    const style = document.createElement('style');
+    style.textContent = `.compare-term-active { background-color: white; box-shadow: 0 1px 3px 0 rgba(0,0,0,.1),0 1px 2px 0 rgba(0,0,0,.06); color: #1d4ed8; font-weight: 600; }`;
+    document.head.appendChild(style);
+
+    // -------------------------------------------------------------------------
+    // Bootstrap
+    // -------------------------------------------------------------------------
+    async function init() {
+      const initItems = parseItemsParam();
+      if (initItems.length > 0) {
+        pickedItems = initItems;
+        renderPicker();
+        compareLoading.classList.remove('hidden');
+        compareEmpty.classList.add('hidden');
+
+        await Promise.all(
+          pickedItems.map(async (item) => {
+            try {
+              item.detail = await loadInstance(item.provider, item.instanceType) as V3InstanceFile;
+            } catch (err) {
+              item.error = String(err);
+            }
+          })
+        );
+
+        compareLoading.classList.add('hidden');
+        renderPicker();
+        renderCompareTable();
+      } else {
+        renderPicker();
+        renderCompareTable();
+      }
+    }
+
+    init();
+  </script>
+</BaseLayout>

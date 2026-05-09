@@ -246,15 +246,15 @@
 
 ## Stage 8 — Comparison Features
 
-- [ ] **Goal:** Make the site genuinely useful for comparing across the 4 clouds, not just a filtering UI.
+- [x] **Goal:** Make the site genuinely useful for comparing across the 4 clouds, not just a filtering UI.
 
 **Tasks**
-- [ ] Add a **commitment toggle** in the table header (radio: On-Demand / 1-Year / 3-Year). Toggling recomputes displayed prices client-side from already-loaded family data — no extra fetch.
-- [ ] Add a **Side-by-Side Compare view** at `src/pages/compare.astro`:
+- [x] Add a **commitment toggle** in the table header (radio: On-Demand / 1-Year / 3-Year). Toggling recomputes displayed prices client-side from already-loaded family data — no extra fetch.
+- [x] Add a **Side-by-Side Compare view** at `src/pages/compare.astro`:
   - User picks 2-4 instances (across providers) from a search box
   - Renders a table with rows: vCPU, RAM, GPU, $/hr (on-demand), $/hr (1yr), $/hr (3yr), $/vCPU/hr, $/GiB-RAM/hr
-- [ ] Add an **Equivalents row** under each instance: "Closest match in AWS / Azure / GCP / OCI" using `data/equivalents.json` (built in Stage 6).
-- [ ] Display the normalized metrics ($/vCPU/hr, $/GiB-RAM/hr) prominently as a sortable column in the main table.
+- [x] Add an **Equivalents row** under each instance: "Closest match in AWS / Azure / GCP / OCI" using `data/equivalents.json` (built in Stage 6).
+- [x] Display the normalized metrics ($/vCPU/hr, $/GiB-RAM/hr) prominently as a sortable column in the main table.
 
 **Verification**
 - Toggling 1yr in the table changes prices visibly (and DOM-only — no network)
@@ -262,8 +262,8 @@
 - Equivalents resolve to non-empty matches for at least the 20 most common families
 
 **Definition of Done**
-- [ ] No layout shift on commitment toggle (CLS in Lighthouse)
-- [ ] PR: `v3/stage-8-compare`
+- [x] No layout shift on commitment toggle (CLS in Lighthouse)
+- [x] PR: `v3/stage-8-compare`
 
 ---
 
