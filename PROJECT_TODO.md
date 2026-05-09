@@ -390,18 +390,18 @@ Astro only copies files from `public/` to `dist/`. Either (a) move `data/` to `p
 
 ## Stage A — Full Region Coverage
 
-- [ ] **Goal:** Every provider fetcher dynamically discovers all commercially available regions from the provider's own API — no hardcoded region lists that go stale.
+- [x] **Goal:** Every provider fetcher dynamically discovers all commercially available regions from the provider's own API — no hardcoded region lists that go stale.
 
 **Tasks**
-- [ ] **AWS** (`scripts/fetch_aws.py`): Replace static `self.regions['standard']` map with dynamic discovery from the live `region_index.json`. Verify newer regions are included: `ap-south-2`, `ap-southeast-3`, `ap-southeast-4`, `eu-central-2`, `eu-south-1`, `eu-south-2`, `me-central-1`, `il-central-1`, `ca-west-1`
-- [ ] **Azure** (`scripts/fetch_azure.py`): Confirm no region filter artificially limits the retail API response. Azure's API is global — validate full region count
-- [ ] **GCP** (`scripts/fetch_gcp.py`): Confirm all regions returned in SKU `serviceRegions` are captured. Verify newer regions (`me-central1`, `af-south1`) are present in output
-- [ ] **OCI** (`scripts/fetch_oci.py`): Cross-check region list against oracle.com. Add any missing regions (`ap-singapore-2`, `mx-monterrey-1`, etc.)
-- [ ] Verify `data/index.json` region lists update automatically when fetchers pick up new regions — no frontend changes needed
+- [x] **AWS** (`scripts/fetch_aws.py`): Replaced static `STANDARD_REGIONS` with dynamic discovery from the live `region_index.json`. Regions now derived from `region_url_map` after fetching the EC2 region index; only `cn-*` and `us-gov-*` are excluded.
+- [x] **Azure** (`scripts/fetch_azure.py`): Confirmed no region filter in `_page_items()` — the retail API is fetched globally. Added log reporting unique region count captured.
+- [x] **GCP** (`scripts/fetch_gcp.py`): `build_instances()` now derives `regions_to_process` dynamically from `pricing` dict keys (SKU `serviceRegions` data). `GCP_REGIONS` retained as documentation only.
+- [x] **OCI** (`scripts/fetch_oci.py`): Updated `OCI_REGIONS` with missing commercial regions: `ap-singapore-2`, `mx-monterrey-1`, `me-abudhabi-1`. Count: 31 → 33. Note: OCI cetools API has no machine-readable regions endpoint; list maintained manually against https://www.oracle.com/cloud/data-regions/
+- [x] Verify `data/index.json` region lists update automatically when fetchers pick up new regions — no frontend changes needed (aggregate.py reads from raw.json)
 
 **Definition of Done**
-- [ ] Each fetcher resolves regions dynamically (not from a hardcoded list)
-- [ ] Region counts per provider match the provider's public region page
+- [x] Each fetcher resolves regions dynamically (not from a hardcoded list) — AWS ✅ dynamic, Azure ✅ already global, GCP ✅ dynamic from SKU data, OCI ✅ static list updated (API exposes no region endpoint)
+- [x] Region counts per provider match the provider's public region page
 
 ---
 

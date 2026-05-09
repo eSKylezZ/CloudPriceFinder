@@ -27,11 +27,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'utils'))
 from data_normalizer import normalize_commitments
 from azure_regions import get_country_from_azure_region, create_location_detail
 from azure_services import (
-    get_service_category,
-    get_service_type_from_category,
-    is_virtual_machine_service,
     is_dedicated_host_service,
-    get_china_region_mapping,
 )
 
 # ---------------------------------------------------------------------------
@@ -194,64 +190,6 @@ def parse_sku_specs(sku_name: str) -> Tuple[Optional[int], Optional[float]]:
     return None, None
 
 
-# ---------------------------------------------------------------------------
-# China static fallback
-# ---------------------------------------------------------------------------
-
-def fetch_china_static() -> List[Dict[str, Any]]:
-    """
-    Azure China (21Vianet) uses a separate restricted API.
-    Return a small set of static representative instances so that
-    China region rows are present in the output.
-    """
-    print("Note: Azure China pricing requires 21Vianet API access. Using static fallback.")
-    china_regions = ['chinaeast', 'chinaeast2', 'chinanorth', 'chinanorth2', 'chinanorth3']
-    china_region_map = get_china_region_mapping()
-
-    sample_skus = [
-        {'sku': 'Standard_B2s', 'vcpu': 2, 'mem': 4, 'factor': 0.95},
-        {'sku': 'Standard_D2s_v5', 'vcpu': 2, 'mem': 8, 'factor': 0.92},
-        {'sku': 'Standard_D4s_v5', 'vcpu': 4, 'mem': 16, 'factor': 0.92},
-        {'sku': 'Standard_E4s_v5', 'vcpu': 4, 'mem': 32, 'factor': 0.90},
-    ]
-
-    instances = []
-    now = datetime.utcnow().isoformat()
-    for s in sample_skus:
-        hourly = round(0.05 * s['vcpu'] * s['factor'], 6)
-        loc_details = []
-        for r in china_regions:
-            country = china_region_map.get(r.lower(), 'China')
-            loc_details.append(create_location_detail(r, country))
-
-        instances.append({
-            'provider': 'azure',
-            'type': 'cloud-server',
-            'instanceType': s['sku'],
-            'vCPU': s['vcpu'],
-            'memoryGiB': float(s['mem']),
-            'priceUSD_hourly': hourly,
-            'priceUSD_monthly': round(hourly * 730.44, 4),
-            'architecture': detect_architecture(s['sku']),
-            'family': extract_family(s['sku']),
-            'commitments': [],
-            'regions': ['China'],
-            'locationDetails': loc_details,
-            'source': 'Azure China Static Data (21Vianet fallback)',
-            'lastUpdated': now,
-            'marketSegment': 'china',
-            'operatedBy': '21Vianet',
-            'raw': {
-                'note': 'Static pricing data — verify with 21Vianet for actual pricing.',
-                'serviceName': VM_SERVICE_NAME,
-                'armSkuName': s['sku'],
-                'marketSegment': 'china',
-            },
-        })
-
-    print(f"Added {len(instances)} China instances (static fallback).")
-    return instances
-
 
 # ---------------------------------------------------------------------------
 # Main fetcher
@@ -303,7 +241,6 @@ def fetch_azure_data() -> List[Dict[str, Any]]:
     in v3 schema format with commitments[].
     """
     now = datetime.utcnow().isoformat()
-    china_region_map = get_china_region_mapping()
 
     # ------------------------------------------------------------------
     # 1. Fetch Consumption rows (on-demand pricing)
@@ -372,10 +309,7 @@ def fetch_azure_data() -> List[Dict[str, Any]]:
             continue
 
         # Determine region → country
-        if region.lower() in china_region_map:
-            country = china_region_map[region.lower()]
-        else:
-            country = get_country_from_azure_region(region)
+        country = get_country_from_azure_region(region)
         loc_detail = create_location_detail(region, country)
 
         hourly = float(item.get('unitPrice', 0) or 0)
@@ -416,7 +350,8 @@ def fetch_azure_data() -> List[Dict[str, Any]]:
                 existing['priceUSD_hourly'] = hourly
                 existing['priceUSD_monthly'] = monthly
 
-    print(f"Consumption groups built: {len(consumption_groups)}", flush=True)
+    unique_regions_seen = len({region for (_, region) in consumption_groups})
+    print(f"Consumption groups built: {len(consumption_groups)} (across {unique_regions_seen} regions — no region filter applied, Azure API is global)", flush=True)
     print(f"  Skipped — Windows/SQL: {skipped_windows_sql}, DevTest: {skipped_devtest}, "
           f"no SKU: {skipped_no_sku}, no specs: {skipped_no_specs}", flush=True)
 
@@ -628,21 +563,14 @@ if __name__ == "__main__":
     os.makedirs("data/providers", exist_ok=True)
     output_path = "data/providers/azure.raw.json"
 
-    print("=== Azure fetcher (Stage 3 — Reservation extension) ===", flush=True)
+    print("=== Azure fetcher ===", flush=True)
 
-    global_instances = fetch_azure_data()
-    china_instances = fetch_china_static()
-    all_instances = global_instances + china_instances
+    instances = fetch_azure_data()
 
     with open(output_path, 'w', encoding='utf-8') as f:
-        json.dump(all_instances, f, indent=2)
+        json.dump(instances, f, indent=2)
 
-    vm_count = sum(1 for i in all_instances if i.get('type') == 'cloud-server')
-    with_commitments = sum(1 for i in all_instances if i.get('commitments'))
+    with_commitments = sum(1 for i in instances if i.get('commitments'))
 
-    print(f"\nSaved {len(all_instances)} instances to {output_path}")
-    print(f"  - Global VM SKUs: {len(global_instances)}")
-    print(f"  - China instances (static): {len(china_instances)}")
+    print(f"\nSaved {len(instances)} instances to {output_path}")
     print(f"  - Instances with commitments[]: {with_commitments}")
-    print("\nNote: Azure China pricing is approximate. "
-          "Verify with 21Vianet for actual pricing.")

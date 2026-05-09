@@ -20,12 +20,14 @@
   "dependencies": {
     "@astrojs/check": "^0.9.9",
     "@astrojs/sitemap": "^3.7.2",
-    "@rollup/rollup-win32-x64-msvc": "^4.60.3",
-    "@tailwindcss/oxide-win32-x64-msvc": "^4.3.0",
     "@tailwindcss/vite": "^4.3.0",
     "astro": "^6.3.1",
-    "lightningcss-win32-x64-msvc": "^1.32.0",
     "tailwindcss": "^4.3.0"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-win32-x64-msvc": "^4.60.3",
+    "@tailwindcss/oxide-win32-x64-msvc": "^4.3.0",
+    "lightningcss-win32-x64-msvc": "^1.32.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.59.2",
