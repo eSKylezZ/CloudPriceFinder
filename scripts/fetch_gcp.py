@@ -650,8 +650,9 @@ def _extract_service_regions(pricing_info: List[Dict[str, Any]]) -> List[str]:
 # SKU classification helpers
 # ---------------------------------------------------------------------------
 
-# All standard commercial GCP regions in a flat list (for fallback)
-_ALL_REGIONS = GCP_REGIONS[:]
+# GCP_REGIONS is kept as a documentation reference only.
+# Region discovery in build_instances() is now driven by serviceRegions
+# fields returned by the Billing API, so new GCP regions appear automatically.
 
 # ---------------------------------------------------------------------------
 # CUD description family token → machine family prefix mapping.
@@ -1112,7 +1113,13 @@ def build_instances(
     Returns:
         List of CloudInstance dicts, one per machine type.
     """
-    regions_to_process = target_regions if target_regions else GCP_REGIONS
+    if target_regions is not None:
+        regions_to_process = target_regions
+    else:
+        # Derive all regions dynamically from SKU serviceRegions data collected by the
+        # Billing API. The "global" sentinel covers SKUs with no serviceRegions — exclude it.
+        regions_to_process = sorted(r for r in pricing.keys() if r != "global")
+        logger.info(f"Dynamically discovered {len(regions_to_process)} regions from GCP Billing API SKU data")
     instances: List[Dict[str, Any]] = []
     now = datetime.now(timezone.utc).isoformat()
 

@@ -57,41 +57,10 @@ PRICING_BASE = "https://pricing.us-east-1.amazonaws.com"
 OFFER_INDEX_URL = f"{PRICING_BASE}/offers/v1.0/aws/index.json"
 EC2_REGION_INDEX_PATH = "/offers/v1.0/aws/AmazonEC2/current/region_index.json"
 
-# Standard commercial AWS regions we include in v1.
-# Excludes: cn-north-1, cn-northwest-1 (China), us-gov-* (GovCloud).
-STANDARD_REGIONS: List[str] = [
-    "af-south-1",
-    "ap-east-1",
-    "ap-northeast-1",
-    "ap-northeast-2",
-    "ap-northeast-3",
-    "ap-south-1",
-    "ap-south-2",
-    "ap-southeast-1",
-    "ap-southeast-2",
-    "ap-southeast-3",
-    "ap-southeast-4",
-    "ap-southeast-5",
-    "ca-central-1",
-    "ca-west-1",
-    "eu-central-1",
-    "eu-central-2",
-    "eu-north-1",
-    "eu-south-1",
-    "eu-south-2",
-    "eu-west-1",
-    "eu-west-2",
-    "eu-west-3",
-    "il-central-1",
-    "me-central-1",
-    "me-south-1",
-    "mx-central-1",
-    "sa-east-1",
-    "us-east-1",
-    "us-east-2",
-    "us-west-1",
-    "us-west-2",
-]
+# Regions excluded from v1 — separate pricing API endpoints.
+# Kept here for documentation; discovery is now fully dynamic from the live
+# EC2 region index. Any region code starting with these prefixes is skipped.
+_EXCLUDED_REGION_PREFIXES = ("cn-", "us-gov-")
 
 # OS filter — only Linux on-demand/reserved (RunInstances) for v1
 INCLUDED_OS = {"Linux"}
@@ -729,20 +698,8 @@ def fetch_aws_data(
     Returns:
         List of normalised instance dicts.
     """
-    if regions is None:
-        regions = STANDARD_REGIONS
-    else:
-        # Filter out China/GovCloud — document exclusion
-        filtered = []
-        for r in regions:
-            if r.startswith("cn-") or r.startswith("us-gov-"):
-                logger.warning(
-                    f"Skipping {r}: China and GovCloud regions use a separate pricing API "
-                    "and are excluded from v1 (see PROJECT_TODO.md 'Out of scope')."
-                )
-            else:
-                filtered.append(r)
-        regions = filtered
+    # Explicit regions from --regions flag; None means discover dynamically.
+    explicit_regions = regions
 
     session = _make_session()
 
@@ -773,6 +730,24 @@ def fetch_aws_data(
             region_url_map[region_code] = PRICING_BASE + current_version_url
 
     logger.info(f"EC2 region index has {len(region_url_map)} regions")
+
+    # Determine which regions to process — discover dynamically when no --regions flag given.
+    if explicit_regions is None:
+        regions = sorted(
+            code for code in region_url_map
+            if not any(code.startswith(pfx) for pfx in _EXCLUDED_REGION_PREFIXES)
+        )
+        logger.info(f"Dynamically discovered {len(regions)} standard commercial regions from EC2 region index")
+    else:
+        regions = []
+        for r in explicit_regions:
+            if any(r.startswith(pfx) for pfx in _EXCLUDED_REGION_PREFIXES):
+                logger.warning(
+                    f"Skipping {r}: China and GovCloud regions use a separate pricing API "
+                    "and are excluded from v1 (see PROJECT_TODO.md 'Out of scope')."
+                )
+            else:
+                regions.append(r)
 
     # Step 3: Process each requested region
     per_region: Dict[str, List[Dict[str, Any]]] = {}

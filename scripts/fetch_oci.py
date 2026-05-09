@@ -71,14 +71,24 @@ VM_CATEGORIES = {
     "Compute - GPU",
 }
 
-# OCI regions for v1 (standard commercial only)
+# OCI standard commercial regions.
+# OCI pricing is globally uniform — this list is informational (which regions exist).
+# The cetools public API does not expose a machine-readable regions endpoint, so
+# this list is maintained manually. Authoritative source:
+#   https://www.oracle.com/cloud/data-regions/
 OCI_REGIONS: List[Dict[str, str]] = [
+    # Americas
     {"code": "us-ashburn-1",    "name": "US East (Ashburn)",              "country": "United States", "countryCode": "US"},
     {"code": "us-phoenix-1",    "name": "US West (Phoenix)",              "country": "United States", "countryCode": "US"},
     {"code": "us-sanjose-1",    "name": "US West (San Jose)",             "country": "United States", "countryCode": "US"},
     {"code": "us-chicago-1",    "name": "US Midwest (Chicago)",           "country": "United States", "countryCode": "US"},
     {"code": "ca-toronto-1",    "name": "Canada Southeast (Toronto)",     "country": "Canada",        "countryCode": "CA"},
     {"code": "ca-montreal-1",   "name": "Canada Southeast (Montreal)",    "country": "Canada",        "countryCode": "CA"},
+    {"code": "sa-saopaulo-1",   "name": "Brazil East (Sao Paulo)",        "country": "Brazil",        "countryCode": "BR"},
+    {"code": "sa-vinhedo-1",    "name": "Brazil Southeast (Vinhedo)",     "country": "Brazil",        "countryCode": "BR"},
+    {"code": "mx-queretaro-1",  "name": "Mexico Central (Queretaro)",     "country": "Mexico",        "countryCode": "MX"},
+    {"code": "mx-monterrey-1",  "name": "Mexico Northeast (Monterrey)",   "country": "Mexico",        "countryCode": "MX"},
+    # Europe
     {"code": "eu-frankfurt-1",  "name": "Germany Central (Frankfurt)",    "country": "Germany",       "countryCode": "DE"},
     {"code": "eu-zurich-1",     "name": "Switzerland North (Zurich)",     "country": "Switzerland",   "countryCode": "CH"},
     {"code": "eu-amsterdam-1",  "name": "Netherlands Northwest (Amsterdam)", "country": "Netherlands", "countryCode": "NL"},
@@ -87,6 +97,7 @@ OCI_REGIONS: List[Dict[str, str]] = [
     {"code": "eu-milan-1",      "name": "Italy Northwest (Milan)",        "country": "Italy",         "countryCode": "IT"},
     {"code": "eu-paris-1",      "name": "France Central (Paris)",         "country": "France",        "countryCode": "FR"},
     {"code": "eu-madrid-1",     "name": "Spain Central (Madrid)",         "country": "Spain",         "countryCode": "ES"},
+    # Asia Pacific
     {"code": "ap-mumbai-1",     "name": "India West (Mumbai)",            "country": "India",         "countryCode": "IN"},
     {"code": "ap-hyderabad-1",  "name": "India South (Hyderabad)",        "country": "India",         "countryCode": "IN"},
     {"code": "ap-seoul-1",      "name": "South Korea Central (Seoul)",    "country": "South Korea",   "countryCode": "KR"},
@@ -96,13 +107,14 @@ OCI_REGIONS: List[Dict[str, str]] = [
     {"code": "ap-sydney-1",     "name": "Australia East (Sydney)",        "country": "Australia",     "countryCode": "AU"},
     {"code": "ap-melbourne-1",  "name": "Australia Southeast (Melbourne)","country": "Australia",     "countryCode": "AU"},
     {"code": "ap-singapore-1",  "name": "Singapore (Singapore)",          "country": "Singapore",     "countryCode": "SG"},
-    {"code": "sa-saopaulo-1",   "name": "Brazil East (Sao Paulo)",        "country": "Brazil",        "countryCode": "BR"},
-    {"code": "sa-vinhedo-1",    "name": "Brazil Southeast (Vinhedo)",     "country": "Brazil",        "countryCode": "BR"},
+    {"code": "ap-singapore-2",  "name": "Singapore West (Singapore)",     "country": "Singapore",     "countryCode": "SG"},
+    # Middle East & Africa
     {"code": "me-jeddah-1",     "name": "Saudi Arabia West (Jeddah)",     "country": "Saudi Arabia",  "countryCode": "SA"},
     {"code": "me-dubai-1",      "name": "UAE East (Dubai)",               "country": "UAE",           "countryCode": "AE"},
+    {"code": "me-abudhabi-1",   "name": "UAE Central (Abu Dhabi)",        "country": "UAE",           "countryCode": "AE"},
     {"code": "af-johannesburg-1","name": "South Africa Central (Johannesburg)", "country": "South Africa", "countryCode": "ZA"},
+    # Other
     {"code": "il-jerusalem-1",  "name": "Israel Central (Jerusalem)",     "country": "Israel",        "countryCode": "IL"},
-    {"code": "mx-queretaro-1",  "name": "Mexico Central (Queretaro)",     "country": "Mexico",        "countryCode": "MX"},
 ]
 
 _REGION_CODES = [r["code"] for r in OCI_REGIONS]
