@@ -291,10 +291,10 @@
 **Implementation note for the agent:**
 Astro only copies files from `public/` to `dist/`. Either (a) move `data/` to `public/data/` so it ships, or (b) add a postbuild step `cp -r data/ dist/data/`. Recommend (b) so that `data/` stays at repo root for clarity and CI tooling.
 
-**Verification**
+<!-- **Verification**
 - Push to `main` → Cloudflare Pages build green
 - `curl -I https://<site>.pages.dev/data/index.json` returns 200 with `cache-control: public, max-age=300`
-- Site loads < 1.5s on a cold cache (DevTools Slow 3G profile)
+- Site loads < 1.5s on a cold cache (DevTools Slow 3G profile) -->
 
 **Definition of Done**
 - [ ] Production URL set in `astro.config.mjs` and in this README
@@ -342,6 +342,7 @@ Astro only copies files from `public/` to `dist/`. Either (a) move `data/` to `p
 - [ ] Lighthouse run: ≥ 90 perf, ≥ 95 a11y, ≥ 100 SEO, ≥ 100 best-practices.
 - [ ] Check GitHub for security issues on repo, fix issues. Ask user to input them if they cannot be fetched.
 - [ ] Update packages (python and astro) to the latest version and test they do not break functionality.
+- [ ] Add creator link to the footer kyleblenkinsop.co.uk
 
 **Definition of Done**
 - [ ] One person who has never seen the project lands on the URL and can complete a comparison in < 60 seconds
