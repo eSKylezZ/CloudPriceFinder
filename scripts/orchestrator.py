@@ -52,30 +52,53 @@ TIMEOUT_SECONDS = 300  # 5 minutes per provider
 # Set 'enabled': False to skip fetching and use existing data files
 # Set 'enabled': True to fetch fresh data from the provider's API
 # This allows you to selectively update only specific providers
+#
+# v3 launch providers (Big-4 only):
 PROVIDER_CONFIG = {
-    'hetzner': {
-        'enabled': False,  # Set to False to skip fetching and use existing data
-        'description': 'Hetzner Cloud and Dedicated Servers'
-    },
     'aws': {
-        'enabled': False,  # Not implemented yet
+        'enabled': True,
         'description': 'Amazon Web Services'
     },
     'azure': {
-        'enabled': False,  # Not implemented yet
+        'enabled': True,
         'description': 'Microsoft Azure'
     },
     'gcp': {
-        'enabled': False,  # Not implemented yet
+        'enabled': True,
         'description': 'Google Cloud Platform'
     },
     'oci': {
-        'enabled': False,  # Set to False to skip fetching and use existing data
+        'enabled': True,
         'description': 'Oracle Cloud Infrastructure'
     },
+    # v3.1 — disabled for v1 launch
+    'hetzner': {
+        'enabled': False,  # v3.1 — disabled for v1 launch
+        'description': 'Hetzner Cloud and Dedicated Servers'
+    },
     'ovh': {
-        'enabled': False,  # Not implemented yet
+        'enabled': False,  # v3.1 — disabled for v1 launch
         'description': 'OVH Cloud'
+    },
+    'digitalocean': {
+        'enabled': False,  # v3.1 — disabled for v1 launch
+        'description': 'DigitalOcean'
+    },
+    'linode': {
+        'enabled': False,  # v3.1 — disabled for v1 launch
+        'description': 'Linode / Akamai Cloud'
+    },
+    'scaleway': {
+        'enabled': False,  # v3.1 — disabled for v1 launch
+        'description': 'Scaleway'
+    },
+    'vultr': {
+        'enabled': False,  # v3.1 — disabled for v1 launch
+        'description': 'Vultr'
+    },
+    'contabo': {
+        'enabled': False,  # v3.1 — disabled for v1 launch
+        'description': 'Contabo'
     },
 }
 

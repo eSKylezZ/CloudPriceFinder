@@ -1,0 +1,4 @@
+# Cloudflare Pages _redirects
+# Placeholder — Stage 9 fills in the real rules
+# Format: /from /to [status]
+# Example: /v2/* /:splat 301
