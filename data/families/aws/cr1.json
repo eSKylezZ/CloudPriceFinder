@@ -1,0 +1,1 @@
+[{"provider": "aws", "type": "cloud-server", "instanceType": "cr1.8xlarge", "family": "cr1", "architecture": "x86_64", "vCPU": 32, "memoryGiB": 244.0, "priceUSD_hourly": 3.5, "priceUSD_monthly": 2555.0, "commitments": [], "regions": ["us-east-1"], "source": "aws_pricing_api", "lastUpdated": "2026-05-09T09:55:00.525846+00:00", "generation": "1"}]

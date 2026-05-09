@@ -1,0 +1,1 @@
+{"provider": "gcp", "type": "cloud-server", "instanceType": "m2-hypermem-416", "vCPU": 416, "memoryGiB": 8832.0, "architecture": "x86_64", "family": "m2", "generation": "2", "priceUSD_hourly": 7.7376, "priceUSD_monthly": 5571.072, "commitments": [], "regions": ["us-central1"], "source": "gcp_billing_catalog_api", "lastUpdated": "2026-05-09T11:52:16.327239+00:00"}

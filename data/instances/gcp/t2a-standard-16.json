@@ -1,0 +1,1 @@
+{"provider": "gcp", "type": "cloud-server", "instanceType": "t2a-standard-16", "vCPU": 16, "memoryGiB": 64.0, "architecture": "arm64", "family": "t2a", "generation": "2", "priceUSD_hourly": 0.616, "priceUSD_monthly": 443.52, "commitments": [], "regions": ["us-central1"], "source": "gcp_billing_catalog_api", "lastUpdated": "2026-05-09T11:52:16.327239+00:00"}

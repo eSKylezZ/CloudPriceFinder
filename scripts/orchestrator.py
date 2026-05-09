@@ -453,19 +453,36 @@ class CloudDataOrchestrator:
             
             print(f"\n✅ SUCCESS: Saved {len(all_data)} instances to {OUTPUT_FILE}")
             print(f"✅ Summary saved to {SUMMARY_FILE}")
-            
+
             # Print summary
             print(f"\n📈 Data Summary:")
             for provider, count in summary['byProvider'].items():
                 print(f"  {provider}: {count} instances")
-            
+
             if summary.get('errors') and isinstance(summary['errors'], dict):
                 print(f"\n⚠️ Errors encountered:")
                 for provider, error in summary['errors'].items():
                     print(f"  {provider}: {error}")
-            
+
+            # Run aggregator to produce three-tier output (index/families/instances)
+            print("\n📦 Running build-time aggregator...")
+            try:
+                import importlib.util, sys as _sys
+                _agg_path = Path(__file__).parent / "aggregate.py"
+                _spec = importlib.util.spec_from_file_location("aggregate", _agg_path)
+                _agg = importlib.util.module_from_spec(_spec)
+                _spec.loader.exec_module(_agg)
+                agg_ok = _agg.aggregate()
+                if agg_ok:
+                    print("✅ Aggregation complete: data/index.json + families/ + instances/")
+                else:
+                    print("⚠️ Aggregation finished with warnings (check output above)")
+            except Exception as agg_err:
+                logger.error(f"Aggregation failed: {agg_err}")
+                print(f"❌ Aggregation error: {agg_err}")
+
             return len(all_data) > 0
-            
+
         except Exception as e:
             logger.error(f"Orchestration failed: {e}")
             print(f"\n❌ FATAL ERROR: {e}")

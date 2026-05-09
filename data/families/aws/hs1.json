@@ -1,0 +1,1 @@
+[{"provider": "aws", "type": "cloud-server", "instanceType": "hs1.8xlarge", "family": "hs1", "architecture": "x86_64", "vCPU": 16, "memoryGiB": 117.0, "priceUSD_hourly": 4.6, "priceUSD_monthly": 3358.0, "commitments": [], "regions": ["us-east-1"], "source": "aws_pricing_api", "lastUpdated": "2026-05-09T09:55:00.525846+00:00", "generation": "1"}]
