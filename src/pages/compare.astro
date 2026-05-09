@@ -9,12 +9,23 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-8 flex-1">
 
     <!-- Page header -->
-    <div class="mb-6">
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">Side-by-Side Comparison</h1>
-      <p class="text-gray-600">
-        Compare up to 4 instances across providers. Use the search boxes to add instances, or
-        follow a <span class="font-mono text-sm bg-gray-100 px-1 rounded-sm">?items=aws:m7i.xlarge,azure:Standard_D4s_v5</span> deep-link.
-      </p>
+    <div class="mb-6 flex items-start justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Side-by-Side Comparison</h1>
+        <p class="text-gray-600">
+          Compare up to 4 instances across providers. Use the search boxes to add instances, or
+          follow a <span class="font-mono text-sm bg-gray-100 px-1 rounded-sm">?items=aws:m7i.xlarge,azure:Standard_D4s_v5</span> deep-link.
+        </p>
+      </div>
+      <button id="print-btn"
+        class="no-print shrink-0 inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 hidden"
+        title="Print or save as PDF">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+        </svg>
+        Print / Save PDF
+      </button>
     </div>
 
     <!-- Instance picker -->
@@ -510,5 +521,88 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     }
 
     init();
+
+    // -------------------------------------------------------------------------
+    // Print button (Stage F) — show once table has content
+    // -------------------------------------------------------------------------
+    const printBtn = document.getElementById('print-btn') as HTMLButtonElement | null;
+    printBtn?.addEventListener('click', () => {
+      // Stamp current date for print footer
+      compareTableWrapper.setAttribute('data-date', new Date().toLocaleDateString());
+      window.print();
+    });
+
+    // Reveal print button when table is rendered
+    const tableObserver = new MutationObserver(() => {
+      if (!compareTableWrapper.classList.contains('hidden')) {
+        printBtn?.classList.remove('hidden');
+      } else {
+        printBtn?.classList.add('hidden');
+      }
+    });
+    tableObserver.observe(compareTableWrapper, { attributes: true, attributeFilter: ['class'] });
   </script>
+
+  <style>
+    @media print {
+      /* Hide everything except the comparison table */
+      .no-print,
+      header, footer, nav,
+      #picker-row,
+      #compare-error,
+      #compare-empty,
+      #compare-loading {
+        display: none !important;
+      }
+
+      body {
+        font-size: 11pt;
+        background: white;
+      }
+
+      /* Remove padding so table fills the page */
+      .max-w-full {
+        max-width: 100% !important;
+        padding: 0 !important;
+      }
+
+      /* Ensure table borders print */
+      #compare-table th,
+      #compare-table td {
+        border: 1px solid #d1d5db !important;
+        padding: 4pt 6pt !important;
+      }
+
+      /* Keep table on one page if possible */
+      #compare-table {
+        width: 100%;
+        page-break-inside: avoid;
+      }
+
+      /* Print-friendly header */
+      h1 {
+        font-size: 16pt;
+        margin-bottom: 8pt;
+      }
+
+      p {
+        display: none;
+      }
+
+      /* Remove toggle buttons from print */
+      .compare-term-btn {
+        display: none !important;
+      }
+
+      /* Add print timestamp footer */
+      #compare-table-wrapper::after {
+        content: "Exported from CloudPriceFinder (cloudpricefinder.com) — " attr(data-date);
+        display: block;
+        margin-top: 12pt;
+        font-size: 8pt;
+        color: #6b7280;
+        text-align: center;
+      }
+    }
+  </style>
 </BaseLayout>
