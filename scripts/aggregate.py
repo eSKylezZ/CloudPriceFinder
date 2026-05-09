@@ -16,7 +16,7 @@ import sys
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -51,7 +51,7 @@ PRIMARY_REGION: dict[str, str] = {
 # Helpers
 # ---------------------------------------------------------------------------
 
-def load_raw(provider: str) -> list[dict]:
+def load_raw(provider: str) -> list[dict[str, Any]]:
     """Load raw instances for a provider, trying .raw.json then fallbacks."""
     candidates = [
         PROVIDERS_DIR / f"{provider}.raw.json",
@@ -120,6 +120,63 @@ def on_demand_price_in_primary(inst: dict) -> float | None:
 def median_or_none(values: list[float]) -> float | None:
     clean = [v for v in values if v is not None and v > 0]
     return round(statistics.median(clean), 8) if clean else None
+
+
+# ---------------------------------------------------------------------------
+# Instance deduplication / region merging
+# ---------------------------------------------------------------------------
+
+def merge_instances(instances: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """
+    Collapse duplicate raw entries (same instanceType + marketSegment) into one
+    by unioning their regions, regionPricing, locationDetails, and commitments.
+    All scalar fields (vCPU, memoryGiB, architecture, etc.) are taken from the
+    first entry encountered; later entries only contribute regional data.
+    """
+    groups: dict[str, dict[str, Any]] = {}
+    order: list[str] = []
+
+    for inst in instances:
+        key = f"{inst.get('instanceType', '')}|{inst.get('marketSegment', 'global')}"
+        if key not in groups:
+            groups[key] = dict(inst)
+            order.append(key)
+        else:
+            base = groups[key]
+
+            # Union regions list
+            merged_regions: set[str] = set(cast(list[str], base.get("regions") or []))
+            merged_regions.update(cast(list[str], inst.get("regions") or []))
+            base["regions"] = sorted(merged_regions)
+
+            # Merge regionPricing dict (first-writer wins per region key)
+            base_rp = cast(dict[str, Any], base.setdefault("regionPricing", {}))
+            for region, price in cast(dict[str, Any], inst.get("regionPricing") or {}).items():
+                if region not in base_rp:
+                    base_rp[region] = price
+
+            # Merge locationDetails list (keyed by 'region' to avoid dupes)
+            base_ld = cast(list[dict[str, Any]], base.setdefault("locationDetails", []))
+            ld_seen: set[str] = {str(d.get("region", "")) for d in base_ld}
+            for detail in cast(list[dict[str, Any]], inst.get("locationDetails") or []):
+                region_key = str(detail.get("region", ""))
+                if region_key not in ld_seen:
+                    base_ld.append(detail)
+                    ld_seen.add(region_key)
+
+            # Merge commitments (keyed by term+payment+product)
+            base_commits = cast(list[dict[str, Any]], base.setdefault("commitments", []))
+            commit_seen: set[str] = {
+                f"{c.get('term')}|{c.get('payment')}|{c.get('product')}"
+                for c in base_commits
+            }
+            for c in cast(list[dict[str, Any]], inst.get("commitments") or []):
+                ck = f"{c.get('term')}|{c.get('payment')}|{c.get('product')}"
+                if ck not in commit_seen:
+                    base_commits.append(c)
+                    commit_seen.add(ck)
+
+    return [groups[k] for k in order]
 
 
 # ---------------------------------------------------------------------------
@@ -308,8 +365,41 @@ def slim_for_family(inst: dict) -> dict:
     return {k: v for k, v in inst.items() if k in FAMILY_FIELDS}
 
 
-def slim_for_instance(inst: dict) -> dict:
-    return {k: v for k, v in inst.items() if k not in INSTANCE_STRIP}
+def _normalize_region_pricing(raw_rp: Any) -> dict[str, dict[str, float]] | None:
+    """
+    Normalize regionPricing to {region: {priceUSD_hourly, priceUSD_monthly}}.
+    Raw fetchers may store plain floats (hourly) or dicts with an 'onDemand' key.
+    """
+    if not raw_rp or not isinstance(raw_rp, dict):
+        return None
+    typed_rp = cast(dict[str, Any], raw_rp)
+    result: dict[str, dict[str, float]] = {}
+    for region, val in typed_rp.items():
+        if isinstance(val, (int, float)) and val > 0:
+            hourly = float(val)
+        elif isinstance(val, dict):
+            val_dict = cast(dict[str, Any], val)
+            raw_h = val_dict.get("priceUSD_hourly") or val_dict.get("onDemand")
+            if raw_h is None or not isinstance(raw_h, (int, float)) or raw_h <= 0:
+                continue
+            hourly = float(raw_h)
+        else:
+            continue
+        result[region] = {
+            "priceUSD_hourly": round(hourly, 8),
+            "priceUSD_monthly": round(hourly * 730, 4),
+        }
+    return result or None
+
+
+def slim_for_instance(inst: dict[str, Any]) -> dict[str, Any]:
+    out = {k: v for k, v in inst.items() if k not in INSTANCE_STRIP}
+    normalized = _normalize_region_pricing(out.get("regionPricing"))
+    if normalized is not None:
+        out["regionPricing"] = normalized
+    elif "regionPricing" in out:
+        del out["regionPricing"]
+    return out
 
 
 # ---------------------------------------------------------------------------
@@ -351,7 +441,7 @@ def aggregate() -> bool:
 
     # 1. Load raw data
     print("Loading raw provider data ...")
-    all_raw: dict[str, list[dict]] = {}
+    all_raw: dict[str, list[dict[str, Any]]] = {}
     for provider in PROVIDERS:
         all_raw[provider] = load_raw(provider)
 
@@ -359,6 +449,15 @@ def aggregate() -> bool:
     if total_loaded == 0:
         print("ERROR: no raw data found for any provider. Run fetchers first.")
         return False
+
+    # 1b. Merge duplicate instance types (same instanceType + marketSegment)
+    print("Merging duplicate instance types ...")
+    for provider in PROVIDERS:
+        before = len(all_raw[provider])
+        all_raw[provider] = merge_instances(all_raw[provider])
+        merged = before - len(all_raw[provider])
+        if merged:
+            print(f"  {provider}: merged {merged} duplicate entr{'y' if merged == 1 else 'ies'}")
 
     # Derive stable timestamp from the raw data (idempotency)
     now = latest_timestamp(all_raw)
