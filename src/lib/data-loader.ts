@@ -57,11 +57,11 @@ export async function loadFamily(provider: string, family: string): Promise<V3Fa
 
 /**
  * Load full detail for a single instance (includes per-region pricing breakdown).
- * The instance id is the instanceType string (e.g. "m7i.xlarge").
+ * Mirrors aggregate.py's safe_id(): lowercase, keep [a-z0-9._-], replace rest with '-'.
  */
 export async function loadInstance(provider: string, id: string): Promise<V3InstanceFile> {
-  // Instance file names use the instanceType as-is; dots are kept in the filename.
-  return _fetchJSON<V3InstanceFile>(`/data/instances/${provider}/${id}.json`);
+  const slug = id.toLowerCase().replace(/[^a-z0-9._-]/g, '-').replace(/^-+|-+$/g, '');
+  return _fetchJSON<V3InstanceFile>(`/data/instances/${provider}/${slug}.json`);
 }
 
 /**

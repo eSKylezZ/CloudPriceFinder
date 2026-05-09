@@ -500,6 +500,7 @@ Astro only copies files from `public/` to `dist/`. Either (a) move `data/` to `p
 **Tasks**
 - [ ] Have the ability to select multiple VMs before going to the compare page, could be a select multiple an a pop up bar appears asking if you want to compare
 - [ ] Fix the Compare side-by-side option so it compare the closted matched ones, currently it only goes to the compare screen with the first VM and not the others. 
+- [ ] Add the ability to filter using regions to find specfic region pricing or supported resources
 
 
 ---
