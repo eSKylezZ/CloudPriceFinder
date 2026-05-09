@@ -1,10 +1,19 @@
 ---
+import '../styles/global.css';
+
 export interface Props {
   title: string;
   description?: string;
+  ogImage?: string;
 }
 
-const { title, description = "Compare cloud instance costs across AWS, Azure, GCP, Hetzner, OCI, and OVH" } = Astro.props;
+const {
+  title,
+  description = "CloudPriceFinder — free, open-source cloud instance cost comparison for AWS, Azure, GCP, and OCI. No ads, no upselling.",
+  ogImage = "/og-image.png",
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 ---
 
 <!DOCTYPE html>
@@ -13,9 +22,26 @@ const { title, description = "Compare cloud instance costs across AWS, Azure, GC
     <meta charset="UTF-8" />
     <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://flagsapi.com" />
-    <link rel="dns-prefetch" href="https://flagsapi.com" />
+    <link rel="icon" type="image/png" href="/favicon.png" sizes="32x32" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={new URL(ogImage, Astro.site)} />
+    <meta property="og:site_name" content="CloudPriceFinder" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={new URL(ogImage, Astro.site)} />
+
     <title>{title}</title>
     <style>
       /* Critical CSS for faster rendering */
@@ -24,35 +50,44 @@ const { title, description = "Compare cloud instance costs across AWS, Azure, GC
     </style>
   </head>
   <body class="bg-gray-50 min-h-screen flex flex-col">
-    <nav class="bg-white shadow-sm border-b">
+    <nav class="bg-white shadow-xs border-b border-gray-200">
       <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
         <div class="flex justify-between h-16">
           <div class="flex items-center">
-            <a href="/" class="text-xl font-bold text-primary-600">
-              CloudPriceFinder.com
+            <a href="/" class="flex items-center space-x-2 text-xl font-bold text-primary-600">
+              <img src="/favicon.svg" alt="" class="h-7 w-7" aria-hidden="true" />
+              <span>CloudPriceFinder</span>
             </a>
           </div>
           <div class="flex items-center space-x-4">
-            <a href="/" class="text-gray-700 hover:text-primary-600">Compare</a>
+            <a href="/" class="text-gray-700 hover:text-primary-600">Table</a>
+            <a href="/compare" class="text-gray-700 hover:text-primary-600">Compare</a>
             <a href="/about" class="text-gray-700 hover:text-primary-600">About</a>
           </div>
         </div>
       </div>
     </nav>
-    
+
     <main>
       <slot />
     </main>
-    
-    <footer class="bg-white border-t mt-auto">
+
+    <footer class="bg-white border-t border-gray-200 mt-auto">
       <div class="max-w-full mx-auto py-6 px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
-        <div class="flex justify-between items-center">
+        <!-- Disclaimer -->
+        <div class="mb-4 text-xs text-gray-500 bg-gray-50 rounded-lg border border-gray-200 px-4 py-3">
+          Pricing is fetched weekly from public provider APIs. Always verify with the provider before purchasing.
+          We are not affiliated with AWS, Azure, GCP, or OCI.
+        </div>
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-2">
           <div class="text-sm text-gray-500">
-            © 2024 CloudPriceFinder.com
+            &copy; {new Date().getFullYear()} CloudPriceFinder &mdash; Made by
+            <a href="https://kyleblenkinsop.co.uk" class="hover:text-primary-600 underline" target="_blank" rel="noopener noreferrer">Kyle Blenkinsop</a>
           </div>
-          <div class="text-sm text-gray-500">
-            <a href="https://github.com/eSKylezZ/CloudPriceFinder/" class="hover:text-primary-600">
-              Open Source
+          <div class="flex items-center space-x-4 text-sm text-gray-500">
+            <a href="/about" class="hover:text-primary-600">About</a>
+            <a href="https://github.com/eSKylezZ/cloudpricefinder.com" class="hover:text-primary-600" target="_blank" rel="noopener noreferrer">
+              Open Source on GitHub
             </a>
           </div>
         </div>

@@ -1,0 +1,54 @@
+name: PR Build
+
+# Runs on every branch push (except main) and on pull requests targeting
+# main or v3-revival.  Validates type-checking, linting, and a full Astro
+# build without collecting real data or committing anything.
+
+on:
+  push:
+    branches-ignore:
+      - main
+
+  pull_request:
+    branches:
+      - main
+      - v3-revival
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run type-check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Create stub data (if real data is absent)
+        run: |
+          if [ ! -f data/index.json ]; then
+            echo "No data/index.json found — creating stub so the build can proceed"
+            echo '{"providers":[],"families":{},"regions":{},"lastUpdated":"stub","counts":{}}' > data/index.json
+            mkdir -p data/families data/instances
+          fi
+
+      - name: Build site
+        run: npm run build

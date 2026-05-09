@@ -1,3 +1,12 @@
+export interface CommitmentPrice {
+  term: 'on-demand' | '1yr' | '3yr';
+  payment: 'no-upfront' | 'partial-upfront' | 'all-upfront' | 'flexible';
+  product: 'reserved' | 'savings-plan' | 'cud' | 'flex';
+  priceUSD_hourly: number;
+  effectiveHourlyUSD: number;
+  savingsVsOnDemandPct: number;
+}
+
 export interface LocationDetail {
   code: string;
   city: string;
@@ -104,8 +113,14 @@ export interface CloudInstance {
   unit?: string;                   // Storage pricing units
   location?: string;               // Single location services
   
+  // v3 extended fields
+  commitments: CommitmentPrice[];
+  gpu?: { count: number; type: string; memoryGiB: number };
+  architecture: 'x86_64' | 'arm64';
+  family: string;
+  generation?: string;
+
   // Technical specifications
-  architecture?: string;
   network_speed?: string;
   datacenter?: string;
   
@@ -131,7 +146,7 @@ export interface CloudInstance {
   };
   
   // Provider-specific data
-  raw?: Record<string, any>;
+  raw?: Record<string, unknown>;
 }
 
 export type CloudProvider = 

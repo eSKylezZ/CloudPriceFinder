@@ -1,0 +1,181 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://cloudpricefinder.dev/schemas/instance.schema.json",
+  "title": "CloudInstance",
+  "description": "Single-source-of-truth schema for a normalised cloud compute instance record. Used by both Python validators and TypeScript consumers.",
+  "type": "object",
+  "required": ["provider", "type", "instanceType", "priceUSD_hourly", "lastUpdated", "commitments", "architecture", "family"],
+  "additionalProperties": true,
+  "properties": {
+    "provider": {
+      "type": "string",
+      "enum": ["aws", "azure", "gcp", "hetzner", "oci", "ovh"],
+      "description": "Cloud provider identifier"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "cloud-server",
+        "cloud-loadbalancer",
+        "cloud-volume",
+        "cloud-network",
+        "cloud-floating-ip",
+        "cloud-snapshot",
+        "cloud-certificate",
+        "dedicated-server",
+        "dedicated-auction",
+        "dedicated-storage",
+        "dedicated-colocation"
+      ],
+      "description": "Service category"
+    },
+    "instanceType": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Provider-specific instance type identifier (e.g. m7i.xlarge, Standard_D4s_v5)"
+    },
+    "family": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Instance family grouping (e.g. m7i, D-series, n2-standard)"
+    },
+    "generation": {
+      "type": "string",
+      "description": "Generation suffix where applicable (e.g. 7, v5)"
+    },
+    "architecture": {
+      "type": "string",
+      "enum": ["x86_64", "arm64"],
+      "description": "CPU instruction set architecture"
+    },
+    "vCPU": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Number of virtual CPUs"
+    },
+    "memoryGiB": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Memory in gibibytes"
+    },
+    "gpu": {
+      "type": "object",
+      "required": ["count", "type", "memoryGiB"],
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1,
+          "description": "GPU model (e.g. NVIDIA A100, NVIDIA H100)"
+        },
+        "memoryGiB": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "diskType": {
+      "type": "string"
+    },
+    "diskSizeGB": {
+      "type": "number",
+      "minimum": 0
+    },
+    "priceUSD_hourly": {
+      "type": "number",
+      "minimum": 0,
+      "description": "On-demand price in USD per hour"
+    },
+    "priceUSD_monthly": {
+      "type": "number",
+      "minimum": 0,
+      "description": "On-demand price in USD per month (730 hrs)"
+    },
+    "originalPrice": {
+      "type": "object",
+      "required": ["hourly", "monthly", "currency"],
+      "properties": {
+        "hourly": {"type": "number", "minimum": 0},
+        "monthly": {"type": "number", "minimum": 0},
+        "currency": {"type": "string", "minLength": 3, "maxLength": 3}
+      },
+      "additionalProperties": false
+    },
+    "commitments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/CommitmentPrice"
+      },
+      "description": "Reserved / savings-plan / CUD pricing options"
+    },
+    "regions": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "List of region identifiers where this instance is available"
+    },
+    "deprecated": {
+      "type": "boolean"
+    },
+    "source": {
+      "type": "string",
+      "description": "Data source identifier (e.g. aws_pricing_api, azure_retail_api)"
+    },
+    "description": {
+      "type": "string"
+    },
+    "lastUpdated": {
+      "type": "string",
+      "description": "ISO-8601 timestamp of last data fetch"
+    },
+    "raw": {
+      "type": "object",
+      "description": "Provider-specific raw data preserved for debugging"
+    }
+  },
+  "$defs": {
+    "CommitmentPrice": {
+      "title": "CommitmentPrice",
+      "description": "A single reserved / savings-plan / CUD pricing option for one commitment term.",
+      "type": "object",
+      "required": ["term", "payment", "product", "priceUSD_hourly", "effectiveHourlyUSD", "savingsVsOnDemandPct"],
+      "additionalProperties": false,
+      "properties": {
+        "term": {
+          "type": "string",
+          "enum": ["on-demand", "1yr", "3yr"],
+          "description": "Commitment duration"
+        },
+        "payment": {
+          "type": "string",
+          "enum": ["no-upfront", "partial-upfront", "all-upfront", "flexible"],
+          "description": "Payment option"
+        },
+        "product": {
+          "type": "string",
+          "enum": ["reserved", "savings-plan", "cud", "flex"],
+          "description": "Provider product type: reserved (AWS/OCI), savings-plan (AWS), cud (GCP), flex (OCI monthly-flex)"
+        },
+        "priceUSD_hourly": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Raw hourly rate for this commitment (may be 0 for all-upfront)"
+        },
+        "effectiveHourlyUSD": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Amortised effective hourly cost including upfront fee"
+        },
+        "savingsVsOnDemandPct": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Percentage savings compared to on-demand priceUSD_hourly"
+        }
+      }
+    }
+  }
+}

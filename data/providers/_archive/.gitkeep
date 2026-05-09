@@ -1,0 +1,3 @@
+# v3.1 archive — secondary provider data files held here for future re-activation
+# These providers are disabled for v1 launch per PROJECT_TODO.md Stage 0
+# Re-enable in scripts/orchestrator.py PROVIDER_CONFIG when ready

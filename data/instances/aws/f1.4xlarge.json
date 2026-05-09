@@ -1,0 +1,1 @@
+{"provider": "aws", "type": "cloud-server", "instanceType": "f1.4xlarge", "family": "f1", "architecture": "x86_64", "vCPU": 16, "memoryGiB": 244.0, "priceUSD_hourly": 3.63, "priceUSD_monthly": 2649.9, "commitments": [], "regions": ["us-east-1"], "source": "aws_pricing_api", "lastUpdated": "2026-05-09T09:55:00.525846+00:00", "generation": "1", "regionPricing": {"us-east-1": 3.63}}

@@ -1,52 +1,40 @@
-# CloudPriceFinder v2.0
+# CloudPriceFinder v3
 
-> Multi-cloud instance cost comparison tool with automated data collection
+> Free, open-source cloud instance cost comparison for AWS, Azure, GCP, and OCI.
+> No ads, no upselling, no tracking.
 
-CloudPriceFinder is an open-source application that helps you compare cloud instance costs and specifications across multiple providers. Built with Astro + TypeScript frontend and Python data collection, featuring automated GitHub Actions workflows for zero-maintenance operation.
+**Live site:** https://cloudpricefinder.com
 
-## 🌟 Features
+---
 
-- 🌩️ **Multi-Cloud Support** - Compare instances across major cloud providers
-- 💰 **Real-Time Pricing** - Automated data collection from provider APIs
-- 🔍 **Advanced Filtering** - Filter by CPU, memory, price, provider, regions, and instance types with regional pricing support
-- 📊 **Interactive Comparison** - Sort and compare instances side-by-side with region-specific pricing
-- 📱 **Responsive Design** - Works perfectly on desktop and mobile
-- 🔒 **Privacy First** - No tracking, no analytics, no data collection
-- ⚡ **Fast Performance** - Static site generation for optimal loading speed
-- 🤖 **Fully Automated** - GitHub Actions handle data collection and deployment
+## What is this?
 
-## 🚀 Quick Start (10 minutes)
+CloudPriceFinder lets you compare compute instance specifications and costs across the four major cloud providers in one view. It shows on-demand pricing and 1-year / 3-year reserved/committed pricing so you can see the full cost picture before committing.
 
-### Automated Setup with GitHub Actions + Cloudflare Pages
+Data is fetched weekly from official public provider APIs via GitHub Actions and served as a fully static site on Cloudflare Pages.
 
-1. **Fork this repository**
-2. **Connect to Cloudflare Pages:**
-   - Go to [Cloudflare Pages](https://pages.cloudflare.com/)
-   - Connect your GitHub account and select the forked repository
-   - Set build command: `npm run build`
-   - Set output directory: `dist`
-3. **Set up API credentials** following our [API Setup Guide](./docs/API_SETUP.md)
-4. **Configure GitHub Secrets:**
-   - `HETZNER_API_TOKEN` - Your Hetzner Cloud API token (required)
-   - `HETZNER_ROBOT_USER` - Robot API username (optional, for dedicated servers)
-   - `HETZNER_ROBOT_PASSWORD` - Robot API password (optional, for dedicated servers)
-5. **Enable GitHub Actions** in your repository settings
-6. **Enjoy automated data collection** every week!
+## Providers
 
-See our [GitHub Actions Setup Guide](./docs/GITHUB_ACTIONS_SETUP.md) for detailed instructions.
+| Provider | On-demand | 1-yr | 3-yr | Notes |
+|----------|-----------|------|------|-------|
+| **AWS** | Yes | Yes (RI) | Yes (RI) | Savings Plans also included |
+| **Azure** | Yes | Yes | Yes | Reservation pricing |
+| **GCP** | Yes | Yes | Yes | Committed Use Discounts |
+| **OCI** | Yes | — | — | Commitment pricing via Universal Credits (not per-shape) |
 
-### Local Development
+## Quick Start (local development)
 
-#### Prerequisites
-- Node.js 18+ 
-- Python 3.8+
+### Prerequisites
+
+- Node.js 20+
+- Python 3.11+
 - Git
 
-#### Installation
+### Setup
+
 ```bash
-# Clone the repository
-git clone https://github.com/eSKylezZ/CloudPriceFinder.git
-cd CloudPriceFinder
+git clone https://github.com/eSKylezZ/cloudpricefinder.com.git
+cd cloudpricefinder.com
 
 # Install Node.js dependencies
 npm install
@@ -54,183 +42,110 @@ npm install
 # Install Python dependencies
 pip install -r requirements.txt
 
-# Set up environment variables (optional - for Hetzner data)
-export HETZNER_API_TOKEN="your-hetzner-api-token"
-
-# Fetch data and start development server
-npm run fetch-data
-npm run dev
+# Build the site (uses existing data/index.json if present)
+npm run build
+npm run preview
 ```
 
-Visit `http://localhost:4321` to see the application.
+To regenerate the pricing data locally you need provider API credentials. See [Environment Variables](#environment-variables) below.
 
-> **Note**: For local development, you may want to ignore `data/` and `dist/` directories locally while keeping them in the repository for Cloudflare Pages. Copy `.gitignore.local` to `.git/info/exclude` to do this.
+### Development server
 
-## 📋 Development Commands
+```bash
+npm run dev      # hot-reload at http://localhost:4321
+```
+
+## Commands
 
 | Command | Description |
 |---------|-------------|
 | `npm run dev` | Start development server |
-| `npm run build` | Build for production (includes data fetching) |
-| `npm run fetch-data` | Fetch cloud pricing data |
+| `npm run build` | Build static site (copies data/ to dist/) |
+| `npm run fetch-data` | Run data collection pipeline |
 | `npm run preview` | Preview production build |
-| `npm run type-check` | Run TypeScript checks |
-| `npm run lint` | Lint code with ESLint |
-| `npm run format` | Format code with Prettier |
+| `npm run type-check` | TypeScript type checking |
+| `npm run lint` | ESLint |
+| `npm run format` | Prettier |
+| `npm test` | Vitest unit tests |
 
-## 🤖 Automated Data Collection
+## Architecture
 
-CloudPriceFinder includes GitHub Actions workflows for fully automated data collection and deployment:
+```
+cloudpricefinder/
+├── scripts/                 # Python data collection
+│   ├── fetch_aws.py         # AWS Pricing API (streaming JSON)
+│   ├── fetch_azure.py       # Azure Retail Prices API
+│   ├── fetch_gcp.py         # GCP Cloud Billing Catalog API
+│   ├── fetch_oci.py         # Oracle Cloud cetools API
+│   ├── aggregate.py         # Three-tier output builder
+│   ├── orchestrator.py      # Master coordinator
+│   └── utils/               # Validator, normalizer, currency converter
+├── src/                     # Astro frontend
+│   ├── layouts/BaseLayout.astro
+│   ├── pages/
+│   │   ├── index.astro      # Main comparison table
+│   │   ├── compare.astro    # Side-by-side compare view
+│   │   └── about.astro
+│   ├── components/
+│   │   ├── ComparisonTable.astro
+│   │   └── FilterPanel.astro
+│   ├── lib/data-loader.ts   # Lazy-load helpers
+│   └── types/               # TypeScript interfaces
+├── data/                    # Generated at runtime (gitignored raw files)
+│   ├── index.json           # Provider + family index (< 100 KB)
+│   ├── families/{provider}/ # Per-family instance lists
+│   ├── instances/{provider}/# Per-instance detail files
+│   └── equivalents.json     # Cross-provider family matches
+├── .github/workflows/
+│   ├── data-collection.yml  # Weekly Sunday cron + workflow_dispatch
+│   └── build.yml            # PR lint/type-check/build
+└── public/                  # Static assets copied to dist/
+```
 
-### 🔄 Automated Workflows
+### Data pipeline
 
-- **Data Collection & Deployment**: Runs weekly on Sunday, collects fresh pricing data and deploys to Cloudflare Pages
-- **Data Collection Only**: Runs weekly on Wednesday, lightweight data updates without full deployment  
-- **Manual Triggers**: Run workflows on-demand with custom options
+1. **Fetch** — each `scripts/fetch_{provider}.py` hits the provider's public API and writes `data/providers/{provider}.raw.json`.
+2. **Aggregate** — `scripts/aggregate.py` reads the raw files and produces the three-tier output:
+   - `data/index.json` — lightweight index (provider list, family list, instance counts, lastUpdated)
+   - `data/families/{provider}/{family}.json` — all instances in a family
+   - `data/instances/{provider}/{id}.json` — single-instance detail with regional pricing
+3. **Build** — `npm run build` runs Astro's static build and copies `data/` to `dist/data/`.
+4. **Deploy** — Cloudflare Pages serves `dist/` from the edge.
 
-### 📊 What Gets Automated
+### Frontend lazy-loading
 
-- ✅ **Data Collection**: Fetch latest pricing from cloud provider APIs
-- ✅ **Data Validation**: Ensure data quality and consistency  
-- ✅ **Site Building**: Generate static site with fresh data
-- ✅ **Deployment**: Auto-deploy to Cloudflare Pages
-- ✅ **Monitoring**: Detailed reports and error notifications
+The site only loads `data/index.json` on initial page load (~a few KB). Family files are fetched on demand when you apply filters. Instance detail files are fetched when you expand a row. This keeps the initial payload well under 200 KB.
 
-### 🚀 Zero-Maintenance Operation
+## Environment Variables
 
-Once configured, CloudPriceFinder runs completely automatically:
-- No manual data updates needed
-- Always shows current pricing
-- Handles API errors gracefully
-- Provides detailed status reports
-- Weekly schedule to minimize API usage costs
+Create a `.env` file (gitignored) for local data collection:
 
-## 🏢 Provider Status
+```env
+# GCP — obtain from https://console.cloud.google.com/apis/credentials
+GCP_API_KEY=your-gcp-api-key
 
-| Provider | Status | Data Source | Implementation |
-|----------|--------|-------------|----------------|
-| **Hetzner** | ✅ **Complete** | Cloud API + Robot API | Full integration with cloud services and dedicated servers |
-| **AWS** | 📋 **Ready** | Placeholder | Script structure ready for implementation |
-| **Azure** | 📋 **Ready** | Placeholder | Script structure ready for implementation |
-| **GCP** | 📋 **Ready** | Placeholder | Script structure ready for implementation |
-| **OCI** | 📋 **Ready** | Placeholder | Script structure ready for implementation |
-| **OVH** | 📋 **Ready** | Placeholder | Script structure ready for implementation |
+# Hetzner (disabled in v3 — v3.1 only)
+# HETZNER_API_TOKEN=...
+```
 
-### 🌩️ Hetzner Integration (Complete)
+AWS, Azure, and OCI use public/unauthenticated endpoints and require no credentials.
 
-CloudPriceFinder includes comprehensive Hetzner integration supporting:
+For the GitHub Actions weekly cron, set `GCP_PROJECT_ID`, `GCP_PROJECT_NUMBER`, and `GCP_PROJECT_USERNAME` as repository secrets and configure Workload Identity Federation (see `.github/workflows/data-collection.yml` for details).
 
-- **Cloud Services**: Servers, load balancers, volumes, floating IPs, networks
-- **Dedicated Servers**: Full Robot API integration with server types and pricing
-- **Regional Pricing**: Location-specific pricing with filtering and comparison
-- **Platform Indicators**: Clear distinction between cloud and dedicated offerings
-- **Enhanced Metadata**: Service categories, platform types, and detailed specifications
-- **Currency Conversion**: EUR to USD with original prices preserved
-- **Advanced Filtering**: Network options, instance type grouping, and region-specific availability
+## Contributing
 
-## 🏗️ Architecture
+Pull requests are welcome. The easiest contributions are:
 
-CloudPriceFinder uses a modern hybrid architecture:
+- Fixing data issues (wrong instance specs, missing regions)
+- Improving the UI (filtering, sorting, accessibility)
+- Adding missing instance families to existing provider fetchers
 
-- **Frontend**: Astro v4 static site generator with TypeScript and Tailwind CSS
-- **Data Collection**: Python scripts with orchestrator pattern for provider APIs
-- **Data Processing**: Normalization, validation, and currency conversion
-- **Automation**: GitHub Actions for scheduled data collection and deployment
-- **Deployment**: Static files deployed to Cloudflare Pages for global edge delivery
+For large changes, open an issue first to discuss the approach.
 
-## 🤝 Contributing
+## License
 
-We welcome contributions! Here's how you can help:
-
-### High Priority
-1. **Add Cloud Providers**: Implement data fetchers for AWS, Azure, GCP, OCI, or OVH
-2. **Enhance Frontend**: Improve filtering, sorting, and comparison features
-3. **Data Export**: Add CSV/JSON export capabilities
-
-### Medium Priority
-1. **Price Alerts**: Notification system for price changes
-2. **Historical Data**: Price trend tracking and charts
-3. **Advanced Search**: Semantic search capabilities
-
-### Adding a New Provider
-
-1. Copy `scripts/fetch_hetzner_v2.py` as a template
-2. Implement the provider's API integration following the same pattern
-3. Add the provider to `scripts/orchestrator.py`
-4. Test the integration and data output
-5. Submit a pull request with documentation
-
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines.
-
-## 🔧 Environment Variables
-
-### Required for Hetzner (Currently Supported)
-
-- `HETZNER_API_TOKEN` - Hetzner Cloud API token (get from console.hetzner.cloud)
-- `HETZNER_ROBOT_USER` - Robot API username (optional, for dedicated servers)
-- `HETZNER_ROBOT_PASSWORD` - Robot API password (optional, for dedicated servers)
-
-
-### Future Provider Variables
-
-- `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY` - AWS credentials
-- `AZURE_SUBSCRIPTION_ID` + `AZURE_CLIENT_ID` - Azure credentials  
-- `GOOGLE_CLOUD_PROJECT` + service account - GCP credentials
-- `OCI_CONFIG_PROFILE` - OCI configuration
-- `OVH_ENDPOINT` + `OVH_APPLICATION_KEY` - OVH credentials
-
-## 📊 Data Standards
-
-All cloud provider data is normalized to a consistent format:
-
-- **Pricing**: Converted to USD with original currency preserved
-- **Specifications**: Standardized CPU, memory, and storage units
-- **Regions**: Normalized region names and availability zones
-- **Types**: Categorized as cloud-server, dedicated-server, load-balancer, volume, etc.
-- **Platform**: Clear distinction between cloud and dedicated infrastructure
-
-## 🚀 Deployment Options
-
-CloudPriceFinder generates a static site that can be deployed to:
-
-- **Cloudflare Pages** - Global edge deployment (recommended)
-- **Netlify** - Deploy directly from GitHub
-- **Vercel** - Zero-config deployment
-- **GitHub Pages** - Free static hosting
-- **Any Static Host** - Upload the `dist/` folder
-
-### Production Deployment
-
-For production use with automated data collection:
-
-1. **Fork this repository**
-2. **Set up Cloudflare Pages** connection to your GitHub repository
-3. **Configure GitHub Secrets** with your API tokens
-4. **Enable GitHub Actions** workflows
-5. **Customize the schedule** in workflow files if needed
-
-The system will automatically:
-- Collect fresh pricing data weekly
-- Build and deploy the updated site
-- Handle errors gracefully with detailed reporting
-
-## 📚 Documentation
-
-- 📖 [API Setup Guide](./docs/API_SETUP.md) - Setting up read-only API credentials
-- 🤖 [GitHub Actions Setup](./docs/GITHUB_ACTIONS_SETUP.md) - Automation configuration
-- 🏗️ [Development Guide](./CLAUDE.md) - Complete architecture and development workflow
-- 📊 [Project Status](./PROJECT_STATUS.md) - Current implementation status and roadmap
-
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE) for details.
-
-## 🆘 Support
-
-- 🐛 [Issues](https://github.com/eSKylezZ/CloudPriceFinder/issues) - Bug reports and feature requests
-- 💬 [Discussions](https://github.com/eSKylezZ/CloudPriceFinder/discussions) - Community support
-- 📧 [Contact](https://github.com/eSKylezZ/CloudPriceFinder) - Project repository
+MIT — see [LICENSE](LICENSE) for details.
 
 ---
 
-**CloudPriceFinder v2.0** - Making cloud cost comparison simple, automated, and transparent.
+Made by [Kyle Blenkinsop](https://kyleblenkinsop.co.uk)

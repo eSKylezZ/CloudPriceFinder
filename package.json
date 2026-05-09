@@ -1,38 +1,37 @@
 {
-  "name": "CloudPriceFinder",
-  "version": "2.0.0",
-  "description": "Multi-cloud instance cost comparison tool",
+  "name": "cloudpricefinder",
+  "version": "3.0.0",
+  "description": "CloudPriceFinder — free, open-source cloud instance cost comparison for AWS, Azure, GCP, and OCI",
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
-    "build-with-data": "npm run fetch-data && astro build",
+    "build": "astro build && node scripts/copy-data.mjs",
+    "build-with-data": "npm run fetch-data && npm run build",
     "preview": "astro preview",
     "fetch-data": "python3 scripts/orchestrator.py",
     "fetch-hetzner": "python3 scripts/fetch_hetzner.py",
     "clean": "rm -rf dist .astro data/*.json",
     "type-check": "astro check",
-    "lint": "eslint src --ext .js,.ts,.astro",
+    "lint": "eslint src",
     "format": "prettier --write src",
     "test": "vitest",
     "test:ui": "vitest --ui"
   },
   "dependencies": {
-    "astro": "^5.9.4",
-    "@astrojs/tailwind": "^5.1.0",
-    "@astrojs/sitemap": "^3.1.0",
-    "@astrojs/check": "^0.9.0",
-    "tailwindcss": "^3.4.0",
-    "lucide-astro": "^0.516.0"
+    "@astrojs/check": "^0.9.9",
+    "@astrojs/sitemap": "^3.7.2",
+    "@tailwindcss/vite": "^4.3.0",
+    "astro": "^6.3.1",
+    "tailwindcss": "^4.3.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^7.0.0",
-    "@typescript-eslint/parser": "^7.0.0",
-    "eslint": "^8.57.0",
-    "eslint-plugin-astro": "^0.34.0",
-    "prettier": "^3.3.0",
-    "prettier-plugin-astro": "^0.14.0",
-    "typescript": "^5.5.0",
+    "@typescript-eslint/eslint-plugin": "^8.59.2",
+    "@typescript-eslint/parser": "^8.59.2",
+    "eslint": "^10.3.0",
+    "eslint-plugin-astro": "^1.7.0",
+    "prettier": "^3.8.3",
+    "prettier-plugin-astro": "^0.14.1",
+    "typescript": "^6.0.3",
     "vitest": "^3.2.4"
   },
   "keywords": [
@@ -42,10 +41,14 @@
     "aws",
     "azure",
     "gcp",
-    "hetzner",
     "oci",
-    "ovh"
+    "pricing"
   ],
-  "author": "CloudPriceFinder Team",
-  "license": "MIT"
+  "author": "Kyle Blenkinsop",
+  "license": "MIT",
+  "homepage": "https://cloudpricefinder.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eSKylezZ/cloudpricefinder.com"
+  }
 }

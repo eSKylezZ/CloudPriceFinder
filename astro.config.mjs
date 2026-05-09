@@ -1,20 +1,17 @@
 import { defineConfig } from 'astro/config';
-import tailwind from '@astrojs/tailwind';
 import sitemap from '@astrojs/sitemap';
+import tailwindcss from '@tailwindcss/vite';
+
+const SITE_URL = 'https://cloudpricefinder.com';
 
 export default defineConfig({
-  site: process.env.SITE_URL || 'https://cloudpricefinder.com/',
-  integrations: [
-    tailwind(),
-    sitemap()
-  ],
+  site: SITE_URL,
+  integrations: [sitemap()],
   output: 'static',
   build: {
-    inlineStylesheets: 'auto'
+    inlineStylesheets: 'auto',
   },
   vite: {
-    optimizeDeps: {
-      include: ['./data/*.json']
-    }
-  }
+    plugins: [tailwindcss()],
+  },
 });

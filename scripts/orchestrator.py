@@ -52,30 +52,53 @@ TIMEOUT_SECONDS = 300  # 5 minutes per provider
 # Set 'enabled': False to skip fetching and use existing data files
 # Set 'enabled': True to fetch fresh data from the provider's API
 # This allows you to selectively update only specific providers
+#
+# v3 launch providers (Big-4 only):
 PROVIDER_CONFIG = {
-    'hetzner': {
-        'enabled': False,  # Set to False to skip fetching and use existing data
-        'description': 'Hetzner Cloud and Dedicated Servers'
-    },
     'aws': {
-        'enabled': False,  # Not implemented yet
+        'enabled': True,
         'description': 'Amazon Web Services'
     },
     'azure': {
-        'enabled': False,  # Not implemented yet
+        'enabled': True,
         'description': 'Microsoft Azure'
     },
     'gcp': {
-        'enabled': False,  # Not implemented yet
+        'enabled': True,
         'description': 'Google Cloud Platform'
     },
     'oci': {
-        'enabled': False,  # Set to False to skip fetching and use existing data
+        'enabled': True,
         'description': 'Oracle Cloud Infrastructure'
     },
+    # v3.1 — disabled for v1 launch
+    'hetzner': {
+        'enabled': False,  # v3.1 — disabled for v1 launch
+        'description': 'Hetzner Cloud and Dedicated Servers'
+    },
     'ovh': {
-        'enabled': False,  # Not implemented yet
+        'enabled': False,  # v3.1 — disabled for v1 launch
         'description': 'OVH Cloud'
+    },
+    'digitalocean': {
+        'enabled': False,  # v3.1 — disabled for v1 launch
+        'description': 'DigitalOcean'
+    },
+    'linode': {
+        'enabled': False,  # v3.1 — disabled for v1 launch
+        'description': 'Linode / Akamai Cloud'
+    },
+    'scaleway': {
+        'enabled': False,  # v3.1 — disabled for v1 launch
+        'description': 'Scaleway'
+    },
+    'vultr': {
+        'enabled': False,  # v3.1 — disabled for v1 launch
+        'description': 'Vultr'
+    },
+    'contabo': {
+        'enabled': False,  # v3.1 — disabled for v1 launch
+        'description': 'Contabo'
     },
 }
 
@@ -122,9 +145,19 @@ class CloudDataOrchestrator:
             raise
     
     def _fetch_aws(self) -> List[Dict[str, Any]]:
-        """Fetch AWS data - placeholder for now."""
-        logger.warning("AWS fetcher not implemented yet - returning empty data")
-        return []
+        """Fetch AWS EC2 on-demand + reserved + savings-plan pricing."""
+        try:
+            import sys
+            _scripts_dir = os.path.dirname(os.path.abspath(__file__))
+            _repo_root = os.path.dirname(_scripts_dir)
+            if _repo_root not in sys.path:
+                sys.path.insert(0, _repo_root)
+            from scripts.fetch_aws import fetch_aws_data
+            logger.info("Fetching AWS EC2 pricing data (all standard regions)…")
+            return fetch_aws_data()
+        except Exception as e:
+            logger.error(f"AWS fetch failed: {e}")
+            raise
     
     def _fetch_azure(self) -> List[Dict[str, Any]]:
         """Fetch Azure data - placeholder for now."""
@@ -132,9 +165,30 @@ class CloudDataOrchestrator:
         return []
     
     def _fetch_gcp(self) -> List[Dict[str, Any]]:
-        """Fetch GCP data - placeholder for now."""
-        logger.warning("GCP fetcher not implemented yet - returning empty data")
-        return []
+        """Fetch GCP Compute Engine pricing via Cloud Billing Catalog API.
+
+        Authentication (in priority order):
+          1. GCP_API_KEY env var — used when set (local dev convenience).
+          2. Application Default Credentials (ADC) — used in CI after
+             google-github-actions/auth@v2 sets up Workload Identity Federation.
+        """
+        try:
+            import os
+            _scripts_dir = os.path.dirname(os.path.abspath(__file__))
+            _repo_root = os.path.dirname(_scripts_dir)
+            if _repo_root not in sys.path:
+                sys.path.insert(0, _repo_root)
+            from scripts.fetch_gcp import fetch_gcp_data
+            api_key = os.environ.get("GCP_API_KEY", "").strip() or None
+            if api_key:
+                logger.info("GCP_API_KEY found — using API key auth.")
+            else:
+                logger.info("GCP_API_KEY not set — will attempt ADC (Workload Identity / gcloud).")
+            logger.info("Fetching GCP Compute Engine pricing data (all standard regions)…")
+            return fetch_gcp_data(api_key=api_key)
+        except Exception as e:
+            logger.error(f"GCP fetch failed: {e}")
+            raise
     
     def _fetch_oci(self) -> List[Dict[str, Any]]:
         """Fetch OCI data using OCI fetcher."""
@@ -406,30 +460,72 @@ class CloudDataOrchestrator:
             
             print(f"\n✅ SUCCESS: Saved {len(all_data)} instances to {OUTPUT_FILE}")
             print(f"✅ Summary saved to {SUMMARY_FILE}")
-            
+
             # Print summary
             print(f"\n📈 Data Summary:")
             for provider, count in summary['byProvider'].items():
                 print(f"  {provider}: {count} instances")
-            
+
             if summary.get('errors') and isinstance(summary['errors'], dict):
                 print(f"\n⚠️ Errors encountered:")
                 for provider, error in summary['errors'].items():
                     print(f"  {provider}: {error}")
-            
+
+            # Run aggregator to produce three-tier output (index/families/instances)
+            print("\n📦 Running build-time aggregator...")
+            try:
+                import importlib.util, sys as _sys
+                _agg_path = Path(__file__).parent / "aggregate.py"
+                _spec = importlib.util.spec_from_file_location("aggregate", _agg_path)
+                _agg = importlib.util.module_from_spec(_spec)
+                _spec.loader.exec_module(_agg)
+                agg_ok = _agg.aggregate()
+                if agg_ok:
+                    print("✅ Aggregation complete: data/index.json + families/ + instances/")
+                else:
+                    print("⚠️ Aggregation finished with warnings (check output above)")
+            except Exception as agg_err:
+                logger.error(f"Aggregation failed: {agg_err}")
+                print(f"❌ Aggregation error: {agg_err}")
+
             return len(all_data) > 0
-            
+
         except Exception as e:
             logger.error(f"Orchestration failed: {e}")
             print(f"\n❌ FATAL ERROR: {e}")
             return False
 
-async def main():
+async def main(enabled_providers: Optional[List[str]] = None):
     """Main function."""
+    # Override PROVIDER_CONFIG if specific providers were requested via CLI
+    if enabled_providers is not None:
+        for provider in PROVIDER_CONFIG:
+            PROVIDER_CONFIG[provider]['enabled'] = provider in enabled_providers
+        unknown = [p for p in enabled_providers if p not in PROVIDER_CONFIG]
+        if unknown:
+            logger.warning(f"Unknown providers requested (will be ignored): {unknown}")
+
     orchestrator = CloudDataOrchestrator()
     success = await orchestrator.run()
     return 0 if success else 1
 
 if __name__ == "__main__":
-    exit_code = asyncio.run(main())
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="CloudPriceFinder Data Orchestrator"
+    )
+    parser.add_argument(
+        "--providers",
+        nargs="+",
+        metavar="PROVIDER",
+        help=(
+            "Space-separated list of providers to fetch (e.g. --providers aws gcp oci). "
+            "Overrides the PROVIDER_CONFIG enabled flags at runtime. "
+            "All other providers are disabled for this run."
+        ),
+    )
+    args = parser.parse_args()
+
+    exit_code = asyncio.run(main(enabled_providers=args.providers))
     sys.exit(exit_code)

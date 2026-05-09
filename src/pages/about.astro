@@ -2,71 +2,128 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<BaseLayout title="About CloudPriceFinder.com" description="Learn more about CloudPriceFinder.com - the open-source multi-cloud cost comparison tool">
+<BaseLayout
+  title="About — CloudPriceFinder"
+  description="Learn more about CloudPriceFinder — the free, open-source multi-cloud instance cost comparison tool for AWS, Azure, GCP, and OCI."
+>
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <div class="text-center mb-12">
       <h1 class="text-4xl font-bold text-gray-900 mb-4">
-        About CloudPriceFinder.com
+        About CloudPriceFinder
       </h1>
       <p class="text-xl text-gray-600">
-        Open-source multi-cloud instance cost comparison
+        Free, open-source multi-cloud instance cost comparison
       </p>
     </div>
 
     <div class="prose prose-lg mx-auto">
-      <h2>What is CloudPriceFinder.com?</h2>
+      <h2>What is CloudPriceFinder?</h2>
       <p>
-        CloudPriceFinder.com is an open-source tool that helps developers and businesses compare 
-        cloud instance costs across multiple providers. Instead of manually checking 
-        each cloud provider's pricing pages, CloudPriceFinder.com aggregates and normalizes 
-        pricing data to help you make informed decisions.
+        CloudPriceFinder is a free, open-source tool that helps developers and businesses compare
+        cloud compute instance costs across the four major providers: AWS, Azure, Google Cloud (GCP),
+        and Oracle Cloud (OCI). Instead of manually checking each cloud provider's pricing pages,
+        CloudPriceFinder aggregates and normalizes pricing data — including on-demand and 1-year/3-year
+        reserved/committed pricing — so you can make informed decisions quickly.
+      </p>
+      <p>
+        There are no ads, no upselling, and no tracking. Data is refreshed weekly via GitHub Actions
+        and served as a static site on Cloudflare Pages.
       </p>
 
       <h2>Supported Providers</h2>
       <ul>
-        <li><strong>Hetzner Cloud</strong> - Fully integrated with real-time API data</li>
-        <li><strong>Amazon Web Services (AWS)</strong> - Coming soon</li>
-        <li><strong>Microsoft Azure</strong> - Coming soon</li>
-        <li><strong>Google Cloud Platform (GCP)</strong> - Coming soon</li>
-        <li><strong>Oracle Cloud Infrastructure (OCI)</strong> - Coming soon</li>
-        <li><strong>OVH</strong> - Coming soon</li>
+        <li><strong>Amazon Web Services (AWS)</strong> — EC2 instances with on-demand and Reserved Instance pricing</li>
+        <li><strong>Microsoft Azure</strong> — Virtual Machines with Consumption and Reservation pricing</li>
+        <li><strong>Google Cloud Platform (GCP)</strong> — Compute Engine instances with on-demand and Committed Use Discounts (CUDs)</li>
+        <li><strong>Oracle Cloud Infrastructure (OCI)</strong> — Compute shapes with on-demand pricing (commitment pricing is managed via Universal Credits at account level)</li>
       </ul>
 
       <h2>Features</h2>
       <ul>
-        <li>Real-time pricing data from provider APIs</li>
-        <li>Standardized comparison across providers</li>
-        <li>Filter by CPU, memory, price, and region</li>
-        <li>Sort by any specification</li>
-        <li>Mobile-responsive design</li>
-        <li>No tracking or analytics</li>
+        <li>Real pricing data fetched weekly from public provider APIs — no guesswork, no hardcoded values</li>
+        <li>On-demand, 1-year, and 3-year commitment pricing in one view</li>
+        <li>Normalized metrics: $/vCPU/hr and $/GiB-RAM/hr for fair comparison</li>
+        <li>Side-by-side comparison of up to 4 instances across providers</li>
+        <li>Filter by vCPU, memory, provider, architecture, and GPU availability</li>
+        <li>Lazy-loaded data — fast initial page load (&lt; 200 KB)</li>
+        <li>No tracking, no analytics, no cookies</li>
       </ul>
 
       <h2>Data Sources</h2>
       <p>
-        CloudPriceFinder.com fetches data directly from cloud provider APIs when available, 
-        ensuring the most accurate and up-to-date pricing information. All prices 
-        are converted to USD for easy comparison while preserving original pricing 
-        in the provider's currency.
+        All pricing data is fetched directly from official public provider APIs and pricing endpoints:
       </p>
+      <ul>
+        <li>
+          <strong>AWS:</strong>{' '}
+          <a href="https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/index.json" target="_blank" rel="noopener noreferrer">
+            AWS Pricing API (offers/v1.0)
+          </a>{' '}and{' '}
+          <a href="https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/savingsPlan/v1.0/index.json" target="_blank" rel="noopener noreferrer">
+            Savings Plans API
+          </a>
+        </li>
+        <li>
+          <strong>Azure:</strong>{' '}
+          <a href="https://prices.azure.com/api/retail/prices" target="_blank" rel="noopener noreferrer">
+            Azure Retail Prices API
+          </a>
+        </li>
+        <li>
+          <strong>GCP:</strong>{' '}
+          <a href="https://cloud.google.com/billing/v1/how-tos/catalog-api" target="_blank" rel="noopener noreferrer">
+            Cloud Billing Catalog API
+          </a>
+        </li>
+        <li>
+          <strong>OCI:</strong>{' '}
+          <a href="https://apexapps.oracle.com/pls/apex/cetools/api/v1/products/" target="_blank" rel="noopener noreferrer">
+            Oracle Cloud Pricing API (cetools)
+          </a>
+        </li>
+      </ul>
+      <p class="text-sm text-gray-500">
+        Prices are converted to USD for comparison. Original currencies are preserved in the raw data.
+        Data is refreshed weekly and may lag real-time provider changes. Always verify with the
+        provider before purchasing.
+      </p>
+
+      <h2>Disclaimer</h2>
+      <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 not-prose">
+        <p class="text-sm text-yellow-800">
+          <strong>Pricing accuracy:</strong> Pricing is fetched weekly from public provider APIs and may not
+          reflect the latest changes. Some instance types or regions may be missing. Always verify pricing
+          directly with your cloud provider before making purchasing decisions.
+          CloudPriceFinder is not affiliated with AWS, Azure, GCP, or OCI.
+        </p>
+      </div>
 
       <h2>Open Source</h2>
       <p>
-        CloudPriceFinder.com is completely open source and available on GitHub.
+        CloudPriceFinder is completely open source. The data collection scripts, aggregation pipeline,
+        and frontend are all available on GitHub under the MIT license.
       </p>
-      
-      <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mt-8">
-        <h3 class="text-lg font-semibold text-blue-900 mb-2">Contributing</h3>
+
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mt-8 not-prose">
+        <h3 class="text-lg font-semibold text-blue-900 mb-2">Contribute or fork</h3>
         <p class="text-blue-800 mb-4">
-          Help us add more cloud providers or improve the existing functionality.
+          Help us improve the tool, add more providers, or run your own instance.
         </p>
-        <a 
-          href="https://github.com/eSKylezZ/CloudPriceFinder/" 
+        <a
+          href="https://github.com/eSKylezZ/cloudpricefinder.com"
           class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          target="_blank"
+          rel="noopener noreferrer"
         >
           View on GitHub
         </a>
       </div>
+
+      <h2>Creator</h2>
+      <p>
+        Built and maintained by{' '}
+        <a href="https://kyleblenkinsop.co.uk" target="_blank" rel="noopener noreferrer">Kyle Blenkinsop</a>.
+      </p>
     </div>
   </div>
 </BaseLayout>
