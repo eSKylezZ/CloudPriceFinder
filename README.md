@@ -1,6 +1,8 @@
-# CloudPriceFinder v2.0
+# CloudPriceFinder v3
 
 > Multi-cloud instance cost comparison tool with automated data collection
+
+**Live site:** https://cloudpricefinder.com
 
 CloudPriceFinder is an open-source application that helps you compare cloud instance costs and specifications across multiple providers. Built with Astro + TypeScript frontend and Python data collection, featuring automated GitHub Actions workflows for zero-maintenance operation.
 
