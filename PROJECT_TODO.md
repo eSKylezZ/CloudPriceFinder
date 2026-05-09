@@ -501,6 +501,17 @@ Astro only copies files from `public/` to `dist/`. Either (a) move `data/` to `p
 - [ ] Have the ability to select multiple VMs before going to the compare page, could be a select multiple an a pop up bar appears asking if you want to compare
 - [ ] Fix the Compare side-by-side option so it compare the closted matched ones, currently it only goes to the compare screen with the first VM and not the others. 
 
+
+---
+
+## Stage H - Security Issues GitHub
+
+- [ ] **Goal** Fix current security issues
+
+**Tasks**
+- [ ] Fix this yaml issue yaml is vulnerable to Stack Overflow via deeply nested YAML collections, upgrade to the latest version
+- [ ] Fix Clear-text logging of sensitive information logger.info(f"Found Compute Engine service: {svc['name']}"), logger.info(f"Fetching all SKUs for service {compute_service_id}...") , logger.warning(f"GET {url} failed (attempt {attempt + 1}/{_MAX_RETRIES}): {exc} — retrying in {wait:.1f}s")
+
 ## v2 historical reference (for context only)
 
 The previous TODO covered the v2 effort: 11 of 15 secondary providers integrated, provider metadata system, mostly-static pricing. Most of that work is **paused**, not deleted — the scripts and data live in `data/providers/_archive/` and `scripts/fetch_*.py` (disabled in PROVIDER_CONFIG). When v3 is shipped and stable, v3.1 can re-enable them one by one.
