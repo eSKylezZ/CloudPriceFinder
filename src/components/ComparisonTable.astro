@@ -11,16 +11,27 @@
       <div class="flex items-center space-x-4">
         <!-- Result count -->
         <div class="text-sm text-gray-500" id="result-count">Loading...</div>
-        <!-- Page size -->
-        <div class="flex items-center space-x-2">
-          <label for="page-size" class="text-sm text-gray-500">Show:</label>
-          <select id="page-size" class="text-sm border-gray-300 rounded-sm">
-            <option value="50">50</option>
-            <option value="100" selected>100</option>
-            <option value="200">200</option>
-            <option value="500">500</option>
-            <option value="all">All</option>
-          </select>
+        <!-- Page size + export -->
+        <div class="flex items-center space-x-3">
+          <div class="flex items-center space-x-2">
+            <label for="page-size" class="text-sm text-gray-500">Show:</label>
+            <select id="page-size" class="text-sm border-gray-300 rounded-sm">
+              <option value="50">50</option>
+              <option value="100" selected>100</option>
+              <option value="200">200</option>
+              <option value="500">500</option>
+              <option value="all">All</option>
+            </select>
+          </div>
+          <button id="export-csv-btn"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-40 disabled:cursor-not-allowed"
+            disabled title="Export visible results as CSV">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Export CSV
+          </button>
         </div>
       </div>
     </div>
@@ -98,8 +109,9 @@
             Regions</th>
           <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 z-10">
             GPU</th>
-          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 z-10">
-            Compare</th>
+          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 z-10"
+            title="Select up to 4 instances to compare side-by-side">
+            Select</th>
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200" id="table-body">
@@ -131,6 +143,25 @@
   </div>
 </div>
 
+<!-- Sticky compare bar: visible when ≥1 instance is selected -->
+<div id="compare-bar" class="hidden fixed bottom-0 inset-x-0 bg-white border-t border-gray-200 shadow-2xl z-50" role="region" aria-label="Selected instances for comparison">
+  <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
+    <div class="flex items-center gap-3 min-w-0 flex-1">
+      <span class="text-sm font-semibold text-gray-800 whitespace-nowrap" id="compare-bar-count"></span>
+      <div class="flex flex-wrap gap-1.5 min-w-0" id="compare-bar-chips"></div>
+    </div>
+    <div class="flex items-center gap-3 shrink-0">
+      <button id="compare-bar-clear" class="text-sm text-gray-500 hover:text-gray-700 whitespace-nowrap focus:outline-none">
+        Clear
+      </button>
+      <a id="compare-bar-link" href="/compare"
+        class="inline-flex items-center gap-1.5 px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 whitespace-nowrap">
+        Compare
+      </a>
+    </div>
+  </div>
+</div>
+
 <style>
   .commitment-active {
     background-color: white;
@@ -150,6 +181,7 @@
   interface EquivEntry {
     distance: number;
     family: string;
+    instanceType?: string; // representative instance within the family (added by aggregate.py)
   }
   interface EquivRecord {
     equivalents?: Record<string, EquivEntry>;
@@ -166,6 +198,10 @@
   let currentSortDir: 'asc' | 'desc' = 'asc';
   let searchTerm = '';
   let activeCommitmentTerm: 'on-demand' | '1yr' | '3yr' = 'on-demand';
+
+  // Multi-select compare state
+  const MAX_COMPARE = 4;
+  const selectedInstances = new Map<string, V3Instance>(); // key: "provider:instanceType"
 
   // ---------------------------------------------------------------------------
   // DOM refs
@@ -253,6 +289,7 @@
       maxMemory: number;
       maxPrice: number;
       gpuOnly: boolean;
+      regions: string[];
     };
 
     // Sync commitment term from filter panel
@@ -286,6 +323,9 @@
       if (filters.architecture !== 'any' && inst.architecture !== filters.architecture)
         return false;
       if (filters.gpuOnly && !inst.gpu) return false;
+
+      // Region filter: show instance only if it's available in at least one selected region
+      if (filters.regions?.length && !filters.regions.some((r) => inst.regions?.includes(r))) return false;
 
       // Price filter uses effective price for the selected commitment term
       const effectivePrice = getEffectivePrice(inst, filters.commitmentTerm);
@@ -355,11 +395,6 @@
     return map[provider] ?? 'bg-gray-100 text-gray-800';
   }
 
-  // Build compare URL for a given instance
-  function compareHref(inst: V3Instance): string {
-    return `/compare?items=${inst.provider}:${encodeURIComponent(inst.instanceType)}`;
-  }
-
   // ---------------------------------------------------------------------------
   // Sort
   // ---------------------------------------------------------------------------
@@ -420,6 +455,7 @@
     }
 
     if (resultCount) resultCount.textContent = `${total.toLocaleString()} instances`;
+    if (exportCsvBtn) exportCsvBtn.disabled = total === 0;
 
     const totalPages = effectivePageSize > 0 ? Math.ceil(total / effectivePageSize) : 1;
     if (pageInfo) pageInfo.textContent = `Page ${currentPage} of ${Math.max(1, totalPages)}`;
@@ -496,10 +532,13 @@
         ${regionCount} region${regionCount !== 1 ? 's' : ''}
       </td>
       <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">${gpuText}</td>
-      <td class="px-3 py-3 whitespace-nowrap text-sm">
-        <a href="${compareHref(inst)}"
-          class="text-primary-600 hover:text-primary-800 hover:underline font-medium text-xs"
-          title="Compare ${inst.instanceType}">Compare</a>
+      <td class="px-3 py-3 text-center">
+        <input type="checkbox"
+          class="select-row-check h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 cursor-pointer"
+          data-key="${inst.provider}:${inst.instanceType}"
+          ${selectedInstances.has(`${inst.provider}:${inst.instanceType}`) ? 'checked' : ''}
+          ${!selectedInstances.has(`${inst.provider}:${inst.instanceType}`) && selectedInstances.size >= MAX_COMPARE ? 'disabled' : ''}
+          title="Add to compare (up to ${MAX_COMPARE})" />
       </td>
     `;
 
@@ -568,6 +607,106 @@
     }
   });
 
+  // ---------------------------------------------------------------------------
+  // Multi-select: checkbox change delegation
+  // ---------------------------------------------------------------------------
+  tableBody.addEventListener('change', (e: Event) => {
+    const checkbox = (e.target as Element).closest('.select-row-check') as HTMLInputElement | null;
+    if (!checkbox) return;
+
+    const key = checkbox.dataset.key!;
+    const colonIdx = key.indexOf(':');
+    const provider = key.slice(0, colonIdx);
+    const instanceType = key.slice(colonIdx + 1);
+
+    if (checkbox.checked) {
+      if (selectedInstances.size >= MAX_COMPARE) {
+        checkbox.checked = false;
+        return;
+      }
+      const inst = allInstances.find((i) => i.provider === provider && i.instanceType === instanceType);
+      if (inst) selectedInstances.set(key, inst);
+    } else {
+      selectedInstances.delete(key);
+    }
+
+    updateCompareBar();
+    refreshCheckboxDisabledState();
+  });
+
+  function refreshCheckboxDisabledState() {
+    const isFull = selectedInstances.size >= MAX_COMPARE;
+    tableBody.querySelectorAll<HTMLInputElement>('.select-row-check').forEach((cb) => {
+      if (!cb.checked) cb.disabled = isFull;
+    });
+  }
+
+  function updateCompareBar() {
+    const bar = document.getElementById('compare-bar');
+    const countEl = document.getElementById('compare-bar-count');
+    const chipsEl = document.getElementById('compare-bar-chips');
+    const linkEl = document.getElementById('compare-bar-link') as HTMLAnchorElement | null;
+
+    if (!bar) return;
+
+    if (selectedInstances.size === 0) {
+      bar.classList.add('hidden');
+      return;
+    }
+
+    bar.classList.remove('hidden');
+
+    if (countEl) {
+      const n = selectedInstances.size;
+      countEl.textContent = `${n} instance${n !== 1 ? 's' : ''} selected`;
+    }
+
+    if (chipsEl) {
+      chipsEl.innerHTML = '';
+      selectedInstances.forEach((inst, key) => {
+        const chip = document.createElement('span');
+        chip.className = 'inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs font-medium';
+        chip.innerHTML = `
+          <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${providerColor(inst.provider)}">${inst.provider.toUpperCase()}</span>
+          <span class="font-mono text-gray-800">${inst.instanceType}</span>
+          <button class="remove-chip ml-0.5 text-gray-400 hover:text-red-500 focus:outline-none leading-none" data-key="${key}" title="Remove">×</button>
+        `;
+        chipsEl.appendChild(chip);
+      });
+
+      chipsEl.querySelectorAll<HTMLButtonElement>('.remove-chip').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const k = btn.dataset.key!;
+          selectedInstances.delete(k);
+          const cb = tableBody.querySelector<HTMLInputElement>(`.select-row-check[data-key="${k}"]`);
+          if (cb) { cb.checked = false; cb.disabled = false; }
+          updateCompareBar();
+          refreshCheckboxDisabledState();
+        });
+      });
+    }
+
+    if (linkEl) {
+      const items = [...selectedInstances.entries()].map(([key]) => {
+        const colonIdx = key.indexOf(':');
+        const prov = key.slice(0, colonIdx);
+        const itype = key.slice(colonIdx + 1);
+        return `${prov}:${encodeURIComponent(itype)}`;
+      }).join(',');
+      linkEl.href = `/compare?items=${items}`;
+    }
+  }
+
+  document.getElementById('compare-bar-clear')?.addEventListener('click', () => {
+    selectedInstances.clear();
+    tableBody.querySelectorAll<HTMLInputElement>('.select-row-check').forEach((cb) => {
+      cb.checked = false;
+      cb.disabled = false;
+    });
+    updateCompareBar();
+  });
+
+  // ---------------------------------------------------------------------------
   function renderDetail(container: HTMLElement, detail: V3InstanceFile, equivMap: Record<string, EquivRecord>) {
     const fmt = (n: number | undefined | null, d = 4) => (n != null && !isNaN(n) ? `$${n.toFixed(d)}` : '—');
     const fmtPct = (n: number | undefined | null, d = 1) => (n != null && !isNaN(n) ? `${n.toFixed(d)}%` : '—');
@@ -618,22 +757,37 @@
         const eq = equivEquivalents[p];
         if (!eq) return `<div class="text-xs text-gray-400">${p.toUpperCase()}: —</div>`;
         const distLabel = eq.distance < 0.1 ? 'Very close' : eq.distance < 0.5 ? 'Close' : 'Approximate';
-        const compareUrl = `/compare?items=${detail.provider}:${encodeURIComponent(detail.instanceType)},${p}:${encodeURIComponent(eq.family)}`;
+        const eqId = eq.instanceType || eq.family;
+        const compareUrl = `/compare?items=${detail.provider}:${encodeURIComponent(detail.instanceType)},${p}:${encodeURIComponent(eqId)}`;
         return `
           <div class="flex items-center space-x-1">
             <span class="text-xs font-medium text-gray-600 uppercase">${p}:</span>
-            <a href="${compareUrl}" class="text-xs text-primary-600 hover:underline font-mono">${eq.family}</a>
+            <a href="${compareUrl}" class="text-xs text-primary-600 hover:underline font-mono">${eqId}</a>
             <span class="text-xs text-gray-400">(${distLabel})</span>
           </div>
         `;
       });
+
+      // Build a single URL comparing the current instance against all available equivalents.
+      // Prefer instanceType (specific instance) over family (family stub) for each equivalent.
+      const allItems = [
+        `${detail.provider}:${encodeURIComponent(detail.instanceType)}`,
+        ...providerOrder
+          .filter((p) => equivEquivalents[p])
+          .map((p) => {
+            const eq = equivEquivalents[p]!;
+            return `${p}:${encodeURIComponent(eq.instanceType || eq.family)}`;
+          }),
+      ].join(',');
+      const allCompareUrl = `/compare?items=${allItems}`;
+
       equivHtml = `
         <div class="mt-4 pt-4 border-t border-gray-200">
           <h4 class="font-semibold text-gray-800 mb-2 text-sm">Closest Equivalents (by family)</h4>
           <div class="flex flex-wrap gap-4">
             ${equivCells.join('')}
           </div>
-          <p class="text-xs text-gray-400 mt-1">Matched by closest vCPU + RAM ratio. <a href="/compare?items=${detail.provider}:${encodeURIComponent(detail.instanceType)}" class="text-primary-600 hover:underline">Compare side-by-side</a></p>
+          <p class="text-xs text-gray-400 mt-1">Matched by closest vCPU + RAM ratio. <a href="${allCompareUrl}" class="text-primary-600 hover:underline">Compare all side-by-side →</a></p>
         </div>
       `;
     }
@@ -748,6 +902,86 @@
     currentPage = 1;
     sortAndRender();
   });
+
+  // ---------------------------------------------------------------------------
+  // Export CSV (Stage F) — client-side only, no dependencies
+  // ---------------------------------------------------------------------------
+  const exportCsvBtn = document.getElementById('export-csv-btn') as HTMLButtonElement | null;
+
+  function exportCSV() {
+    const rows = filteredInstances;
+    if (!rows.length) return;
+
+    const headers = [
+      'Provider', 'Instance Type', 'Family', 'Architecture',
+      'vCPU', 'RAM (GiB)', 'GPU',
+      'On-Demand $/hr',
+      '1yr Best $/hr', '1yr Savings %',
+      '3yr Best $/hr', '3yr Savings %',
+      'Spot $/hr',
+      'Regions',
+    ];
+
+    function bestCommitment(inst: V3Instance, term: '1yr' | '3yr'): { price: string; savings: string } {
+      const matches = (inst.commitments ?? []).filter((c) => c.term === term);
+      if (!matches.length) return { price: '', savings: '' };
+      const best = matches.reduce((a, b) => a.effectiveHourlyUSD < b.effectiveHourlyUSD ? a : b);
+      return {
+        price: best.effectiveHourlyUSD.toFixed(6),
+        savings: best.savingsVsOnDemandPct.toFixed(2),
+      };
+    }
+
+    function csvCell(value: string | number | undefined | null): string {
+      const s = String(value ?? '');
+      // Wrap in quotes if it contains a comma, quote, or newline
+      if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+        return `"${s.replace(/"/g, '""')}"`;
+      }
+      return s;
+    }
+
+    const lines: string[] = [headers.map(csvCell).join(',')];
+
+    for (const inst of rows) {
+      const yr1 = bestCommitment(inst, '1yr');
+      const yr3 = bestCommitment(inst, '3yr');
+      const spotMatches = (inst.commitments ?? []).filter((c) => (c.term as string) === 'spot');
+      const spotPrice = spotMatches.length
+        ? String(Math.min(...spotMatches.map((c) => c.effectiveHourlyUSD)).toFixed(6))
+        : '';
+
+      lines.push([
+        csvCell(inst.provider),
+        csvCell(inst.instanceType),
+        csvCell(inst.family),
+        csvCell(inst.architecture ?? 'x86_64'),
+        csvCell(inst.vCPU),
+        csvCell(inst.memoryGiB),
+        csvCell(inst.gpu ? `${inst.gpu.count}x ${inst.gpu.type}` : ''),
+        csvCell(inst.priceUSD_hourly != null ? inst.priceUSD_hourly.toFixed(6) : ''),
+        csvCell(yr1.price),
+        csvCell(yr1.savings),
+        csvCell(yr3.price),
+        csvCell(yr3.savings),
+        csvCell(spotPrice),
+        csvCell((inst.regions ?? []).join('|')),
+      ].join(','));
+    }
+
+    const blob = new Blob([lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const date = new Date().toISOString().slice(0, 10);
+    a.download = `cloudpricefinder-${date}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  exportCsvBtn?.addEventListener('click', exportCSV);
 
   // ---------------------------------------------------------------------------
   // Pagination controls
