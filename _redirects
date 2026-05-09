@@ -1,4 +1,14 @@
-# Cloudflare Pages _redirects
-# Placeholder — Stage 9 fills in the real rules
-# Format: /from /to [status]
-# Example: /v2/* /:splat 301
+# Cloudflare Pages redirect rules
+# Stage 9: Deployed at https://cloudpricefinder.com/
+
+# Legacy v2 paths -> root
+/v2/* / 301
+
+# Common old URL patterns
+/instances/* /compare 301
+/comparison/* / 301
+
+# 404 fallback (SPA-style: serve index.html for unknown paths)
+# Astro static generates individual pages so no catch-all needed,
+# but keep this as a safety net for any unmatched route.
+/app/* / 301

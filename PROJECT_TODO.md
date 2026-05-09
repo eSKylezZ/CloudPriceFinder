@@ -269,11 +269,11 @@
 
 ## Stage 9 — Cloudflare Pages Deployment
 
-- [ ] **Goal:** Get the site live on a Cloudflare Pages free-tier URL with proper caching.
+- [x] **Goal:** Get the site live on a Cloudflare Pages free-tier URL with proper caching.
 
 **Tasks (user actions noted)**
-- [ ] Website is already setup here https://cloudpricefinder.com/, make prod changes and well push it to main later. 
-- [ ] Add a `_headers` file at repo root:
+- [x] Website is already setup here https://cloudpricefinder.com/, make prod changes and well push it to main later. 
+- [x] Add a `_headers` file at repo root:
   ```
   /data/index.json
     Cache-Control: public, max-age=300, s-maxage=3600
@@ -284,9 +284,9 @@
   /assets/*
     Cache-Control: public, max-age=31536000, immutable
   ```
-- [ ] Add a `_redirects` file at repo root for any legacy URL paths (e.g. `/v2/* /:splat 301`).
-- [ ] Verify Astro config (`astro.config.mjs`) outputs static (no SSR), site URL set to the production CF Pages URL, sitemap integration enabled.
-- [ ] Verify `dist/data/` ends up in build output (Astro should copy `public/` and we'll need to ensure data files are placed there or copied at build time — see implementation note below).
+- [x] Add a `_redirects` file at repo root for any legacy URL paths (e.g. `/v2/* /:splat 301`).
+- [x] Verify Astro config (`astro.config.mjs`) outputs static (no SSR), site URL set to the production CF Pages URL, sitemap integration enabled.
+- [x] Verify `dist/data/` ends up in build output (Astro should copy `public/` and we'll need to ensure data files are placed there or copied at build time — see implementation note below).
 
 **Implementation note for the agent:**
 Astro only copies files from `public/` to `dist/`. Either (a) move `data/` to `public/data/` so it ships, or (b) add a postbuild step `cp -r data/ dist/data/`. Recommend (b) so that `data/` stays at repo root for clarity and CI tooling.
@@ -297,8 +297,8 @@ Astro only copies files from `public/` to `dist/`. Either (a) move `data/` to `p
 - Site loads < 1.5s on a cold cache (DevTools Slow 3G profile) -->
 
 **Definition of Done**
-- [ ] Production URL set in `astro.config.mjs` and in this README
-- [ ] PR: `v3/stage-9-cf-pages`
+- [x] Production URL set in `astro.config.mjs` and in this README
+- [x] PR: `v3/stage-9-cf-pages`
 
 ---
 
@@ -310,7 +310,8 @@ Astro only copies files from `public/` to `dist/`. Either (a) move `data/` to `p
 - [ ] Update [.github/workflows/data-collection.yml](.github/workflows/data-collection.yml):
   - Trigger: `schedule: cron: '0 4 * * 0'` (Sundays 04:00 UTC) + `workflow_dispatch`
   - Steps: checkout → setup Python 3.11 → setup Node 20 → install deps → `python scripts/orchestrator.py --providers aws azure gcp oci` → `python scripts/aggregate.py` → run validator → `npm run build` (sanity) → commit `data/` changes back to `main`
-  - Inject `GCP_API_KEY` from secrets
+  - use workload_identity_provider: projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github-pool/providers/github-provider           service_account: ${{ secrets.GCP_PROJECT_USERNAME }}@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com
+ for GCP, the secrets GCP_PROJECT_ID, GCP_PROJECT_NUMBER, GCP_PROJECT_USERNAME are already set. 
   - Use `actions/checkout@v4` with `fetch-depth: 0` and `persist-credentials: true`; commit with `[skip ci]` to avoid loops
 - [ ] Add a fallback: if any single provider fetcher fails, log and proceed with other 3 (orchestrator already supports this via `enabled` flags + retries)
 - [ ] Add a separate workflow `.github/workflows/build.yml` for PR/branch builds (no commit, just `npm run build` + type-check + lint)

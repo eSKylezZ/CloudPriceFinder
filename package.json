@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
-    "build-with-data": "npm run fetch-data && astro build",
+    "build": "astro build && node scripts/copy-data.mjs",
+    "build-with-data": "npm run fetch-data && npm run build",
     "preview": "astro preview",
     "fetch-data": "python3 scripts/orchestrator.py",
     "fetch-hetzner": "python3 scripts/fetch_hetzner.py",
