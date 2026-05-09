@@ -4,3 +4,4 @@ python-dotenv>=1.0.0
 hcloud>=1.25.0
 hetzner>=0.8.3
 ijson>=3.2.3
+google-auth>=2.29.0
