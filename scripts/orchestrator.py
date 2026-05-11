@@ -101,6 +101,10 @@ PROVIDER_CONFIG = {
         'enabled': False,  # v3.1 — disabled for v1 launch
         'description': 'Contabo'
     },
+    'vast': {
+        'enabled': False,  # v3.1 — marketplace snapshot, disabled for v1 launch
+        'description': 'Vast.ai GPU Marketplace'
+    },
 }
 
 class CloudDataOrchestrator:
@@ -114,6 +118,9 @@ class CloudDataOrchestrator:
             'gcp': self._fetch_gcp,
             'oci': self._fetch_oci,
             'ovh': self._fetch_ovh,
+            'vultr': self._fetch_vultr,
+            'vast': self._fetch_vast,
+            'scaleway': self._fetch_scaleway,
         }
         self.results = {}
         self.errors = {}
@@ -203,10 +210,45 @@ class CloudDataOrchestrator:
             raise
     
     def _fetch_ovh(self) -> List[Dict[str, Any]]:
-        """Fetch OVH data - placeholder for now."""
-        logger.warning("OVH fetcher not implemented yet - returning empty data")
-        return []
-    
+        """Fetch OVHcloud compute and bare-metal pricing data."""
+        try:
+            logger.info("Fetching OVHcloud pricing data...")
+            from fetch_ovh import fetch_ovh_data
+            return fetch_ovh_data()
+        except Exception as e:
+            logger.error(f"OVH fetch failed: {e}")
+            raise
+
+    def _fetch_vultr(self) -> List[Dict[str, Any]]:
+        """Fetch Vultr data using Vultr fetcher."""
+        try:
+            logger.info("Fetching Vultr cloud pricing data...")
+            from fetch_vultr import fetch_vultr_data
+            return fetch_vultr_data()
+        except Exception as e:
+            logger.error(f"Vultr fetch failed: {e}")
+            raise
+
+    def _fetch_vast(self) -> List[Dict[str, Any]]:
+        """Fetch Vast.ai GPU marketplace snapshot."""
+        try:
+            logger.info("Fetching Vast.ai GPU marketplace data...")
+            from fetch_vast import fetch_vast_data
+            return fetch_vast_data()
+        except Exception as e:
+            logger.error(f"Vast.ai fetch failed: {e}")
+            raise
+
+    def _fetch_scaleway(self) -> List[Dict[str, Any]]:
+        """Fetch Scaleway cloud pricing data."""
+        try:
+            logger.info("Fetching Scaleway cloud pricing data...")
+            from fetch_scaleway import fetch_scaleway_data
+            return fetch_scaleway_data()
+        except Exception as e:
+            logger.error(f"Scaleway fetch failed: {e}")
+            raise
+
     def _normalize_hetzner_data(self, data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Normalize Hetzner data to standard format."""
         normalized = []

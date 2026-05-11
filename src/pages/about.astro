@@ -4,126 +4,381 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 <BaseLayout
   title="About — CloudPriceFinder"
-  description="Learn more about CloudPriceFinder — the free, open-source multi-cloud instance cost comparison tool for AWS, Azure, GCP, and OCI."
+  description="Learn more about CloudPriceFinder — the free, open-source multi-cloud instance cost comparison tool for AWS, Azure, GCP, OCI, OVH, Scaleway, Vultr, and VAST."
 >
-  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <div class="text-center mb-12">
-      <h1 class="text-4xl font-bold text-gray-900 mb-4">
+  <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-8 sm:py-12 space-y-6">
+
+    <!-- Hero -->
+    <div class="relative rounded-2xl border border-blue-200/80 bg-gradient-to-br from-blue-100 via-blue-50 to-slate-50 overflow-hidden px-6 sm:px-10 pt-10 sm:pt-14 pb-10 sm:pb-12 text-center shadow-sm">
+      <div class="flex flex-wrap justify-center gap-2 mb-5">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-gray-200 text-xs font-medium text-gray-600 shadow-xs">
+          <svg class="h-3.5 w-3.5 text-green-500 shrink-0" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
+          </svg>
+          Free &amp; Open Source
+        </span>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-gray-200 text-xs font-medium text-gray-600 shadow-xs">
+          <svg class="h-3.5 w-3.5 text-primary-500 shrink-0" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M15.312 11.424a5.5 5.5 0 01-9.201 2.466l-.312-.311h2.433a.75.75 0 000-1.5H3.989a.75.75 0 00-.75.75v4.242a.75.75 0 001.5 0v-2.43l.31.31a7 7 0 0011.712-3.138.75.75 0 00-1.449-.39zm1.23-3.723a.75.75 0 00.219-.53V2.929a.75.75 0 00-1.5 0V5.36l-.31-.31A7 7 0 003.239 8.188a.75.75 0 101.448.389A5.5 5.5 0 0113.89 6.11l.311.31h-2.432a.75.75 0 000 1.5h4.243a.75.75 0 00.53-.219z" clip-rule="evenodd" />
+          </svg>
+          Updated Weekly
+        </span>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-gray-200 text-xs font-medium text-gray-600 shadow-xs">
+          <svg class="h-3.5 w-3.5 text-primary-500 shrink-0" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" />
+          </svg>
+          No Sign-Up Required
+        </span>
+      </div>
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight mb-3">
         About CloudPriceFinder
       </h1>
-      <p class="text-xl text-gray-600">
-        Free, open-source multi-cloud instance cost comparison
+      <p class="text-base sm:text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">
+        Free, open-source multi-cloud instance cost comparison for
+        <strong class="font-medium text-gray-700">AWS, Azure, Google Cloud, Oracle Cloud,</strong> and <strong class="font-medium text-gray-700">OVH, Scaleway, Vultr, VAST</strong>.
+        No ads, no upselling, no tracking.
       </p>
     </div>
 
-    <div class="prose prose-lg mx-auto">
-      <h2>What is CloudPriceFinder?</h2>
-      <p>
+    <!-- What is CloudPriceFinder -->
+    <div class="bg-white rounded-2xl border border-gray-200 px-6 sm:px-8 py-7">
+      <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <svg class="h-5 w-5 text-primary-600 shrink-0" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd" />
+        </svg>
+        What is CloudPriceFinder?
+      </h2>
+      <p class="text-gray-600 leading-relaxed mb-3">
         CloudPriceFinder is a free, open-source tool that helps developers and businesses compare
-        cloud compute instance costs across the four major providers: AWS, Azure, Google Cloud (GCP),
-        and Oracle Cloud (OCI). Instead of manually checking each cloud provider's pricing pages,
-        CloudPriceFinder aggregates and normalizes pricing data — including on-demand and 1-year/3-year
-        reserved/committed pricing — so you can make informed decisions quickly.
+        cloud compute instance costs across eight providers: AWS, Azure, Google Cloud (GCP),
+        Oracle Cloud (OCI), OVH, Scaleway, Vultr, and VAST. Instead of manually checking each
+        cloud provider's pricing pages, CloudPriceFinder aggregates and normalizes pricing data —
+        including on-demand and 1-year/3-year reserved/committed pricing — so you can make
+        informed decisions quickly.
       </p>
-      <p>
+      <p class="text-gray-600 leading-relaxed">
         There are no ads, no upselling, and no tracking. Data is refreshed weekly via GitHub Actions
         and served as a static site on Cloudflare Pages.
       </p>
+    </div>
 
-      <h2>Supported Providers</h2>
-      <ul>
-        <li><strong>Amazon Web Services (AWS)</strong> — EC2 instances with on-demand and Reserved Instance pricing</li>
-        <li><strong>Microsoft Azure</strong> — Virtual Machines with Consumption and Reservation pricing</li>
-        <li><strong>Google Cloud Platform (GCP)</strong> — Compute Engine instances with on-demand and Committed Use Discounts (CUDs)</li>
-        <li><strong>Oracle Cloud Infrastructure (OCI)</strong> — Compute shapes with on-demand pricing (commitment pricing is managed via Universal Credits at account level)</li>
-      </ul>
-
-      <h2>Features</h2>
-      <ul>
-        <li>Real pricing data fetched weekly from public provider APIs — no guesswork, no hardcoded values</li>
-        <li>On-demand, 1-year, and 3-year commitment pricing in one view</li>
-        <li>Normalized metrics: $/vCPU/hr and $/GiB-RAM/hr for fair comparison</li>
-        <li>Side-by-side comparison of up to 4 instances across providers</li>
-        <li>Filter by vCPU, memory, provider, architecture, and GPU availability</li>
-        <li>Lazy-loaded data — fast initial page load (&lt; 200 KB)</li>
-        <li>No tracking, no analytics, no cookies</li>
-      </ul>
-
-      <h2>Data Sources</h2>
-      <p>
-        All pricing data is fetched directly from official public provider APIs and pricing endpoints:
-      </p>
-      <ul>
-        <li>
-          <strong>AWS:</strong>{' '}
-          <a href="https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/index.json" target="_blank" rel="noopener noreferrer">
-            AWS Pricing API (offers/v1.0)
-          </a>{' '}and{' '}
-          <a href="https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/savingsPlan/v1.0/index.json" target="_blank" rel="noopener noreferrer">
-            Savings Plans API
-          </a>
-        </li>
-        <li>
-          <strong>Azure:</strong>{' '}
-          <a href="https://prices.azure.com/api/retail/prices" target="_blank" rel="noopener noreferrer">
-            Azure Retail Prices API
-          </a>
-        </li>
-        <li>
-          <strong>GCP:</strong>{' '}
-          <a href="https://cloud.google.com/billing/v1/how-tos/catalog-api" target="_blank" rel="noopener noreferrer">
-            Cloud Billing Catalog API
-          </a>
-        </li>
-        <li>
-          <strong>OCI:</strong>{' '}
-          <a href="https://apexapps.oracle.com/pls/apex/cetools/api/v1/products/" target="_blank" rel="noopener noreferrer">
-            Oracle Cloud Pricing API (cetools)
-          </a>
-        </li>
-      </ul>
-      <p class="text-sm text-gray-500">
-        Prices are converted to USD for comparison. Original currencies are preserved in the raw data.
-        Data is refreshed weekly and may lag real-time provider changes. Always verify with the
-        provider before purchasing.
-      </p>
-
-      <h2>Disclaimer</h2>
-      <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 not-prose">
-        <p class="text-sm text-yellow-800">
-          <strong>Pricing accuracy:</strong> Pricing is fetched weekly from public provider APIs and may not
-          reflect the latest changes. Some instance types or regions may be missing. Always verify pricing
-          directly with your cloud provider before making purchasing decisions.
-          CloudPriceFinder is not affiliated with AWS, Azure, GCP, or OCI.
-        </p>
+    <!-- Supported Providers -->
+    <div class="bg-white rounded-2xl border border-gray-200 px-6 sm:px-8 py-7">
+      <h2 class="text-xl font-bold text-gray-900 mb-5 flex items-center gap-2">
+        <svg class="h-5 w-5 text-primary-600 shrink-0" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z" />
+          <path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z" />
+        </svg>
+        Supported Providers
+      </h2>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div class="flex items-start gap-3 p-4 rounded-xl border border-orange-100 bg-orange-50">
+          <span class="mt-0.5 w-2.5 h-2.5 rounded-full bg-orange-500 shrink-0" aria-hidden="true"></span>
+          <div>
+            <p class="font-semibold text-orange-800 text-sm">Amazon Web Services (AWS)</p>
+            <p class="text-orange-700 text-sm mt-0.5">EC2 instances — on-demand, Reserved Instance, and Savings Plans pricing</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 p-4 rounded-xl border border-sky-100 bg-sky-50">
+          <span class="mt-0.5 w-2.5 h-2.5 rounded-full bg-sky-500 shrink-0" aria-hidden="true"></span>
+          <div>
+            <p class="font-semibold text-sky-800 text-sm">Microsoft Azure</p>
+            <p class="text-sky-700 text-sm mt-0.5">Virtual Machines — Consumption and Reservation pricing</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 p-4 rounded-xl border border-emerald-100 bg-emerald-50">
+          <span class="mt-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" aria-hidden="true"></span>
+          <div>
+            <p class="font-semibold text-emerald-800 text-sm">Google Cloud Platform (GCP)</p>
+            <p class="text-emerald-700 text-sm mt-0.5">Compute Engine instances — on-demand and Committed Use Discounts (CUDs)</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 p-4 rounded-xl border border-red-100 bg-red-50">
+          <span class="mt-0.5 w-2.5 h-2.5 rounded-full bg-red-500 shrink-0" aria-hidden="true"></span>
+          <div>
+            <p class="font-semibold text-red-800 text-sm">Oracle Cloud Infrastructure (OCI)</p>
+            <p class="text-red-700 text-sm mt-0.5">Compute shapes — on-demand pricing (commitment pricing is managed via Universal Credits at account level)</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 p-4 rounded-xl border border-indigo-100 bg-indigo-50">
+          <span class="mt-0.5 w-2.5 h-2.5 rounded-full bg-indigo-500 shrink-0" aria-hidden="true"></span>
+          <div>
+            <p class="font-semibold text-indigo-800 text-sm">OVHcloud (OVH)</p>
+            <p class="text-indigo-700 text-sm mt-0.5">Public Cloud instances — on-demand hourly pricing via the public OVH catalog API</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 p-4 rounded-xl border border-purple-100 bg-purple-50">
+          <span class="mt-0.5 w-2.5 h-2.5 rounded-full bg-purple-500 shrink-0" aria-hidden="true"></span>
+          <div>
+            <p class="font-semibold text-purple-800 text-sm">Scaleway</p>
+            <p class="text-purple-700 text-sm mt-0.5">Compute Instances — on-demand pricing from the public Scaleway product catalog API</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 p-4 rounded-xl border border-cyan-100 bg-cyan-50">
+          <span class="mt-0.5 w-2.5 h-2.5 rounded-full bg-cyan-500 shrink-0" aria-hidden="true"></span>
+          <div>
+            <p class="font-semibold text-cyan-800 text-sm">Vultr</p>
+            <p class="text-cyan-700 text-sm mt-0.5">Cloud Compute and Bare Metal plans — on-demand pricing from the public Vultr API</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 p-4 rounded-xl border border-pink-100 bg-pink-50">
+          <span class="mt-0.5 w-2.5 h-2.5 rounded-full bg-pink-500 shrink-0" aria-hidden="true"></span>
+          <div>
+            <p class="font-semibold text-pink-800 text-sm">VAST.ai</p>
+            <p class="text-pink-700 text-sm mt-0.5">GPU marketplace spot offers — real-time on-demand pricing snapshot (peer-to-peer, no commitment tiers)</p>
+          </div>
+        </div>
       </div>
+    </div>
 
-      <h2>Open Source</h2>
-      <p>
-        CloudPriceFinder is completely open source. The data collection scripts, aggregation pipeline,
-        and frontend are all available on GitHub under the MIT license.
+    <!-- Features -->
+    <div class="bg-white rounded-2xl border border-gray-200 px-6 sm:px-8 py-7">
+      <h2 class="text-xl font-bold text-gray-900 mb-5 flex items-center gap-2">
+        <svg class="h-5 w-5 text-primary-600 shrink-0" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
+        </svg>
+        Features
+      </h2>
+      <ul class="space-y-3">
+        {[
+          "Real pricing data fetched weekly from public provider APIs — no guesswork, no hardcoded values",
+          "On-demand, 1-year, and 3-year commitment pricing in one view",
+          "Normalized metrics: $/vCPU/hr and $/GiB-RAM/hr for fair comparison",
+          "Side-by-side comparison of up to 4 instances across providers",
+          "Filter by vCPU, memory, provider, architecture, and GPU availability",
+          "Shareable filter state — bookmark or share filtered views via URL parameters",
+          "Export filtered or selected instances as CSV or JSON",
+          "Lazy-loaded data — fast initial page load (< 200 KB)",
+          "No tracking, no analytics, no cookies",
+        ].map((feature) => (
+          <li class="flex items-start gap-3 text-gray-600 text-sm leading-relaxed">
+            <svg class="h-4 w-4 text-green-500 mt-0.5 shrink-0" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
+            </svg>
+            {feature}
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <!-- Methodology -->
+    <div class="bg-white rounded-2xl border border-gray-200 px-6 sm:px-8 py-7">
+      <h2 class="text-xl font-bold text-gray-900 mb-5 flex items-center gap-2">
+        <svg class="h-5 w-5 text-primary-600 shrink-0" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
+        </svg>
+        Methodology
+      </h2>
+      <div class="space-y-5 text-sm text-gray-600 leading-relaxed">
+
+        <div>
+          <h3 class="font-semibold text-gray-800 mb-1">Data Collection</h3>
+          <p>Pricing data is fetched weekly using Python scripts that call the official public pricing APIs for each provider. No scraping is used — all data comes from documented, machine-readable API endpoints.</p>
+        </div>
+
+        <div>
+          <h3 class="font-semibold text-gray-800 mb-1">Price Normalisation</h3>
+          <p>All prices are converted to USD at the time of collection. Original currency values are preserved in the raw data. Prices displayed are effective hourly rates — for commitment pricing this is the total cost amortised to an hourly equivalent (e.g. a 1-year upfront payment divided by 8,760 hours).</p>
+        </div>
+
+        <div>
+          <h3 class="font-semibold text-gray-800 mb-1">Derived Metrics</h3>
+          <ul class="mt-1 space-y-1 list-none">
+            <li class="flex items-start gap-2">
+              <code class="shrink-0 px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 font-mono text-xs">$/vCPU/hr</code>
+              <span>Effective hourly price ÷ vCPU count. Lower means better cost-efficiency per CPU core — useful for CPU-bound workloads.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <code class="shrink-0 px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 font-mono text-xs">$/GiB/hr</code>
+              <span>Effective hourly price ÷ memory in GiB. Lower means better cost-efficiency per gigabyte of RAM — useful for memory-intensive workloads.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <code class="shrink-0 px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 font-mono text-xs">Savings %</code>
+              <span>Percentage reduction vs the same instance's on-demand price: <code class="font-mono">(1 − effective_hourly / on_demand) × 100</code>.</span>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="font-semibold text-gray-800 mb-1">Commitment Pricing</h3>
+          <p>For AWS, commitment options include Reserved Instances (1yr/3yr, Partial/No/All Upfront) and Savings Plans. For Azure, Reservations are shown. For GCP, Committed Use Discounts (CUDs) are included. OCI commitment pricing is managed via Universal Credits at the account level and is not available per-instance. OVH, Scaleway, Vultr, and VAST do not publish public commitment or reserved pricing — only on-demand prices are shown for these providers.</p>
+        </div>
+
+        <div>
+          <h3 class="font-semibold text-gray-800 mb-1">Data Freshness</h3>
+          <p>Data is refreshed weekly. The "Last Updated" date shown on the homepage reflects when the data was last collected. Pricing changes made by providers between updates will not be reflected until the next refresh.</p>
+        </div>
+
+        <div>
+          <h3 class="font-semibold text-gray-800 mb-1">Cross-Provider Equivalent Matching</h3>
+          <p class="mb-2">
+            When you open the Compare page or expand a row, CloudPriceFinder suggests equivalent instances from other providers.
+            These suggestions are computed automatically — here's how, and what the limits are.
+          </p>
+          <p class="mb-2">
+            Instances are grouped into families (e.g. AWS <code class="px-1 py-0.5 rounded bg-gray-100 text-gray-700 font-mono text-xs">m7i</code>, Azure <code class="px-1 py-0.5 rounded bg-gray-100 text-gray-700 font-mono text-xs">D-v5</code>).
+            For each family we compute a <em>representative point</em> — the trimmed median vCPU and RAM across the middle 60% of the family's sizes — to avoid large or small outliers skewing the result.
+          </p>
+          <p class="mb-2">
+            To find the closest equivalent in another provider, we compare that representative point against every individual instance in the target provider using Euclidean distance in log₂(vCPU, RAM) space.
+            A log scale is used so that the difference between 2 and 4 vCPU is treated the same as between 64 and 128 vCPU.
+            We then pick the target provider's family that contains the closest matching instance.
+          </p>
+          <p class="mb-2">Two filters prevent bad matches from appearing:</p>
+          <ul class="space-y-1.5 mb-2">
+            <li class="flex items-start gap-2">
+              <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-gray-400 shrink-0" aria-hidden="true"></span>
+              <span><strong class="font-medium text-gray-700">Distance limit:</strong> if the closest instance is more than ~2× different in both vCPU <em>and</em> RAM simultaneously, no match is shown. A genuine mismatch — such as a 2 GiB family being forced onto a 16 GiB family — scores well above this threshold and is filtered out.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-gray-400 shrink-0" aria-hidden="true"></span>
+              <span><strong class="font-medium text-gray-700">RAM-per-vCPU band:</strong> the GiB-per-vCPU ratio of the source and target must be within 3×. This prevents compute-optimised families (≈ 2 GiB/vCPU) from being paired with memory-optimised families (≈ 16 GiB/vCPU).</span>
+            </li>
+          </ul>
+          <p class="text-gray-500">
+            Matching is profile-based (vCPU + RAM only). It does not account for CPU generation, network throughput, storage type, GPU presence, or burstability.
+            Families with no close counterpart in another provider — such as AWS's 16 TB+ bare-metal instances — will show no suggestion rather than a forced bad match.
+            Always review the full instance spec before treating a suggestion as a direct substitute.
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Data Sources -->
+    <div class="bg-white rounded-2xl border border-gray-200 px-6 sm:px-8 py-7">
+      <h2 class="text-xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+        <svg class="h-5 w-5 text-primary-600 shrink-0" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M10 2a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 2zM10 15a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 15zM10 7a3 3 0 100 6 3 3 0 000-6zM15.657 5.404a.75.75 0 10-1.06-1.06l-1.061 1.06a.75.75 0 001.06 1.06l1.06-1.06zM6.464 14.596a.75.75 0 10-1.06-1.06l-1.06 1.06a.75.75 0 001.06 1.06l1.06-1.06zM18 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0118 10zM5 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 015 10zM14.596 15.657a.75.75 0 001.06-1.06l-1.06-1.061a.75.75 0 10-1.06 1.06l1.06 1.06zM5.404 6.464a.75.75 0 001.06-1.06l-1.06-1.06a.75.75 0 10-1.061 1.06l1.06 1.06z" />
+        </svg>
+        Data Sources
+      </h2>
+      <p class="text-gray-500 text-sm mb-5">All pricing data is fetched directly from official public provider APIs and pricing endpoints.</p>
+      <div class="space-y-3">
+        <div class="flex items-center gap-3 text-sm">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-orange-200 bg-orange-50 text-xs font-semibold text-orange-700 shrink-0">
+            <span class="w-1.5 h-1.5 rounded-full bg-orange-500" aria-hidden="true"></span>AWS
+          </span>
+          <div class="flex flex-wrap gap-x-3 gap-y-1 text-gray-600">
+            <a href="https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/using-pricelist.html" target="_blank" rel="noopener noreferrer" class="text-primary-600 hover:text-primary-700 hover:underline">AWS Pricing API (offers/v1.0)</a>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 text-sm">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-sky-200 bg-sky-50 text-xs font-semibold text-sky-700 shrink-0">
+            <span class="w-1.5 h-1.5 rounded-full bg-sky-500" aria-hidden="true"></span>Azure
+          </span>
+          <a href="https://learn.microsoft.com/en-us/rest/api/cost-management/retail-prices/azure-retail-prices" target="_blank" rel="noopener noreferrer" class="text-primary-600 hover:text-primary-700 hover:underline text-sm">Azure Retail Prices API</a>
+        </div>
+        <div class="flex items-center gap-3 text-sm">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-emerald-200 bg-emerald-50 text-xs font-semibold text-emerald-700 shrink-0">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500" aria-hidden="true"></span>GCP
+          </span>
+          <a href="https://cloud.google.com/billing/v1/how-tos/catalog-api" target="_blank" rel="noopener noreferrer" class="text-primary-600 hover:text-primary-700 hover:underline text-sm">Cloud Billing Catalog API</a>
+        </div>
+        <div class="flex items-center gap-3 text-sm">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-red-200 bg-red-50 text-xs font-semibold text-red-700 shrink-0">
+            <span class="w-1.5 h-1.5 rounded-full bg-red-500" aria-hidden="true"></span>OCI
+          </span>
+          <a href="https://docs.oracle.com/en-us/iaas/Content/Billing/home.htm" target="_blank" rel="noopener noreferrer" class="text-primary-600 hover:text-primary-700 hover:underline text-sm">OCI Billing & Cost Management Docs</a>
+        </div>
+        <div class="flex items-center gap-3 text-sm">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-indigo-200 bg-indigo-50 text-xs font-semibold text-indigo-700 shrink-0">
+            <span class="w-1.5 h-1.5 rounded-full bg-indigo-500" aria-hidden="true"></span>OVH
+          </span>
+          <a href="https://www.ovhcloud.com/en/public-cloud/prices/" target="_blank" rel="noopener noreferrer" class="text-primary-600 hover:text-primary-700 hover:underline text-sm">OVHcloud Public Cloud Pricing</a>
+        </div>
+        <div class="flex items-center gap-3 text-sm">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-purple-200 bg-purple-50 text-xs font-semibold text-purple-700 shrink-0">
+            <span class="w-1.5 h-1.5 rounded-full bg-purple-500" aria-hidden="true"></span>Scaleway
+          </span>
+          <a href="https://www.scaleway.com/en/pricing/" target="_blank" rel="noopener noreferrer" class="text-primary-600 hover:text-primary-700 hover:underline text-sm">Scaleway Pricing</a>
+        </div>
+        <div class="flex items-center gap-3 text-sm">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-cyan-200 bg-cyan-50 text-xs font-semibold text-cyan-700 shrink-0">
+            <span class="w-1.5 h-1.5 rounded-full bg-cyan-500" aria-hidden="true"></span>Vultr
+          </span>
+          <a href="https://www.vultr.com/pricing/" target="_blank" rel="noopener noreferrer" class="text-primary-600 hover:text-primary-700 hover:underline text-sm">Vultr Pricing</a>
+        </div>
+        <div class="flex items-center gap-3 text-sm">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-pink-200 bg-pink-50 text-xs font-semibold text-pink-700 shrink-0">
+            <span class="w-1.5 h-1.5 rounded-full bg-pink-500" aria-hidden="true"></span>VAST
+          </span>
+          <a href="https://vast.ai/pricing" target="_blank" rel="noopener noreferrer" class="text-primary-600 hover:text-primary-700 hover:underline text-sm">Vast.ai Pricing</a>
+        </div>
+      </div>
+      <p class="mt-5 text-xs text-gray-400 border-t border-gray-100 pt-4">
+        Prices are converted to USD for comparison. Original currencies are preserved in the raw data.
+        Data is refreshed weekly and may not reflect the latest provider changes. Always verify with the provider before purchasing.
       </p>
+    </div>
 
-      <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mt-8 not-prose">
-        <h3 class="text-lg font-semibold text-blue-900 mb-2">Contribute or fork</h3>
-        <p class="text-blue-800 mb-4">
-          Help us improve the tool, add more providers, or run your own instance.
+    <!-- Disclaimer -->
+    <div class="rounded-2xl border border-yellow-200 bg-yellow-50 px-6 sm:px-8 py-6">
+      <div class="flex items-start gap-3">
+        <svg class="h-5 w-5 text-yellow-600 mt-0.5 shrink-0" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+        </svg>
+        <div>
+          <p class="font-semibold text-yellow-800 text-sm mb-1">Pricing accuracy disclaimer</p>
+          <p class="text-yellow-700 text-sm leading-relaxed">
+            Pricing is fetched weekly from public provider APIs and may not reflect the latest changes.
+            Some instance types or regions may be missing. Always verify pricing directly with your cloud
+            provider before making purchasing decisions. CloudPriceFinder is not affiliated with AWS, Azure, GCP, OCI, OVH, Scaleway, Vultr, or VAST.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Open Source + Creator (two-column on wider screens) -->
+    <div class="grid sm:grid-cols-2 gap-6">
+
+      <!-- Open Source -->
+      <div class="bg-white rounded-2xl border border-gray-200 px-6 py-7 flex flex-col">
+        <h2 class="text-xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+          <svg class="h-5 w-5 text-primary-600 shrink-0" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.373 0 0 5.373 0 12c0 5.303 3.438 9.8 8.207 11.387.6.11.793-.26.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.09-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+          </svg>
+          Open Source
+        </h2>
+        <p class="text-gray-600 text-sm leading-relaxed mb-5 flex-1">
+          CloudPriceFinder is completely open source. The data collection scripts, aggregation pipeline,
+          and frontend are all available on GitHub under the MIT license. Contributions, forks, and
+          feedback are welcome.
         </p>
         <a
           href="https://github.com/eSKylezZ/cloudpricefinder.com"
-          class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary-600 text-white rounded-lg text-sm font-semibold hover:bg-primary-700 transition-colors"
           target="_blank"
           rel="noopener noreferrer"
         >
+          <svg class="h-4 w-4 shrink-0" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.373 0 0 5.373 0 12c0 5.303 3.438 9.8 8.207 11.387.6.11.793-.26.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.09-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+          </svg>
           View on GitHub
         </a>
       </div>
 
-      <h2>Creator</h2>
-      <p>
-        Built and maintained by{' '}
-        <a href="https://kyleblenkinsop.co.uk" target="_blank" rel="noopener noreferrer">Kyle Blenkinsop</a>.
-      </p>
+      <!-- Creator -->
+      <div class="bg-white rounded-2xl border border-gray-200 px-6 py-7 flex flex-col">
+        <h2 class="text-xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+          <svg class="h-5 w-5 text-primary-600 shrink-0" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 00-13.074.003z" />
+          </svg>
+          Creator
+        </h2>
+        <p class="text-gray-600 text-sm leading-relaxed flex-1">
+          Built and maintained by{' '}
+          <a
+            href="https://kyleblenkinsop.co.uk"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-primary-600 hover:text-primary-700 hover:underline font-medium"
+          >Kyle Blenkinsop</a>.
+          If you find the tool useful, consider starring the repo or contributing.
+        </p>
+      </div>
+
     </div>
+
   </div>
 </BaseLayout>

@@ -1,157 +1,261 @@
 ---
 // FilterPanel v3: drives available options from index.json (loaded client-side).
-// No build-time data dependency — all filter population happens in the <script>.
 ---
 
-<div class="bg-white rounded-lg shadow-xs border border-gray-200 p-6">
-  <h2 class="text-lg font-semibold text-gray-900 mb-4">Filters</h2>
+<style>
+  /*
+   * Below xl (1280px): panel becomes a fixed left drawer.
+   * At xl+: panel is in normal grid flow as a sidebar card.
+   */
+  @media (max-width: 1023px) {
+    #filter-panel-wrapper {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 50;
+      width: 22rem;
+      max-width: 90vw;
+      overflow-y: auto;
+      border-radius: 0;
+      border-top: 0;
+      border-bottom: 0;
+      border-left: 0;
+      box-shadow: 8px 0 32px -4px rgb(0 0 0 / 0.2);
+      transform: translateX(-100%);
+      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    #filter-panel-wrapper.drawer-open {
+      transform: translateX(0);
+    }
+  }
 
-  <div class="space-y-6" id="filter-panel">
+  /* Thin scrollbar affordance for scrollable filter lists */
+  .filter-scroll::-webkit-scrollbar { width: 4px; }
+  .filter-scroll::-webkit-scrollbar-track { background: transparent; }
+  .filter-scroll::-webkit-scrollbar-thumb { background-color: #d1d5db; border-radius: 2px; }
+</style>
 
-    <!-- Provider Filter (populated by JS from index.json) -->
+<!-- FAB: visible on mobile/tablet only (< xl) -->
+<button
+  id="filter-fab"
+  type="button"
+  aria-controls="filter-panel-wrapper"
+  aria-expanded="false"
+  aria-label="Open filters"
+  class="lg:hidden fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 px-4 py-3 bg-primary-600 text-white text-sm font-semibold rounded-full shadow-lg hover:bg-primary-700 active:bg-primary-800 transition-colors"
+>
+  <svg class="h-4 w-4 shrink-0" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor">
+    <path fill-rule="evenodd" d="M2.628 1.601C5.028 1.206 7.49 1 10 1s4.973.206 7.372.601a.75.75 0 01.628.74v2.288a2.25 2.25 0 01-.659 1.59l-4.682 4.683a2.25 2.25 0 00-.659 1.59v3.037c0 .684-.31 1.33-.844 1.757l-1.937 1.55A.75.75 0 018 18.25v-5.757a2.25 2.25 0 00-.659-1.591L2.659 6.22A2.25 2.25 0 012 4.629V2.34a.75.75 0 01.628-.74z" clip-rule="evenodd" />
+  </svg>
+  Filters
+  <span
+    id="fab-count"
+    class="hidden min-w-[1.25rem] h-5 px-1 bg-white text-primary-600 text-xs font-bold rounded-full items-center justify-center leading-none"
+    aria-label="active filters"
+  >0</span>
+</button>
+
+<!-- Backdrop: visible when drawer is open on mobile/tablet -->
+<div id="filter-backdrop" class="lg:hidden hidden fixed inset-0 bg-black/40 z-40"></div>
+
+<!-- Filter panel: drawer on mobile/tablet, sidebar card on xl+ -->
+<div id="filter-panel-wrapper" class="bg-white border border-gray-200 shadow-xs lg:rounded-lg">
+
+  <!-- Drawer header (mobile/tablet only) -->
+  <div class="lg:hidden sticky top-0 bg-white z-10 flex items-center justify-between px-4 py-3 border-b border-gray-100">
+    <div class="flex items-center gap-2">
+      <h2 class="text-base font-semibold text-gray-900">Filters</h2>
+      <span class="filter-count-badge hidden px-2 py-0.5 bg-primary-100 text-primary-700 text-xs font-semibold rounded-full"></span>
+    </div>
+    <button
+      id="filter-close"
+      type="button"
+      aria-label="Close filters"
+      class="p-1.5 rounded-md text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+    >
+      <svg class="h-5 w-5" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Desktop header (xl+ only) -->
+  <div class="hidden lg:flex items-center gap-2 px-4 pt-4 pb-0">
+    <h2 class="text-base font-semibold text-gray-900">Filters</h2>
+    <span class="filter-count-badge hidden px-2 py-0.5 bg-primary-100 text-primary-700 text-xs font-semibold rounded-full"></span>
+  </div>
+
+  <!-- Filter controls -->
+  <div class="p-4 space-y-5" id="filter-panel">
+
+    <!-- Cloud Providers -->
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-2">Cloud Providers</label>
       <div class="space-y-2" id="provider-checkboxes">
-        <!-- skeleton placeholders -->
         {[1,2,3,4].map(() => (
           <div class="h-5 bg-gray-100 rounded-sm animate-pulse w-28"></div>
         ))}
       </div>
     </div>
 
-    <!-- Family Filter (populated by JS after provider selection) -->
+    <!-- Instance Family -->
     <div id="family-filter-section">
       <label class="block text-sm font-medium text-gray-700 mb-2">Instance Family</label>
-      <div class="space-y-1 max-h-44 overflow-y-auto" id="family-checkboxes">
+      <div
+        class="filter-scroll space-y-1 max-h-52 overflow-y-auto rounded-md border border-gray-100 p-2 bg-gray-50/60"
+        id="family-checkboxes"
+      >
         <div class="text-xs text-gray-400 italic">Loading families...</div>
       </div>
     </div>
 
-    <!-- Region Filter (populated by JS from index.json) -->
+    <!-- Region -->
     <div id="region-filter-section">
       <div class="flex items-center justify-between mb-2">
         <label class="block text-sm font-medium text-gray-700">Region</label>
         <div class="flex gap-2 text-xs">
-          <button type="button" id="region-select-all" class="text-primary-600 hover:underline">All</button>
+          <button type="button" id="region-select-all" class="text-primary-600 hover:underline font-medium">All</button>
           <span class="text-gray-300">|</span>
-          <button type="button" id="region-clear-all" class="text-gray-500 hover:underline">None</button>
+          <button type="button" id="region-clear-all" class="text-gray-700 hover:underline">None</button>
         </div>
       </div>
-      <div class="relative mb-1.5">
-        <input type="text" id="region-search" placeholder="Search regions..."
-          class="w-full pl-7 pr-2 py-1 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-primary-500 focus:border-primary-500" />
-        <div class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-          <svg class="h-3.5 w-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      <!-- Prominent search input -->
+      <div class="relative mb-2">
+        <label for="region-search" class="sr-only">Search regions</label>
+        <input
+          type="text"
+          id="region-search"
+          placeholder="Search regions..."
+          class="w-full pl-8 pr-3 py-2 text-sm border border-gray-300 rounded-md bg-white outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-shadow"
+        />
+        <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+          <svg class="h-4 w-4 text-gray-400" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </div>
       </div>
-      <div class="space-y-0.5 max-h-44 overflow-y-auto" id="region-checkboxes">
+      <div
+        class="filter-scroll space-y-0.5 max-h-44 overflow-y-auto rounded-md border border-gray-100 p-2 bg-gray-50/60"
+        id="region-checkboxes"
+      >
         <div class="text-xs text-gray-400 italic">Loading regions...</div>
       </div>
     </div>
 
-    <!-- Commitment Term -->
+    <!-- Pricing Term — grouped box -->
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-2">Pricing Term</label>
-      <div class="space-y-1">
-        <label class="flex items-center">
+      <div class="bg-gray-50 rounded-lg border border-gray-100 p-3 space-y-2">
+        <label class="flex items-center cursor-pointer">
           <input type="radio" name="commitmentTerm" value="on-demand" checked
             class="border-gray-300 text-primary-600 focus:ring-primary-500" />
-          <span class="ml-2 text-sm text-gray-600">On-Demand</span>
+          <span class="ml-2 text-sm text-gray-700">On-Demand</span>
         </label>
-        <label class="flex items-center">
+        <label class="flex items-center cursor-pointer">
           <input type="radio" name="commitmentTerm" value="1yr"
             class="border-gray-300 text-primary-600 focus:ring-primary-500" />
-          <span class="ml-2 text-sm text-gray-600">1-Year Reserved</span>
+          <span class="ml-2 text-sm text-gray-700">1-Year Reserved</span>
         </label>
-        <label class="flex items-center">
+        <label class="flex items-center cursor-pointer">
           <input type="radio" name="commitmentTerm" value="3yr"
             class="border-gray-300 text-primary-600 focus:ring-primary-500" />
-          <span class="ml-2 text-sm text-gray-600">3-Year Reserved</span>
+          <span class="ml-2 text-sm text-gray-700">3-Year Reserved</span>
         </label>
       </div>
     </div>
 
-    <!-- vCPU Range -->
+    <!-- vCPU Range — with live value display -->
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-2">vCPU Count</label>
-      <div class="flex items-center space-x-2">
+      <div class="flex items-center justify-between mb-1.5">
+        <label class="block text-sm font-medium text-gray-700">vCPU Count</label>
+        <span id="vcpu-display" class="text-xs text-gray-500 tabular-nums">1 – 1024</span>
+      </div>
+      <div class="flex items-center gap-2">
         <input type="number" name="minVCPU" id="min-vcpu" placeholder="Min"
           min="1" max="1024" value="1"
-          class="w-20 rounded-sm border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500" />
-        <span class="text-gray-500">to</span>
+          aria-label="Minimum vCPU count"
+          class="w-full rounded-md border border-gray-300 text-sm px-2 py-1.5 text-center focus:ring-1 focus:ring-primary-500 focus:border-primary-500" />
+        <span class="text-gray-400 shrink-0 text-sm" aria-hidden="true">–</span>
         <input type="number" name="maxVCPU" id="max-vcpu" placeholder="Max"
           min="1" max="1024" value="1024"
-          class="w-20 rounded-sm border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500" />
+          aria-label="Maximum vCPU count"
+          class="w-full rounded-md border border-gray-300 text-sm px-2 py-1.5 text-center focus:ring-1 focus:ring-primary-500 focus:border-primary-500" />
       </div>
     </div>
 
-    <!-- Memory Range -->
+    <!-- Memory Range — with live value display -->
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-2">Memory (GiB)</label>
-      <div class="flex items-center space-x-2">
+      <div class="flex items-center justify-between mb-1.5">
+        <label class="block text-sm font-medium text-gray-700">Memory (GiB)</label>
+        <span id="mem-display" class="text-xs text-gray-500 tabular-nums">0.5 – 65536</span>
+      </div>
+      <div class="flex items-center gap-2">
         <input type="number" name="minMemory" id="min-memory" placeholder="Min"
           min="0.5" max="65536" value="0.5"
-          class="w-20 rounded-sm border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500" />
-        <span class="text-gray-500">to</span>
+          aria-label="Minimum memory in GiB"
+          class="w-full rounded-md border border-gray-300 text-sm px-2 py-1.5 text-center focus:ring-1 focus:ring-primary-500 focus:border-primary-500" />
+        <span class="text-gray-400 shrink-0 text-sm" aria-hidden="true">–</span>
         <input type="number" name="maxMemory" id="max-memory" placeholder="Max"
           min="0.5" max="65536" value="65536"
-          class="w-20 rounded-sm border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500" />
+          aria-label="Maximum memory in GiB"
+          class="w-full rounded-md border border-gray-300 text-sm px-2 py-1.5 text-center focus:ring-1 focus:ring-primary-500 focus:border-primary-500" />
       </div>
     </div>
 
-    <!-- Max Hourly Price -->
+    <!-- Max Hourly Price — with $ prefix -->
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-2">Max Price (USD/hour)</label>
-      <input type="number" name="maxPrice" id="max-price" placeholder="e.g. 2.00"
-        min="0" step="0.01"
-        class="w-full rounded-sm border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500" />
+      <label for="max-price" class="block text-sm font-medium text-gray-700 mb-1.5">Max Price (USD/hr)</label>
+      <div class="relative">
+        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 text-sm pointer-events-none">$</span>
+        <input type="number" name="maxPrice" id="max-price" placeholder="e.g. 2.00"
+          min="0" step="0.01"
+          class="w-full pl-6 pr-2 py-1.5 rounded-md border border-gray-300 text-sm focus:ring-1 focus:ring-primary-500 focus:border-primary-500" />
+      </div>
     </div>
 
-    <!-- GPU filter -->
+    <!-- GPU Only -->
     <div>
-      <label class="flex items-center">
+      <label class="flex items-center gap-2 cursor-pointer">
         <input type="checkbox" id="gpu-only"
           class="rounded-sm border-gray-300 text-primary-600 focus:ring-primary-500" />
-        <span class="ml-2 text-sm text-gray-700">GPU instances only</span>
+        <span class="text-sm text-gray-700">GPU instances only</span>
       </label>
     </div>
 
-    <!-- Architecture -->
+    <!-- Architecture — grouped box -->
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-2">Architecture</label>
-      <div class="space-y-1">
-        <label class="flex items-center">
+      <div class="bg-gray-50 rounded-lg border border-gray-100 p-3 space-y-2">
+        <label class="flex items-center cursor-pointer">
           <input type="radio" name="architecture" value="any" checked
             class="border-gray-300 text-primary-600 focus:ring-primary-500" />
-          <span class="ml-2 text-sm text-gray-600">Any</span>
+          <span class="ml-2 text-sm text-gray-700">Any</span>
         </label>
-        <label class="flex items-center">
+        <label class="flex items-center cursor-pointer">
           <input type="radio" name="architecture" value="x86_64"
             class="border-gray-300 text-primary-600 focus:ring-primary-500" />
-          <span class="ml-2 text-sm text-gray-600">x86_64</span>
+          <span class="ml-2 text-sm text-gray-700">x86_64</span>
         </label>
-        <label class="flex items-center">
+        <label class="flex items-center cursor-pointer">
           <input type="radio" name="architecture" value="arm64"
             class="border-gray-300 text-primary-600 focus:ring-primary-500" />
-          <span class="ml-2 text-sm text-gray-600">arm64</span>
+          <span class="ml-2 text-sm text-gray-700">arm64</span>
         </label>
       </div>
     </div>
 
     <!-- Action Buttons -->
-    <div class="space-y-2 pt-4 border-t border-gray-200">
-      <button type="button" id="apply-filters"
-        class="w-full bg-primary-600 text-white py-2 px-4 rounded-md hover:bg-primary-700 focus:outline-hidden focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 text-sm">
-        Apply Filters
-      </button>
-      <button type="button" id="clear-filters"
-        class="w-full bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 focus:outline-hidden focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 text-sm">
+    <div class="pt-4 border-t border-gray-200">
+      <button
+        type="button"
+        id="clear-filters"
+        class="w-full bg-white text-gray-700 py-2 px-4 rounded-md border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 text-sm font-medium transition-colors"
+      >
         Clear All
       </button>
     </div>
+
   </div>
 </div>
 
@@ -160,13 +264,249 @@
 
   let indexData: V3Index | null = null;
 
-  // Receive index from page bootstrap
+  // Tracks user's explicit intent so selections survive provider list re-renders
+  const uncheckedFamilies = new Set<string>(); // families the user has manually unchecked
+  const checkedRegions    = new Set<string>(); // regions the user has manually checked
+
+  // ── Drawer / FAB ─────────────────────────────────────────────────────────────
+
+  const fab       = document.getElementById('filter-fab');
+  const backdrop  = document.getElementById('filter-backdrop');
+  const wrapper   = document.getElementById('filter-panel-wrapper');
+  const closeBtn  = document.getElementById('filter-close');
+
+  function openDrawer() {
+    wrapper?.classList.add('drawer-open');
+    backdrop?.classList.remove('hidden');
+    if (window.innerWidth < 1024) document.body.style.overflow = 'hidden';
+    fab?.setAttribute('aria-expanded', 'true');
+  }
+
+  function closeDrawer() {
+    wrapper?.classList.remove('drawer-open');
+    backdrop?.classList.add('hidden');
+    document.body.style.overflow = '';
+    fab?.setAttribute('aria-expanded', 'false');
+  }
+
+  fab?.addEventListener('click', openDrawer);
+  closeBtn?.addEventListener('click', closeDrawer);
+  backdrop?.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+
+  // ── Filter count badge ───────────────────────────────────────────────────────
+
+  function countActiveFilters(): number {
+    let n = 0;
+
+    const total   = document.querySelectorAll('input[name="provider"]').length;
+    const checked = document.querySelectorAll('input[name="provider"]:checked').length;
+    if (total > 0 && checked < total) n++;
+
+    const term = document.querySelector<HTMLInputElement>('input[name="commitmentTerm"]:checked')?.value;
+    if (term && term !== 'on-demand') n++;
+
+    const arch = document.querySelector<HTMLInputElement>('input[name="architecture"]:checked')?.value;
+    if (arch && arch !== 'any') n++;
+
+    const minV = parseFloat((document.getElementById('min-vcpu') as HTMLInputElement)?.value || '1');
+    const maxV = parseFloat((document.getElementById('max-vcpu') as HTMLInputElement)?.value || '1024');
+    if (minV > 1)    n++;
+    if (maxV < 1024) n++;
+
+    const minM = parseFloat((document.getElementById('min-memory') as HTMLInputElement)?.value || '0.5');
+    const maxM = parseFloat((document.getElementById('max-memory') as HTMLInputElement)?.value || '65536');
+    if (minM > 0.5)    n++;
+    if (maxM < 65536)  n++;
+
+    const maxP = (document.getElementById('max-price') as HTMLInputElement)?.value;
+    if (maxP && parseFloat(maxP) > 0) n++;
+
+    if ((document.getElementById('gpu-only') as HTMLInputElement)?.checked) n++;
+
+    if (document.querySelectorAll('input[name="region"]:checked').length > 0) n++;
+
+    return n;
+  }
+
+  function updateBadges() {
+    const n = countActiveFilters();
+    const label = n === 1 ? '1 active' : `${n} active`;
+
+    document.querySelectorAll<HTMLElement>('.filter-count-badge').forEach((el) => {
+      el.textContent = label;
+      el.classList.toggle('hidden', n === 0);
+      el.classList.toggle('inline-flex', n > 0);
+    });
+
+    const fabCount = document.getElementById('fab-count');
+    if (fabCount) {
+      fabCount.textContent = String(n);
+      fabCount.classList.toggle('hidden', n === 0);
+      fabCount.classList.toggle('inline-flex', n > 0);
+    }
+  }
+
+  // ── Range value display ──────────────────────────────────────────────────────
+
+  function updateRangeDisplays() {
+    const minV = (document.getElementById('min-vcpu') as HTMLInputElement)?.value || '1';
+    const maxV = (document.getElementById('max-vcpu') as HTMLInputElement)?.value || '1024';
+    const vcpuEl = document.getElementById('vcpu-display');
+    if (vcpuEl) vcpuEl.textContent = `${minV} – ${maxV}`;
+
+    const minM = (document.getElementById('min-memory') as HTMLInputElement)?.value || '0.5';
+    const maxM = (document.getElementById('max-memory') as HTMLInputElement)?.value || '65536';
+    const memEl = document.getElementById('mem-display');
+    if (memEl) memEl.textContent = `${minM} – ${maxM}`;
+  }
+
+  let filterDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+  function debouncedApply() {
+    if (filterDebounceTimer) clearTimeout(filterDebounceTimer);
+    filterDebounceTimer = setTimeout(() => { applyFilters(); updateBadges(); }, 350);
+  }
+
+  ['min-vcpu', 'max-vcpu', 'min-memory', 'max-memory'].forEach((id) => {
+    document.getElementById(id)?.addEventListener('input', () => { updateRangeDisplays(); debouncedApply(); });
+  });
+
+  document.getElementById('max-price')?.addEventListener('input', debouncedApply);
+
+  // Auto-apply on static filter changes
+  document.querySelectorAll<HTMLInputElement>('input[name="commitmentTerm"]').forEach((el) => {
+    el.addEventListener('change', () => { applyFilters(); updateBadges(); });
+  });
+  document.querySelectorAll<HTMLInputElement>('input[name="architecture"]').forEach((el) => {
+    el.addEventListener('change', () => { applyFilters(); updateBadges(); });
+  });
+  document.getElementById('gpu-only')?.addEventListener('change', () => { applyFilters(); updateBadges(); });
+
+  // ── URL state persistence ────────────────────────────────────────────────────
+
+  function writeFilterStateToURL() {
+    const params = new URLSearchParams();
+
+    const allProviders = Array.from(document.querySelectorAll<HTMLInputElement>('input[name="provider"]')).map(el => el.value);
+    const checked = getSelectedProviders();
+    if (checked.length > 0 && checked.length < allProviders.length) {
+      params.set('providers', checked.join(','));
+    }
+
+    const term = document.querySelector<HTMLInputElement>('input[name="commitmentTerm"]:checked')?.value;
+    if (term && term !== 'on-demand') params.set('term', term);
+
+    const arch = document.querySelector<HTMLInputElement>('input[name="architecture"]:checked')?.value;
+    if (arch && arch !== 'any') params.set('arch', arch);
+
+    const minV = (document.getElementById('min-vcpu') as HTMLInputElement)?.value;
+    const maxV = (document.getElementById('max-vcpu') as HTMLInputElement)?.value;
+    if (minV && parseFloat(minV) > 1) params.set('minVCPU', minV);
+    if (maxV && parseFloat(maxV) < 1024) params.set('maxVCPU', maxV);
+
+    const minM = (document.getElementById('min-memory') as HTMLInputElement)?.value;
+    const maxM = (document.getElementById('max-memory') as HTMLInputElement)?.value;
+    if (minM && parseFloat(minM) > 0.5) params.set('minMem', minM);
+    if (maxM && parseFloat(maxM) < 65536) params.set('maxMem', maxM);
+
+    const maxP = (document.getElementById('max-price') as HTMLInputElement)?.value;
+    if (maxP && parseFloat(maxP) > 0) params.set('maxPrice', maxP);
+
+    if ((document.getElementById('gpu-only') as HTMLInputElement)?.checked) params.set('gpu', '1');
+
+    const checkedRegionsList = Array.from(document.querySelectorAll<HTMLInputElement>('input[name="region"]:checked')).map(el => el.value);
+    if (checkedRegionsList.length > 0) params.set('regions', checkedRegionsList.join(','));
+
+    // Persist unchecked families (shorter URL than listing all checked ones)
+    if (uncheckedFamilies.size > 0) {
+      params.set('excludeFamilies', Array.from(uncheckedFamilies).join(','));
+    }
+
+    const newURL = new URL(window.location.href);
+    newURL.search = params.toString();
+    window.history.replaceState({}, '', newURL.toString());
+  }
+
+  function readURLState() {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.toString()) return;
+
+    const providers = params.get('providers');
+    if (providers) {
+      const providerList = providers.split(',');
+      document.querySelectorAll<HTMLInputElement>('input[name="provider"]').forEach(cb => {
+        cb.checked = providerList.includes(cb.value);
+      });
+      if (indexData) {
+        const selected = indexData.providers.filter(p => providerList.includes(p.id));
+        populateFamilies(selected);
+        populateRegions(selected);
+      }
+    }
+
+    const term = params.get('term');
+    if (term) {
+      const radio = document.querySelector<HTMLInputElement>(`input[name="commitmentTerm"][value="${term}"]`);
+      if (radio) radio.checked = true;
+    }
+
+    const arch = params.get('arch');
+    if (arch) {
+      const radio = document.querySelector<HTMLInputElement>(`input[name="architecture"][value="${arch}"]`);
+      if (radio) radio.checked = true;
+    }
+
+    const minVCPU = params.get('minVCPU');
+    const maxVCPU = params.get('maxVCPU');
+    if (minVCPU) (document.getElementById('min-vcpu') as HTMLInputElement).value = minVCPU;
+    if (maxVCPU) (document.getElementById('max-vcpu') as HTMLInputElement).value = maxVCPU;
+
+    const minMem = params.get('minMem');
+    const maxMem = params.get('maxMem');
+    if (minMem) (document.getElementById('min-memory') as HTMLInputElement).value = minMem;
+    if (maxMem) (document.getElementById('max-memory') as HTMLInputElement).value = maxMem;
+
+    const maxPrice = params.get('maxPrice');
+    if (maxPrice) (document.getElementById('max-price') as HTMLInputElement).value = maxPrice;
+
+    if (params.get('gpu') === '1') {
+      const gpuCb = document.getElementById('gpu-only') as HTMLInputElement;
+      if (gpuCb) gpuCb.checked = true;
+    }
+
+    const regions = params.get('regions');
+    if (regions) {
+      const regionList = regions.split(',');
+      regionList.forEach(r => checkedRegions.add(r));
+      document.querySelectorAll<HTMLInputElement>('input[name="region"]').forEach(cb => {
+        cb.checked = regionList.includes(cb.value);
+      });
+    }
+
+    const excludeFamilies = params.get('excludeFamilies');
+    if (excludeFamilies) {
+      const excludeList = excludeFamilies.split(',');
+      excludeList.forEach(f => uncheckedFamilies.add(f));
+      document.querySelectorAll<HTMLInputElement>('input[name="family"]').forEach(cb => {
+        if (excludeList.includes(cb.value)) cb.checked = false;
+      });
+    }
+
+    updateRangeDisplays();
+    applyFilters();
+    updateBadges();
+  }
+
+  // ── Index loading ────────────────────────────────────────────────────────────
+
   window.addEventListener('indexLoaded', (event: Event) => {
     const { index } = (event as CustomEvent<{ index: V3Index }>).detail;
     indexData = index;
     populateProviders(index);
     populateFamilies(index.providers);
     populateRegions(index.providers);
+    updateBadges();
+    readURLState();
   });
 
   function populateProviders(index: V3Index) {
@@ -186,13 +526,15 @@
       container.appendChild(label);
     });
 
-    // Refresh family list when provider selection changes
     container.querySelectorAll('input[name="provider"]').forEach((input) => {
       input.addEventListener('change', () => {
         if (!indexData) return;
         const selectedIds = getSelectedProviders();
         const selected = indexData.providers.filter((p) => selectedIds.includes(p.id));
         populateFamilies(selected);
+        populateRegions(selected);
+        applyFilters();
+        updateBadges();
       });
     });
   }
@@ -209,13 +551,13 @@
     container.innerHTML = '';
     providers.forEach((provider) => {
       const heading = document.createElement('div');
-      heading.className = 'text-xs font-semibold text-gray-500 uppercase tracking-wider mt-2 mb-1';
+      heading.className = 'text-xs font-semibold text-gray-500 uppercase tracking-wider mt-2 mb-1 first:mt-0';
       heading.textContent = provider.id.toUpperCase();
       container.appendChild(heading);
 
       provider.families.forEach((family) => {
         const label = document.createElement('label');
-        label.className = 'flex items-center ml-2';
+        label.className = 'flex items-center ml-2 cursor-pointer';
         label.innerHTML = `
           <input type="checkbox" name="family" value="${provider.id}:${family.id}" checked
             class="rounded-sm border-gray-300 text-primary-600 focus:ring-primary-500" />
@@ -223,6 +565,17 @@
           <span class="ml-1 text-xs text-gray-400">(${family.count})</span>
         `;
         container.appendChild(label);
+      });
+    });
+
+    // Restore explicit unchecks and wire up live tracking + auto-apply
+    container.querySelectorAll<HTMLInputElement>('input[name="family"]').forEach((cb) => {
+      if (uncheckedFamilies.has(cb.value)) cb.checked = false;
+      cb.addEventListener('change', () => {
+        if (cb.checked) uncheckedFamilies.delete(cb.value);
+        else uncheckedFamilies.add(cb.value);
+        applyFilters();
+        updateBadges();
       });
     });
   }
@@ -239,8 +592,7 @@
       hasRegions = true;
 
       const heading = document.createElement('div');
-      heading.className = 'region-provider-heading text-xs font-semibold text-gray-500 uppercase tracking-wider mt-2 mb-0.5';
-      heading.style.cssText = 'margin-top: 0.375rem;';
+      heading.className = 'region-provider-heading text-xs font-semibold text-gray-500 uppercase tracking-wider mt-2 mb-0.5 first:mt-0';
       heading.dataset.provider = provider.id;
       heading.textContent = provider.id.toUpperCase();
       container.appendChild(heading);
@@ -262,9 +614,21 @@
     if (!hasRegions) {
       container.innerHTML = '<div class="text-xs text-gray-400 italic">No regions available</div>';
     }
+
+    // Restore explicit checks and wire up live tracking + auto-apply
+    container.querySelectorAll<HTMLInputElement>('input[name="region"]').forEach((cb) => {
+      if (checkedRegions.has(cb.value)) cb.checked = true;
+      cb.addEventListener('change', () => {
+        if (cb.checked) checkedRegions.add(cb.value);
+        else checkedRegions.delete(cb.value);
+        applyFilters();
+        updateBadges();
+      });
+    });
   }
 
-  // Region search — filter displayed region items
+  // ── Region search ────────────────────────────────────────────────────────────
+
   document.getElementById('region-search')?.addEventListener('input', (e) => {
     const q = (e.target as HTMLInputElement).value.toLowerCase().trim();
     const container = document.getElementById('region-checkboxes');
@@ -290,12 +654,24 @@
   });
 
   document.getElementById('region-select-all')?.addEventListener('click', () => {
-    document.querySelectorAll<HTMLInputElement>('input[name="region"]').forEach((cb) => { cb.checked = true; });
+    document.querySelectorAll<HTMLInputElement>('input[name="region"]').forEach((cb) => {
+      cb.checked = true;
+      checkedRegions.add(cb.value);
+    });
+    applyFilters();
+    updateBadges();
   });
 
   document.getElementById('region-clear-all')?.addEventListener('click', () => {
-    document.querySelectorAll<HTMLInputElement>('input[name="region"]').forEach((cb) => { cb.checked = false; });
+    document.querySelectorAll<HTMLInputElement>('input[name="region"]').forEach((cb) => {
+      cb.checked = false;
+      checkedRegions.delete(cb.value);
+    });
+    applyFilters();
+    updateBadges();
   });
+
+  // ── Helpers ──────────────────────────────────────────────────────────────────
 
   function getSelectedProviders(): string[] {
     return Array.from(
@@ -303,8 +679,12 @@
     ).map((el) => el.value);
   }
 
-  document.getElementById('apply-filters')?.addEventListener('click', applyFilters);
-  document.getElementById('clear-filters')?.addEventListener('click', clearFilters);
+  // ── Apply / Clear ────────────────────────────────────────────────────────────
+
+  document.getElementById('clear-filters')?.addEventListener('click', () => {
+    clearFilters();
+    updateBadges();
+  });
 
   function applyFilters() {
     const providers = getSelectedProviders();
@@ -324,21 +704,13 @@
     const architecture =
       document.querySelector<HTMLInputElement>('input[name="architecture"]:checked')?.value ?? 'any';
 
-    const minVCPU = parseFloat(
-      (document.getElementById('min-vcpu') as HTMLInputElement)?.value || '1'
-    );
-    const maxVCPU = parseFloat(
-      (document.getElementById('max-vcpu') as HTMLInputElement)?.value || '1024'
-    );
-    const minMemory = parseFloat(
-      (document.getElementById('min-memory') as HTMLInputElement)?.value || '0.5'
-    );
-    const maxMemory = parseFloat(
-      (document.getElementById('max-memory') as HTMLInputElement)?.value || '65536'
-    );
+    const minVCPU   = parseFloat((document.getElementById('min-vcpu')   as HTMLInputElement)?.value || '1');
+    const maxVCPU   = parseFloat((document.getElementById('max-vcpu')   as HTMLInputElement)?.value || '1024');
+    const minMemory = parseFloat((document.getElementById('min-memory') as HTMLInputElement)?.value || '0.5');
+    const maxMemory = parseFloat((document.getElementById('max-memory') as HTMLInputElement)?.value || '65536');
     const maxPriceRaw = (document.getElementById('max-price') as HTMLInputElement)?.value;
     const maxPrice = maxPriceRaw ? parseFloat(maxPriceRaw) : Infinity;
-    const gpuOnly = (document.getElementById('gpu-only') as HTMLInputElement)?.checked ?? false;
+    const gpuOnly  = (document.getElementById('gpu-only') as HTMLInputElement)?.checked ?? false;
 
     const regions = Array.from(
       document.querySelectorAll<HTMLInputElement>('input[name="region"]:checked')
@@ -346,36 +718,38 @@
 
     window.dispatchEvent(
       new CustomEvent('filtersChanged', {
-        detail: { providers, families, commitmentTerm, architecture, minVCPU, maxVCPU, minMemory, maxMemory, maxPrice, gpuOnly, regions },
+        detail: { providers, families, commitmentTerm, architecture, minVCPU, maxVCPU, minMemory, maxMemory, maxPrice, gpuOnly, regions, filterCount: countActiveFilters() },
       })
     );
+    writeFilterStateToURL();
   }
 
   function clearFilters() {
-    // Check all non-region checkboxes (providers, families, gpu)
+    uncheckedFamilies.clear();
+    checkedRegions.clear();
+
     document.querySelectorAll<HTMLInputElement>('input[type="checkbox"]:not([name="region"])').forEach((el) => {
       el.checked = true;
     });
-    // Clear region filter (unchecked = no region filter applied)
     document.querySelectorAll<HTMLInputElement>('input[name="region"]').forEach((el) => {
       el.checked = false;
     });
-    // Reset region search and visibility
+
     const regionSearchEl = document.getElementById('region-search') as HTMLInputElement | null;
     if (regionSearchEl) regionSearchEl.value = '';
     document.querySelectorAll<HTMLElement>('#region-checkboxes .region-item, #region-checkboxes .region-provider-heading').forEach((el) => {
       el.style.display = '';
     });
-    const odRadio = document.querySelector<HTMLInputElement>(
-      'input[name="commitmentTerm"][value="on-demand"]'
-    );
+
+    const odRadio = document.querySelector<HTMLInputElement>('input[name="commitmentTerm"][value="on-demand"]');
     if (odRadio) odRadio.checked = true;
-    const anyArch = document.querySelector<HTMLInputElement>(
-      'input[name="architecture"][value="any"]'
-    );
+
+    const anyArch = document.querySelector<HTMLInputElement>('input[name="architecture"][value="any"]');
     if (anyArch) anyArch.checked = true;
+
     const maxPriceInput = document.getElementById('max-price') as HTMLInputElement;
     if (maxPriceInput) maxPriceInput.value = '';
+
     const minVCPU = document.getElementById('min-vcpu') as HTMLInputElement;
     if (minVCPU) minVCPU.value = '1';
     const maxVCPU = document.getElementById('max-vcpu') as HTMLInputElement;
@@ -385,6 +759,13 @@
     const maxMem = document.getElementById('max-memory') as HTMLInputElement;
     if (maxMem) maxMem.value = '65536';
 
+    updateRangeDisplays();
     applyFilters();
+    window.history.replaceState({}, '', window.location.pathname);
   }
+
+  window.addEventListener('requestClearFilters', () => {
+    clearFilters();
+    updateBadges();
+  });
 </script>

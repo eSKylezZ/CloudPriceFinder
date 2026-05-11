@@ -2,7 +2,180 @@
 
 @theme {
   --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
   --color-primary-500: #3b82f6;
   --color-primary-600: #2563eb;
   --color-primary-700: #1d4ed8;
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', 'Fira Code', ui-monospace, monospace;
+}
+
+/* ── Base Typography ─────────────────────────────────────────── */
+body {
+  font-family: var(--font-sans);
+}
+
+/* ── Dark mode: manual toggle (data-theme set by inline script) ── */
+[data-theme="dark"] {
+  --color-white:    #1f2937;
+  --color-gray-50:  #111827;
+  --color-gray-100: #1a2535;
+  --color-gray-200: #283548;
+  --color-gray-300: #374151;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #94a3b8;
+  --color-gray-600: #cbd5e1;
+  --color-gray-700: #e2e8f0;
+  --color-gray-800: #f1f5f9;
+  --color-gray-900: #f8fafc;
+  --color-slate-50:  #111827;
+  --color-slate-100: #1a2535;
+  --color-slate-200: #283548;
+  --color-blue-50:  #1e3a5f;
+  --color-blue-100: #1e3559;
+  --color-blue-800: #93c5fd;
+  --color-indigo-50:  #1e2440;
+  --color-indigo-100: #1e274a;
+  --color-indigo-200: #2a3560;
+  --color-indigo-700: #a5b4fc;
+  --color-indigo-800: #c7d2fe;
+  --color-primary-50: #1e3a5f;
+  color-scheme: dark;
+}
+
+/* ── Dark mode: CSS-only fallback for users without JS ───────── */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-white:    #1f2937;
+    --color-gray-50:  #111827;
+    --color-gray-100: #1a2535;
+    --color-gray-200: #283548;
+    --color-gray-300: #374151;
+    --color-gray-400: #9ca3af;
+    --color-gray-500: #94a3b8;
+    --color-gray-600: #cbd5e1;
+    --color-gray-700: #e2e8f0;
+    --color-gray-800: #f1f5f9;
+    --color-gray-900: #f8fafc;
+    --color-slate-50:  #111827;
+    --color-slate-100: #1a2535;
+    --color-slate-200: #283548;
+    --color-blue-50:  #1e3a5f;
+    --color-blue-100: #1e3559;
+    --color-blue-800: #93c5fd;
+    --color-indigo-50:  #1e2440;
+    --color-indigo-100: #1e274a;
+    --color-indigo-200: #2a3560;
+    --color-indigo-700: #a5b4fc;
+    --color-indigo-800: #c7d2fe;
+    --color-primary-50: #1e3a5f;
+    color-scheme: dark;
+  }
+}
+
+/* ── text-white rescue: --color-white is now dark, so restore white text ── */
+/* Targets text-white on coloured buttons/chips where white text is intentional */
+[data-theme="dark"] .text-white { color: #f8fafc; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .text-white { color: #f8fafc; }
+}
+
+/* ── Hover state corrections for dark mode ───────────────────── */
+[data-theme="dark"] .hover\:bg-gray-50:hover,
+[data-theme="dark"] .hover\:bg-gray-100:hover { background-color: #283548; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .hover\:bg-gray-50:hover,
+  :root:not([data-theme="light"]) .hover\:bg-gray-100:hover { background-color: #283548; }
+}
+
+/* ── Hardcoded-background dark overrides (JS-generated rows) ─── */
+[data-theme="dark"] .commitment-active { background-color: #283548; color: #93c5fd; }
+[data-theme="dark"] #table-body tr.row-even { background-color: #1a2535; }
+[data-theme="dark"] #table-body tr.row-even:hover,
+[data-theme="dark"] #table-body tr.row-odd:hover { background-color: #1e3a5f; }
+[data-theme="dark"] .detail-row { background-color: #151e2d; }
+[data-theme="dark"] .card-detail { background-color: #151e2d; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .commitment-active { background-color: #283548; color: #93c5fd; }
+  :root:not([data-theme="light"]) #table-body tr.row-even { background-color: #1a2535; }
+  :root:not([data-theme="light"]) #table-body tr.row-even:hover,
+  :root:not([data-theme="light"]) #table-body tr.row-odd:hover { background-color: #1e3a5f; }
+  :root:not([data-theme="light"]) .detail-row { background-color: #151e2d; }
+  :root:not([data-theme="light"]) .card-detail { background-color: #151e2d; }
+}
+
+/* ── Inputs and selects in dark mode ─────────────────────────── */
+[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]),
+[data-theme="dark"] select {
+  background-color: #1f2937;
+  color: #f1f5f9;
+  border-color: #374151;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) input:not([type="checkbox"]):not([type="radio"]),
+  :root:not([data-theme="light"]) select {
+    background-color: #1f2937;
+    color: #f1f5f9;
+    border-color: #374151;
+  }
+}
+
+/* ── Critical rendering ──────────────────────────────────────── */
+.table-loading { min-height: 200px; }
+.content-visibility-auto { content-visibility: auto; contain-intrinsic-size: 50px; }
+
+/* ── Accessibility ───────────────────────────────────────────── */
+
+/* Skip-to-content link — visually hidden until focused */
+.skip-link {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+.skip-link:focus-visible {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 200;
+  width: auto;
+  height: auto;
+  padding: 0.5rem 1rem;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+  background: #fff;
+  color: #1d4ed8;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-radius: 0.375rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15);
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* Fallback focus ring for all interactive elements not already styled with Tailwind ring utilities */
+:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+/* Suppress duplicate outline on elements that already use Tailwind focus:ring (box-shadow ring) */
+[class*="focus:ring"]:focus-visible,
+[class*="focus-visible:ring"]:focus-visible {
+  outline: none;
+}
+
+/* Focusable sort column headers */
+th[data-sort] {
+  outline: none;
+}
+th[data-sort]:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: -2px;
 }

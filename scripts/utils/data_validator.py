@@ -103,7 +103,7 @@ REQUIRED_FIELDS = [
     'lastUpdated'
 ]
 
-VALID_PROVIDERS = ['aws', 'azure', 'gcp', 'hetzner', 'oci', 'ovh']
+VALID_PROVIDERS = ['aws', 'azure', 'gcp', 'hetzner', 'oci', 'ovh', 'scaleway', 'vast', 'vultr']
 VALID_TYPES = [
     'cloud-server',
     'cloud-loadbalancer', 
