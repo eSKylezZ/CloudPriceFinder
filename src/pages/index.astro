@@ -6,27 +6,102 @@ import FilterPanel from '../components/FilterPanel.astro';
 
 <BaseLayout
   title="CloudPriceFinder — Compare Cloud Instance Costs"
-  description="Compare AWS, Azure, GCP, and OCI cloud compute instance costs side-by-side. On-demand and 1yr/3yr reserved pricing. Free, no ads, updated weekly."
+  description="Compare AWS, Azure, GCP, OCI, OVH, Scaleway, Vultr, and VAST cloud compute instance costs side-by-side. On-demand and 1yr/3yr reserved pricing. Free, no ads, updated weekly."
 >
-  <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-8 flex-1">
+  <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 pt-4 sm:pt-8 pb-8 flex-1">
     <!-- Hero Section -->
-    <div class="text-center mb-8">
-      <h1 class="text-4xl font-bold text-gray-900 mb-4">
+    <div class="relative rounded-2xl border border-blue-200/80 bg-gradient-to-br from-blue-100 via-blue-50 to-slate-50 overflow-hidden mb-8 px-6 sm:px-10 py-10 sm:py-12 text-center shadow-sm">
+
+      <!-- Trust badges -->
+      <div class="flex flex-wrap justify-center gap-2 mb-5">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-gray-200 text-xs font-medium text-gray-600 shadow-xs">
+          <svg class="h-3.5 w-3.5 text-green-500 shrink-0" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
+          </svg>
+          Free &amp; Open Source
+        </span>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-gray-200 text-xs font-medium text-gray-600 shadow-xs">
+          <svg class="h-3.5 w-3.5 text-primary-500 shrink-0" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" />
+          </svg>
+          No Sign-Up Required
+        </span>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-gray-200 text-xs font-medium text-gray-600 shadow-xs">
+          <svg class="h-3.5 w-3.5 text-primary-500 shrink-0" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M15.312 11.424a5.5 5.5 0 01-9.201 2.466l-.312-.311h2.433a.75.75 0 000-1.5H3.989a.75.75 0 00-.75.75v4.242a.75.75 0 001.5 0v-2.43l.31.31a7 7 0 0011.712-3.138.75.75 0 00-1.449-.39zm1.23-3.723a.75.75 0 00.219-.53V2.929a.75.75 0 00-1.5 0V5.36l-.31-.31A7 7 0 003.239 8.188a.75.75 0 101.448.389A5.5 5.5 0 0113.89 6.11l.311.31h-2.432a.75.75 0 000 1.5h4.243a.75.75 0 00.53-.219z" clip-rule="evenodd" />
+          </svg>
+          Updated Weekly
+        </span>
+      </div>
+
+      <!-- Heading -->
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 tracking-tight mb-3">
         Multi-Cloud Instance Comparison
       </h1>
-      <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-        Compare cloud instance costs and specifications across AWS, Azure, Google Cloud,
-        and Oracle Cloud. Find the best value for your workload.
+
+      <!-- Subtitle — clearly subordinate weight/colour -->
+      <p class="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto mb-7 leading-relaxed [text-shadow:0_1px_3px_rgba(0,0,0,0.15)]">
+        Compare instance costs and specs across <strong class="font-medium text-gray-700">AWS, Azure, Google Cloud, Oracle Cloud,</strong> and <strong class="font-medium text-gray-700">OVH, Scaleway, Vultr, VAST</strong>.
+        Find the best value for your workload — no ads, no upselling.
       </p>
+
+      <!-- Provider badges -->
+      <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-8">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-orange-200 bg-orange-50 text-xs font-semibold text-orange-700">
+          <span class="w-2 h-2 rounded-full bg-orange-500 shrink-0" aria-hidden="true"></span>
+          AWS
+        </span>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-sky-200 bg-sky-50 text-xs font-semibold text-sky-700">
+          <span class="w-2 h-2 rounded-full bg-sky-500 shrink-0" aria-hidden="true"></span>
+          Azure
+        </span>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-emerald-200 bg-emerald-50 text-xs font-semibold text-emerald-700">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0" aria-hidden="true"></span>
+          Google Cloud
+        </span>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-red-200 bg-red-50 text-xs font-semibold text-red-700">
+          <span class="w-2 h-2 rounded-full bg-red-500 shrink-0" aria-hidden="true"></span>
+          Oracle Cloud
+        </span>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-indigo-200 bg-indigo-50 text-xs font-semibold text-indigo-700">
+          <span class="w-2 h-2 rounded-full bg-indigo-500 shrink-0" aria-hidden="true"></span>
+          OVH
+        </span>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-purple-200 bg-purple-50 text-xs font-semibold text-purple-700">
+          <span class="w-2 h-2 rounded-full bg-purple-500 shrink-0" aria-hidden="true"></span>
+          Scaleway
+        </span>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-cyan-200 bg-cyan-50 text-xs font-semibold text-cyan-700">
+          <span class="w-2 h-2 rounded-full bg-cyan-500 shrink-0" aria-hidden="true"></span>
+          Vultr
+        </span>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-pink-200 bg-pink-50 text-xs font-semibold text-pink-700">
+          <span class="w-2 h-2 rounded-full bg-pink-500 shrink-0" aria-hidden="true"></span>
+          VAST
+        </span>
+      </div>
+
+      <!-- CTA -->
+      <a
+        href="#comparison"
+        class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary-600 text-white font-semibold text-sm sm:text-base hover:bg-primary-700 active:bg-primary-800 transition-colors shadow-md"
+      >
+        Explore Prices
+        <svg class="h-4 w-4 shrink-0" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 3a.75.75 0 01.75.75v10.638l3.96-4.158a.75.75 0 111.08 1.04l-5.25 5.5a.75.75 0 01-1.08 0l-5.25-5.5a.75.75 0 111.08-1.04l3.96 4.158V3.75A.75.75 0 0110 3z" clip-rule="evenodd" />
+        </svg>
+      </a>
     </div>
 
     <!-- Data Summary (populated client-side after index.json loads) -->
     <div id="data-summary-section" class="mb-8" aria-live="polite">
       <!-- Loading skeleton -->
-      <div id="summary-skeleton" class="bg-white rounded-lg shadow-xs border border-gray-200 p-6 animate-pulse">
+      <div id="summary-skeleton" class="bg-white rounded-lg shadow-xs border border-gray-200 p-4 sm:p-6 animate-pulse">
+        <div class="h-4 bg-gray-200 rounded w-28 mb-4"></div>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[1,2,3,4].map(() => (
             <div class="text-center space-y-2">
+              <div class="h-5 w-5 bg-gray-200 rounded mx-auto"></div>
               <div class="h-8 bg-gray-200 rounded-sm w-20 mx-auto"></div>
               <div class="h-4 bg-gray-100 rounded-sm w-24 mx-auto"></div>
             </div>
@@ -34,46 +109,104 @@ import FilterPanel from '../components/FilterPanel.astro';
         </div>
       </div>
       <!-- Actual summary (rendered by JS) -->
-      <div id="data-summary" class="hidden bg-white rounded-lg shadow-xs border border-gray-200 p-6">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">Data Overview</h2>
+      <div id="data-summary" class="hidden bg-white rounded-lg shadow-xs border border-gray-200 p-4 sm:p-6">
+        <!-- Header -->
+        <div class="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
+          <svg class="h-4 w-4 text-gray-400 shrink-0" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M3 12v3c0 1.657 3.134 3 7 3s7-1.343 7-3v-3c0 1.657-3.134 3-7 3s-7-1.343-7-3z" />
+            <path d="M3 7v3c0 1.657 3.134 3 7 3s7-1.343 7-3V7c0 1.657-3.134 3-7 3S3 8.657 3 7z" />
+            <path d="M17 5c0 1.657-3.134 3-7 3S3 6.657 3 5s3.134-3 7-3 7 1.343 7 3z" />
+          </svg>
+          <h2 class="text-sm font-semibold uppercase tracking-wide text-gray-500">Data Overview</h2>
+        </div>
+        <!-- Stats grid: 2-col mobile → 4-col at md (768px) -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+
+          <!-- Total Instances -->
           <div class="text-center">
-            <div class="text-2xl font-bold text-primary-600" id="stat-instances">-</div>
+            <div class="flex justify-center mb-1.5">
+              <svg class="h-5 w-5 text-gray-500" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M2 5a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm14 1a1 1 0 11-2 0 1 1 0 012 0zM2 13a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 01-2 2H4a2 2 0 01-2-2v-2zm14 1a1 1 0 11-2 0 1 1 0 012 0z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div class="text-2xl font-bold text-gray-900" id="stat-instances">-</div>
             <div class="text-sm text-gray-500">Total Instances</div>
           </div>
+
+          <!-- Providers -->
           <div class="text-center">
-            <div class="text-2xl font-bold text-primary-600" id="stat-providers">-</div>
+            <div class="flex justify-center mb-1.5">
+              <svg class="h-5 w-5 text-gray-500" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z" />
+              </svg>
+            </div>
+            <div class="text-2xl font-bold text-gray-900" id="stat-providers">-</div>
             <div class="text-sm text-gray-500">Providers</div>
           </div>
+
+          <!-- Instance Families -->
           <div class="text-center">
-            <div class="text-2xl font-bold text-primary-600" id="stat-families">-</div>
+            <div class="flex justify-center mb-1.5">
+              <svg class="h-5 w-5 text-gray-500" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+              </svg>
+            </div>
+            <div class="text-2xl font-bold text-gray-900" id="stat-families">-</div>
             <div class="text-sm text-gray-500">Instance Families</div>
           </div>
+
+          <!-- Last Updated — neutral grey, not blue; + refresh button -->
           <div class="text-center">
-            <div class="text-2xl font-bold text-primary-600" id="stat-updated">-</div>
-            <div class="text-sm text-gray-500">Last Updated</div>
+            <div class="flex justify-center mb-1.5">
+              <svg class="h-5 w-5 text-gray-500" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div class="text-2xl font-bold text-gray-900" id="stat-updated">-</div>
+            <div class="flex items-center justify-center gap-1">
+              <span class="text-sm text-gray-500">Last Updated</span>
+              <button
+                id="refresh-data"
+                type="button"
+                title="Reload data"
+                aria-label="Reload data"
+                class="text-gray-400 hover:text-primary-600 transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              >
+                <svg class="h-3.5 w-3.5" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M15.312 11.424a5.5 5.5 0 01-9.201 2.466l-.312-.311h2.433a.75.75 0 000-1.5H3.989a.75.75 0 00-.75.75v4.242a.75.75 0 001.5 0v-2.43l.31.31a7 7 0 0011.712-3.138.75.75 0 00-1.449-.39zm1.23-3.723a.75.75 0 00.219-.53V2.929a.75.75 0 00-1.5 0V5.36l-.31-.31A7 7 0 003.239 8.188a.75.75 0 101.448.389A5.5 5.5 0 0113.89 6.11l.311.31h-2.432a.75.75 0 000 1.5h4.243a.75.75 0 00.53-.219z" clip-rule="evenodd" />
+                </svg>
+              </button>
+            </div>
           </div>
+
         </div>
-        <div class="mt-4 pt-4 border-t border-gray-200">
-          <div class="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p class="text-xs text-blue-800">
-              <span class="font-medium">Note:</span> Pricing is fetched from public provider APIs.
-              Always verify with the provider before purchasing. We are not affiliated with AWS, Azure, GCP, or OCI.
-            </p>
-          </div>
-        </div>
+        <details class="mt-4 pt-3 border-t border-gray-100 group">
+          <summary class="flex items-center gap-1.5 text-xs text-gray-600 cursor-pointer select-none list-none [&::-webkit-details-marker]:hidden hover:text-gray-800 transition-colors">
+            <svg class="h-3.5 w-3.5 shrink-0" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd" />
+            </svg>
+            Data sourcing notice
+            <svg class="h-3 w-3 ml-1 transition-transform group-open:rotate-180" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 011.06 0L10 11.94l3.72-3.72a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.22 9.28a.75.75 0 010-1.06z" clip-rule="evenodd" />
+            </svg>
+          </summary>
+          <p class="mt-2 text-xs text-gray-600 leading-relaxed">
+            Pricing is fetched from public provider APIs. Always verify with the provider before purchasing.
+            We are not affiliated with AWS, Azure, GCP, OCI, OVH, Scaleway, Vultr, or VAST.
+          </p>
+        </details>
       </div>
     </div>
 
     <!-- Main Content -->
-    <div class="grid grid-cols-1 xl:grid-cols-5 2xl:grid-cols-6 gap-6 lg:gap-8">
+    <div id="comparison" class="lg:grid lg:grid-cols-5 2xl:grid-cols-6 gap-6 lg:gap-8 scroll-mt-20">
       <!-- Filters Sidebar -->
-      <div class="xl:col-span-1 2xl:col-span-1">
+      <div class="lg:col-span-1 2xl:col-span-1">
         <FilterPanel />
       </div>
 
       <!-- Comparison Table -->
-      <div class="xl:col-span-4 2xl:col-span-5">
+      <div class="lg:col-span-4 2xl:col-span-5">
         <ComparisonTable />
       </div>
     </div>
@@ -129,6 +262,8 @@ import FilterPanel from '../components/FilterPanel.astro';
       const summary = document.getElementById('data-summary');
       if (skeleton) skeleton.classList.add('hidden');
       if (summary) summary.classList.remove('hidden');
+
+      document.getElementById('refresh-data')?.addEventListener('click', () => location.reload());
 
       // -----------------------------------------------------------------------
       // Broadcast index to filter panel and table

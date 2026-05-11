@@ -27,7 +27,7 @@ PROVIDERS_DIR = DATA_DIR / "providers"
 FAMILIES_DIR = DATA_DIR / "families"
 INSTANCES_DIR = DATA_DIR / "instances"
 
-PROVIDERS = ["aws", "azure", "gcp", "oci"]
+PROVIDERS = ["aws", "azure", "gcp", "oci", "ovh", "scaleway", "vultr", "vast"]
 
 # Fields kept in family-level summary entries (strips raw/locationDetails/regionPricing)
 FAMILY_FIELDS = {
@@ -46,6 +46,12 @@ PRIMARY_REGION: dict[str, str] = {
     "gcp": "us-central1",
     "oci": "us-ashburn-1",
 }
+
+# Max log2-space Euclidean distance for a family to be considered "equivalent".
+# sqrt(log2(2)^2 + log2(2)^2) = 1.41 — a 2x difference in BOTH vCPU and RAM simultaneously.
+# 1.5 allows families whose medians differ by up to ~2x in each dimension to match,
+# while a genuine mismatch (e.g. 2 GiB vs 16 GiB at same vCPU) scores ~2.5 and is filtered.
+MAX_EQUIV_DISTANCE = 1.5
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -120,6 +126,18 @@ def on_demand_price_in_primary(inst: dict) -> float | None:
 def median_or_none(values: list[float]) -> float | None:
     clean = [v for v in values if v is not None and v > 0]
     return round(statistics.median(clean), 8) if clean else None
+
+
+def trimmed_median(values: list[float], trim: float = 0.2) -> float:
+    """Median of the middle (1-2*trim) fraction of sorted values."""
+    if not values:
+        return 0.0
+    s = sorted(v for v in values if v > 0)
+    if len(s) <= 2:
+        return statistics.median(s) if s else 0.0
+    cut = max(1, int(len(s) * trim))
+    trimmed = s[cut:-cut]
+    return statistics.median(trimmed) if trimmed else statistics.median(s)
 
 
 # ---------------------------------------------------------------------------
@@ -230,19 +248,24 @@ def build_equivalents(
     """
     import math
 
-    # Build representative (vCPU, RAM) per provider+family and track the
-    # instance type closest to that median profile.
+    # Build representative (vCPU, RAM) per provider+family using a trimmed
+    # median (drop top/bottom 20%) to avoid outlier sizes skewing wide families.
+    # Also compute GB-per-vCPU ratio to guard against cross-workload-class matches.
     rep: dict[tuple[str, str], tuple[float, float]] = {}
     rep_instance: dict[tuple[str, str], str] = {}
+    rep_ratio: dict[tuple[str, str], float] = {}  # GB per vCPU
 
     for provider, families in all_families.items():
         for fam_id, insts in families.items():
             vcpus = [i.get("vCPU", 0) or 0 for i in insts]
             gibs = [i.get("memoryGiB", 0) or 0 for i in insts]
-            vcpu = statistics.median([v for v in vcpus if v > 0] or [0])
-            gib = statistics.median([g for g in gibs if g > 0] or [0])
+            vcpu = trimmed_median([v for v in vcpus if v > 0])
+            gib = trimmed_median([g for g in gibs if g > 0])
             if vcpu > 0 and gib > 0:
                 rep[(provider, fam_id)] = (vcpu, gib)
+                ratio = gib / vcpu
+                if ratio > 0:
+                    rep_ratio[(provider, fam_id)] = ratio
                 candidates = [
                     i for i in insts
                     if (i.get("vCPU") or 0) > 0 and (i.get("memoryGiB") or 0) > 0
@@ -262,29 +285,49 @@ def build_equivalents(
         dm = math.log2(a[1] + 1) - math.log2(b[1] + 1)
         return math.sqrt(dv * dv + dm * dm)
 
+    # Compare the source family's rep point against every individual instance
+    # in each target provider, not against family medians. This lets large
+    # specialised families (e.g. u7in-24tb) find their true counterpart even
+    # when the target family's median is far from the extreme end of its range.
+    src_ratio_cache: dict[tuple[str, str], float] = {
+        k: rep_ratio[k] for k in rep_ratio
+    }
+
     equivalents: dict[str, dict] = {}
     for (prov, fam), profile in rep.items():
+        src_ratio = src_ratio_cache.get((prov, fam), 0)
         matches: dict[str, dict] = {}
         for other_prov, families in all_families.items():
             if other_prov == prov:
                 continue
-            best_fam = None
+            best_fam: str | None = None
             best_dist = float("inf")
-            for other_fam in families:
-                other_key = (other_prov, other_fam)
-                if other_key not in rep:
-                    continue
-                d = log_dist(profile, rep[other_key])
-                if d < best_dist:
-                    best_dist = d
-                    best_fam = other_fam
-            if best_fam is not None:
-                best_key = (other_prov, best_fam)
-                matches[other_prov] = {
-                    "family": best_fam,
-                    "instanceType": rep_instance.get(best_key, ""),
-                    "distance": round(best_dist, 4),
-                }
+            best_inst_type = ""
+            best_inst_ratio = 0.0
+            for other_fam, other_insts in families.items():
+                for inst in other_insts:
+                    v = inst.get("vCPU") or 0
+                    g = inst.get("memoryGiB") or 0
+                    if v <= 0 or g <= 0:
+                        continue
+                    d = log_dist(profile, (v, g))
+                    if d < best_dist:
+                        best_dist = d
+                        best_fam = other_fam
+                        best_inst_type = inst.get("instanceType", "")
+                        best_inst_ratio = g / v
+            if best_fam is not None and best_dist <= MAX_EQUIV_DISTANCE:
+                ratio_ok = (
+                    src_ratio > 0 and best_inst_ratio > 0
+                    and max(src_ratio, best_inst_ratio) / min(src_ratio, best_inst_ratio) <= 3.0
+                )
+                if ratio_ok:
+                    matches[other_prov] = {
+                        "family": best_fam,
+                        "instanceType": best_inst_type,
+                        "distance": round(best_dist, 4),
+                        "ratioMatch": True,
+                    }
         equivalents[f"{prov}/{fam}"] = {
             "provider": prov,
             "family": fam,

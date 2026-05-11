@@ -96,6 +96,43 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     let pickedItems: PickedInstance[] = [];
     let activeCommitmentTerm: 'on-demand' | '1yr' | '3yr' = 'on-demand';
 
+    // Typeahead suggestion list — loaded from index.json
+    interface Suggestion { label: string; prefix: string; provider: string; family: string; count: number; }
+    let searchSuggestions: Suggestion[] = [];
+
+    async function loadSearchSuggestions() {
+      try {
+        const res = await fetch('/data/index.json');
+        if (!res.ok) return;
+        const idx = await res.json();
+        searchSuggestions = (idx.providers ?? []).flatMap((p: { id: string; families: { id: string; count: number }[] }) =>
+          (p.families ?? []).map((f) => ({
+            label: `${p.id}:${f.id}`,
+            prefix: `${p.id}:`,
+            provider: p.id,
+            family: f.id,
+            count: f.count,
+          }))
+        );
+      } catch { /* non-critical */ }
+    }
+
+    // Instance-level suggestion cache: 'provider/family' → slim instance list
+    const instanceSuggestCache = new Map<string, Array<{ instanceType: string; priceUSD_hourly: number }>>();
+
+    async function getFamilyInstances(provider: string, family: string) {
+      const k = `${provider}/${family}`;
+      if (instanceSuggestCache.has(k)) return instanceSuggestCache.get(k)!;
+      try {
+        const r = await fetch(`/data/families/${provider}/${family}.json`);
+        if (!r.ok) return [];
+        const arr = (await r.json()) as Array<{ instanceType: string; priceUSD_hourly: number }>;
+        const slim = arr.map(i => ({ instanceType: i.instanceType, priceUSD_hourly: i.priceUSD_hourly ?? 0 }));
+        instanceSuggestCache.set(k, slim);
+        return slim;
+      } catch { return []; }
+    }
+
     // -------------------------------------------------------------------------
     // DOM refs
     // -------------------------------------------------------------------------
@@ -178,8 +215,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <div class="relative">
             <input type="text" id="add-instance-input"
               placeholder="e.g. aws:m7i.xlarge"
-              class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 w-52"
-              autocomplete="off" spellcheck="false" />
+              class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 w-64"
+              autocomplete="off" spellcheck="false" aria-label="Instance to add (format: provider:type)" aria-autocomplete="list" aria-controls="suggest-dropdown" />
+            <div id="suggest-dropdown" role="listbox" aria-label="Instance suggestions"
+              class="hidden absolute top-full left-0 mt-1 w-72 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-52 overflow-y-auto text-sm">
+            </div>
           </div>
           <button id="add-instance-btn"
             class="px-3 py-2 bg-primary-600 text-white text-sm rounded-lg hover:bg-primary-700 focus:outline-hidden focus:ring-2 focus:ring-primary-500">
@@ -191,6 +231,126 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         // Wire up add
         const input = document.getElementById('add-instance-input') as HTMLInputElement;
         const btn = document.getElementById('add-instance-btn') as HTMLButtonElement;
+        const dropdown = document.getElementById('suggest-dropdown') as HTMLDivElement;
+
+        // ── Typeahead ──────────────────────────────────────────────
+        const provBadge = (p: string) =>
+          p === 'aws'   ? 'bg-amber-100 text-amber-800' :
+          p === 'azure' ? 'bg-blue-100 text-blue-800'   :
+          p === 'gcp'   ? 'bg-green-100 text-green-800'  : 'bg-red-100 text-red-700';
+
+        function bindSuggestOpts(selectValue: (opt: HTMLButtonElement) => string) {
+          dropdown.querySelectorAll<HTMLButtonElement>('.suggest-opt').forEach(opt => {
+            opt.addEventListener('mousedown', e => {
+              e.preventDefault();
+              input.value = selectValue(opt);
+              dropdown.classList.add('hidden');
+              input.focus();
+            });
+          });
+        }
+
+        async function renderSuggestions(q: string) {
+          if (!q || q.length < 2) { dropdown.classList.add('hidden'); return; }
+          const thisQ = q;
+          const ql = q.toLowerCase();
+          const ci = q.indexOf(':');
+
+          if (ci > 0 && q.length > ci + 1) {
+            const prov   = q.slice(0, ci).toLowerCase();
+            const suffix = q.slice(ci + 1).toLowerCase();
+
+            // If suffix matches the start of a known family, load instance-level suggestions
+            const matchedFamily = searchSuggestions.find(s =>
+              s.provider === prov && suffix.startsWith(s.family.toLowerCase())
+            );
+
+            if (matchedFamily) {
+              const k = `${prov}/${matchedFamily.family}`;
+              if (!instanceSuggestCache.has(k)) {
+                dropdown.innerHTML = '<div class="px-3 py-2 text-xs text-gray-400 italic">Loading instances…</div>';
+                dropdown.classList.remove('hidden');
+              }
+              const instances = await getFamilyInstances(prov, matchedFamily.family);
+              if (input.value.trim() !== thisQ) return; // stale — user has typed more
+
+              const hits = instances
+                .filter(i => i.instanceType.toLowerCase().includes(suffix))
+                .sort((a, b) => a.priceUSD_hourly - b.priceUSD_hourly)
+                .slice(0, 10);
+
+              if (hits.length) {
+                const pc = provBadge(prov);
+                dropdown.innerHTML = hits.map(i => `
+                  <button type="button" role="option"
+                    class="suggest-opt flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-primary-50 focus:bg-primary-50 focus:outline-none"
+                    data-value="${prov}:${i.instanceType}">
+                    <span class="shrink-0 text-[11px] font-semibold uppercase px-1.5 py-0.5 rounded ${pc}">${prov}</span>
+                    <span class="flex-1 font-mono text-gray-800 text-xs">${i.instanceType}</span>
+                    <span class="shrink-0 text-xs text-gray-500 tabular-nums">$${i.priceUSD_hourly.toFixed(4)}/hr</span>
+                  </button>
+                `).join('');
+                dropdown.classList.remove('hidden');
+                bindSuggestOpts(opt => opt.dataset.value!);
+                return;
+              }
+            }
+
+            // Family-level suggestions filtered to this provider
+            const famMatches = searchSuggestions
+              .filter(s => s.provider === prov && s.family.toLowerCase().startsWith(suffix))
+              .slice(0, 8);
+
+            if (famMatches.length) {
+              dropdown.innerHTML = famMatches.map(m => `
+                <button type="button" role="option"
+                  class="suggest-opt flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-primary-50 focus:bg-primary-50 focus:outline-none"
+                  data-prefix="${m.prefix}" data-family="${m.family}">
+                  <span class="shrink-0 text-[11px] font-semibold uppercase px-1.5 py-0.5 rounded ${provBadge(m.provider)}">${m.provider}</span>
+                  <span class="flex-1 font-mono text-gray-800 text-xs">${m.family}</span>
+                  <span class="shrink-0 text-xs text-gray-400">${m.count} instances</span>
+                </button>
+              `).join('') +
+              `<div class="px-3 py-1.5 border-t border-gray-100 text-[11px] text-gray-400">
+                 Select a family, then type the instance size (e.g. ${famMatches[0]?.family ?? ''}<em>.xlarge</em>)
+               </div>`;
+              dropdown.classList.remove('hidden');
+              bindSuggestOpts(opt => opt.dataset.prefix! + opt.dataset.family! + '.');
+              return;
+            }
+          }
+
+          // Generic cross-provider family search
+          const matches = searchSuggestions.filter(s =>
+            s.label.toLowerCase().includes(ql) ||
+            s.family.toLowerCase().startsWith(ql.replace(/^[^:]+:/, ''))
+          ).slice(0, 10);
+
+          if (!matches.length) { dropdown.classList.add('hidden'); return; }
+
+          dropdown.innerHTML = matches.map(m => `
+            <button type="button" role="option"
+              class="suggest-opt flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-primary-50 focus:bg-primary-50 focus:outline-none"
+              data-prefix="${m.prefix}" data-family="${m.family}">
+              <span class="shrink-0 text-[11px] font-semibold uppercase px-1.5 py-0.5 rounded ${provBadge(m.provider)}">${m.provider}</span>
+              <span class="flex-1 font-mono text-gray-800 text-xs">${m.family}</span>
+              <span class="shrink-0 text-xs text-gray-400">${m.count}</span>
+            </button>
+          `).join('') +
+          `<div class="px-3 py-1.5 border-t border-gray-100 text-[11px] text-gray-400">
+             Type full instance name to compare (e.g. ${matches[0]?.prefix ?? ''}m7i.xlarge)
+           </div>`;
+          dropdown.classList.remove('hidden');
+          bindSuggestOpts(opt => opt.dataset.prefix! + opt.dataset.family! + '.');
+        }
+
+        input.addEventListener('input', () => renderSuggestions(input.value.trim()));
+        input.addEventListener('keydown', e => {
+          if (e.key === 'Escape') dropdown.classList.add('hidden');
+        });
+        input.addEventListener('blur', () => {
+          setTimeout(() => dropdown.classList.add('hidden'), 180);
+        });
 
         const doAdd = async () => {
           const val = input.value.trim();
@@ -306,24 +466,63 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       // ---- Header row ----
       compareThead.innerHTML = '';
       const htr = document.createElement('tr');
-      htr.innerHTML = `<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50 border-b border-gray-200 w-40">Metric</th>`;
-      loaded.forEach((item) => {
+      htr.innerHTML = `<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 bg-gray-50 border-b border-gray-200 w-40">Metric</th>`;
+      loaded.forEach((item, colIdx) => {
+        const isFirst = colIdx === 0;
+        const isLast  = colIdx === loaded.length - 1;
         htr.innerHTML += `
           <th class="px-4 py-3 text-left text-xs font-medium bg-gray-50 border-b border-gray-200">
-            <div class="flex items-center space-x-2">
-              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${providerBadge[item.provider] ?? 'bg-gray-100 text-gray-700'}">
-                ${item.provider.toUpperCase()}
-              </span>
-              <span class="font-mono text-gray-800 text-sm">${item.instanceType}</span>
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${providerBadge[item.provider] ?? 'bg-gray-100 text-gray-700'}">
+                  ${item.provider.toUpperCase()}
+                </span>
+                <span class="font-mono text-gray-800 text-sm">${item.instanceType}</span>
+              </div>
+              <div class="flex items-center gap-0.5 shrink-0">
+                <button class="col-move-btn p-1 rounded text-gray-300 hover:text-gray-600 hover:bg-gray-100 transition-colors ${isFirst ? 'invisible' : ''}"
+                  data-col-idx="${colIdx}" data-dir="left"
+                  title="Move column left" aria-label="Move ${item.instanceType} left">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
+                  </svg>
+                </button>
+                <button class="col-move-btn p-1 rounded text-gray-300 hover:text-gray-600 hover:bg-gray-100 transition-colors ${isLast ? 'invisible' : ''}"
+                  data-col-idx="${colIdx}" data-dir="right"
+                  title="Move column right" aria-label="Move ${item.instanceType} right">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+                  </svg>
+                </button>
+              </div>
             </div>
           </th>`;
       });
       compareThead.appendChild(htr);
 
+      // Wire column move buttons
+      compareThead.querySelectorAll<HTMLButtonElement>('.col-move-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const colIdx  = parseInt(btn.dataset.colIdx ?? '0', 10);
+          const dir     = btn.dataset.dir;
+          const item    = loaded[colIdx];
+          const pickIdx = pickedItems.findIndex((p) => p === item);
+          if (pickIdx < 0) return;
+          if (dir === 'left' && pickIdx > 0) {
+            [pickedItems[pickIdx - 1], pickedItems[pickIdx]] = [pickedItems[pickIdx], pickedItems[pickIdx - 1]];
+          } else if (dir === 'right' && pickIdx < pickedItems.length - 1) {
+            [pickedItems[pickIdx], pickedItems[pickIdx + 1]] = [pickedItems[pickIdx + 1], pickedItems[pickIdx]];
+          }
+          updateURL();
+          renderPicker();
+          renderCompareTable();
+        });
+      });
+
       // ---- Commitment toggle in the compare table ----
       const toggleRow = document.createElement('tr');
       toggleRow.innerHTML = `
-        <td class="px-4 py-2 bg-white border-b border-gray-100 text-xs text-gray-500 font-medium uppercase tracking-wider">Pricing term</td>
+        <td class="px-4 py-2 bg-white border-b border-gray-100 text-xs text-gray-500 font-medium">Pricing term</td>
         <td colspan="${loaded.length}" class="px-4 py-2 bg-white border-b border-gray-100">
           <div class="flex items-center space-x-1 bg-gray-100 rounded-lg p-1 w-fit" role="group">
             <button class="compare-term-btn px-3 py-1 text-sm rounded-md font-medium transition-colors compare-term-active" data-term="on-demand">On-Demand</button>
@@ -405,7 +604,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         }),
         mkRow({ label: 'On-Demand/mo', render: (d: V3InstanceFile) => d.priceUSD_monthly != null ? formatUSD(d.priceUSD_monthly, 2) : '-', highlight: 'lower' }),
         mkRow({ label: 'Regions', render: (d: V3InstanceFile) => `${(d.regions ?? []).length}`, highlight: 'higher' }),
-      ] as Row[]).filter((r) => r.label !== '');
+      ] as Row[]).filter((r) => {
+        if (!r.label) return false;
+        // Hide rows where every compared instance has no data (e.g. Storage, Network)
+        return loaded.some(item => {
+          if (!item.detail) return false;
+          const v = r.render(item.detail);
+          return v !== '-' && v !== '—' && v !== '';
+        });
+      });
 
       rows.forEach((rowDef, rowIdx) => {
         // Compute values for highlight logic
@@ -427,7 +634,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         const tr = document.createElement('tr');
         tr.className = rowIdx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50';
 
-        let cells = `<td class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-100 whitespace-nowrap">${rowDef.label}</td>`;
+        let cells = `<td class="px-4 py-3 text-xs font-medium text-gray-500 border-b border-gray-100 whitespace-nowrap">${rowDef.label}</td>`;
         loaded.forEach((_item, colIdx) => {
           const val = values[colIdx];
           const isHighlight = bestNum != null && val?.num != null && val.num === bestNum;
@@ -443,7 +650,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       // ---- 1yr commitment options ----
       if (activeCommitmentTerm !== 'on-demand') {
         const spacer = document.createElement('tr');
-        spacer.innerHTML = `<td colspan="${loaded.length + 1}" class="pt-4 pb-1 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider bg-white border-b border-gray-200">Commitment Detail</td>`;
+        spacer.innerHTML = `<td colspan="${loaded.length + 1}" class="pt-4 pb-1 px-4 text-xs font-semibold text-gray-500 bg-white border-b border-gray-200">Commitment detail</td>`;
         compareTbody.appendChild(spacer);
 
         loaded.forEach((item) => {
@@ -494,6 +701,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     // Bootstrap
     // -------------------------------------------------------------------------
     async function init() {
+      loadSearchSuggestions(); // non-blocking — populates typeahead as data arrives
       const initItems = parseItemsParam();
       if (initItems.length > 0) {
         pickedItems = initItems;

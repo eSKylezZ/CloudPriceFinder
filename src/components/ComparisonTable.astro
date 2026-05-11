@@ -1,149 +1,331 @@
 ---
-// ComparisonTable v3 (Stage 8): commitment toggle, normalized metrics columns,
-// equivalents row, row-expand for instance detail lazy-load.
+// ComparisonTable v3
 ---
 
 <div class="bg-white rounded-lg shadow-xs border border-gray-200">
   <!-- Table Header -->
-  <div class="px-6 py-4 border-b border-gray-200">
-    <div class="flex items-center justify-between mb-3">
-      <h2 class="text-lg font-semibold text-gray-900">Instance Comparison</h2>
-      <div class="flex items-center space-x-4">
-        <!-- Result count -->
-        <div class="text-sm text-gray-500" id="result-count">Loading...</div>
-        <!-- Page size + export -->
-        <div class="flex items-center space-x-3">
-          <div class="flex items-center space-x-2">
-            <label for="page-size" class="text-sm text-gray-500">Show:</label>
-            <select id="page-size" class="text-sm border-gray-300 rounded-sm">
-              <option value="50">50</option>
-              <option value="100" selected>100</option>
-              <option value="200">200</option>
-              <option value="500">500</option>
-              <option value="all">All</option>
-            </select>
-          </div>
-          <button id="export-csv-btn"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-40 disabled:cursor-not-allowed"
-            disabled title="Export visible results as CSV">
+  <div class="px-4 sm:px-6 py-4 border-b border-gray-200 space-y-3">
+    <!-- Row 1: title + controls -->
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3 min-w-0 flex-1">
+        <h2 class="text-lg font-semibold text-gray-900 shrink-0">Instance Comparison</h2>
+        <span id="filter-active-badge" class="hidden px-2 py-0.5 bg-amber-100 text-amber-800 text-xs font-semibold rounded-full whitespace-nowrap" aria-live="polite"></span>
+        <span class="text-sm text-gray-500" id="result-count" aria-live="polite" aria-atomic="true">Loading...</span>
+      </div>
+      <div class="flex flex-wrap items-center gap-2 shrink-0">
+        <!-- Page size -->
+        <div class="flex items-center gap-1.5">
+          <label for="page-size" class="text-sm text-gray-500 whitespace-nowrap">Show:</label>
+          <select id="page-size" class="text-sm border border-gray-300 rounded-md px-2 py-1.5 bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 cursor-pointer">
+            <option value="25" selected>25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="200">200</option>
+            <option value="500">500</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+        <!-- Column visibility toggle -->
+        <div class="relative" id="col-toggle-container">
+          <button id="col-toggle-btn" type="button"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 4h18M3 9h18M3 14h12M3 19h8"/>
+            </svg>
+            Columns
+          </button>
+          <div id="col-toggle-panel" class="hidden absolute right-0 top-full mt-1 z-30 bg-white border border-gray-200 rounded-lg shadow-lg p-3 w-44 space-y-1.5">
+            <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider pb-1.5 border-b border-gray-100">Show / Hide</p>
+            <label class="flex items-center gap-2 cursor-pointer select-none py-0.5">
+              <input type="checkbox" class="col-toggle-check rounded-sm border-gray-300 text-primary-600 focus:ring-primary-500" data-col="pricePerGiB" />
+              <span class="text-sm text-gray-700">$/GiB/hr</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer select-none py-0.5">
+              <input type="checkbox" class="col-toggle-check rounded-sm border-gray-300 text-primary-600 focus:ring-primary-500" data-col="gpu" />
+              <span class="text-sm text-gray-700">GPU</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer select-none py-0.5">
+              <input type="checkbox" class="col-toggle-check rounded-sm border-gray-300 text-primary-600 focus:ring-primary-500" data-col="regions" checked />
+              <span class="text-sm text-gray-700">Regions</span>
+            </label>
+          </div>
+        </div>
+        <!-- Export dropdown -->
+        <div class="relative" id="export-dropdown-container">
+          <button id="export-dropdown-btn"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-40 disabled:cursor-not-allowed"
+            disabled title="Export data">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
-            Export CSV
+            <span id="export-btn-label">Export</span>
+            <svg class="w-3 h-3 shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
           </button>
+          <div id="export-dropdown-panel" class="hidden absolute right-0 top-full mt-1 z-30 bg-white border border-gray-200 rounded-lg shadow-lg py-1 w-44">
+            <p class="px-3 pt-1.5 pb-1 text-[11px] font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-100 mb-1">Export format</p>
+            <button id="export-csv-btn" type="button"
+              class="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 text-left">
+              <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7"/>
+              </svg>
+              <span class="flex-1">Export as CSV</span>
+              <span class="text-xs text-gray-400">spreadsheet</span>
+            </button>
+            <button id="export-json-btn" type="button"
+              class="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 text-left">
+              <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h8M4 18h8"/>
+              </svg>
+              <span class="flex-1">Export as JSON</span>
+              <span class="text-xs text-gray-400">for scripts</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Commitment toggle (Stage 8) — DOM-only, no extra fetch -->
-    <div class="flex items-center space-x-1 mb-3 bg-gray-100 rounded-lg p-1 w-fit" role="group" aria-label="Pricing term">
-      <button class="commitment-btn px-3 py-1 text-sm rounded-md font-medium transition-colors commitment-active"
+    <!-- Commitment toggle -->
+    <div class="flex items-center space-x-1 bg-gray-100 rounded-lg p-1 w-fit" role="group" aria-label="Pricing term">
+      <button class="commitment-btn px-3 py-1 text-sm rounded-md font-medium transition-colors commitment-active focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-1"
         data-term="on-demand">On-Demand</button>
-      <button class="commitment-btn px-3 py-1 text-sm rounded-md font-medium transition-colors text-gray-600 hover:bg-white hover:shadow-xs"
+      <button class="commitment-btn px-3 py-1 text-sm rounded-md font-medium transition-colors text-gray-600 hover:bg-white hover:shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-1"
         data-term="1yr">1-Year</button>
-      <button class="commitment-btn px-3 py-1 text-sm rounded-md font-medium transition-colors text-gray-600 hover:bg-white hover:shadow-xs"
+      <button class="commitment-btn px-3 py-1 text-sm rounded-md font-medium transition-colors text-gray-600 hover:bg-white hover:shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-1"
         data-term="3yr">3-Year</button>
     </div>
 
-    <!-- Search -->
-    <div class="flex-1 max-w-md">
-      <div class="relative">
-        <input type="text" id="search-input" placeholder="Search instances..."
-          class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500" />
-        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
+    <!-- Search — full width -->
+    <div class="relative w-full">
+      <label for="search-input" class="sr-only">Search instances</label>
+      <input type="text" id="search-input" placeholder="Search instances (e.g. m7i, arm64, us-east-1...)"
+        class="w-full pl-10 pr-10 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500" />
+      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+      <button id="clear-search" aria-label="Clear search"
+        class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 hidden">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading skeleton -->
+  <div id="table-loading" aria-live="polite" aria-busy="true">
+    <!-- Desktop skeleton table -->
+    <div class="hidden sm:block overflow-x-auto animate-pulse">
+      <table class="min-w-full">
+        <thead>
+          <tr class="bg-slate-100 border-b-2 border-slate-200">
+            <th class="w-10 px-2 py-3"></th>
+            <th class="px-3 py-3 text-left"><div class="h-3 bg-slate-300 rounded w-16"></div></th>
+            <th class="px-3 py-3 text-left" style="min-width:190px"><div class="h-3 bg-slate-300 rounded w-28"></div></th>
+            <th class="px-3 py-3 text-left"><div class="h-3 bg-slate-300 rounded w-10"></div></th>
+            <th class="px-3 py-3 text-left"><div class="h-3 bg-slate-300 rounded w-16"></div></th>
+            <th class="px-3 py-3 text-left"><div class="h-3 bg-slate-300 rounded w-10"></div></th>
+            <th class="px-3 py-3 text-left"><div class="h-3 bg-slate-300 rounded w-24"></div></th>
+            <th class="px-3 py-3 text-left"><div class="h-3 bg-slate-300 rounded w-14"></div></th>
+            <th class="px-3 py-3 text-left"><div class="h-3 bg-slate-300 rounded w-16"></div></th>
+            <th class="px-3 py-3 text-left"><div class="h-3 bg-slate-300 rounded w-16"></div></th>
+            <th class="px-3 py-3 text-left"><div class="h-3 bg-slate-300 rounded w-14"></div></th>
+            <th class="px-3 py-3 text-left"><div class="h-3 bg-slate-300 rounded w-8"></div></th>
+            <th class="px-3 py-3"></th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-100">
+          {[0,1,2,3,4,5,6,7].map((i) => (
+            <tr class={i % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
+              <td class="px-2 py-3"><div class="h-6 w-6 bg-gray-200 rounded mx-auto"></div></td>
+              <td class="px-3 py-3"><div class="h-5 w-12 bg-gray-200 rounded-full"></div></td>
+              <td class="px-3 py-3">
+                <div class="h-4 bg-gray-200 rounded w-36 mb-1.5"></div>
+                <div class="h-3 bg-gray-100 rounded w-20"></div>
+              </td>
+              <td class="px-3 py-3"><div class="h-4 w-8 bg-gray-200 rounded"></div></td>
+              <td class="px-3 py-3"><div class="h-4 w-16 bg-gray-200 rounded"></div></td>
+              <td class="px-3 py-3"><div class="h-5 w-14 bg-gray-200 rounded"></div></td>
+              <td class="px-3 py-3"><div class="h-4 w-16 bg-gray-200 rounded"></div></td>
+              <td class="px-3 py-3"><div class="h-5 w-14 bg-green-100 rounded-full"></div></td>
+              <td class="px-3 py-3"><div class="h-4 w-16 bg-gray-200 rounded"></div></td>
+              <td class="px-3 py-3"><div class="h-4 w-16 bg-gray-200 rounded"></div></td>
+              <td class="px-3 py-3"><div class="h-4 w-10 bg-gray-200 rounded"></div></td>
+              <td class="px-3 py-3"><div class="h-4 w-8 bg-gray-200 rounded"></div></td>
+              <td class="px-3 py-3"><div class="h-4 w-4 bg-gray-200 rounded mx-auto"></div></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <!-- Mobile skeleton cards -->
+    <div class="block sm:hidden divide-y divide-gray-100 animate-pulse">
+      {[0,1,2,3,4].map((i) => (
+        <div class={`px-4 py-3 ${i % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}>
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex-1 min-w-0">
+              <div class="flex gap-1.5 mb-2">
+                <div class="h-5 w-12 bg-gray-200 rounded-full"></div>
+              </div>
+              <div class="h-4 bg-gray-200 rounded w-36 mb-1"></div>
+              <div class="h-3 bg-gray-100 rounded w-24 mb-2"></div>
+              <div class="flex gap-3">
+                <div class="h-4 w-12 bg-gray-200 rounded"></div>
+                <div class="h-4 w-16 bg-gray-200 rounded"></div>
+                <div class="h-5 w-14 bg-gray-200 rounded"></div>
+              </div>
+            </div>
+            <div class="shrink-0 text-right">
+              <div class="h-6 w-16 bg-gray-200 rounded mb-1"></div>
+              <div class="h-3 w-6 bg-gray-100 rounded ml-auto"></div>
+            </div>
+          </div>
         </div>
-        <button id="clear-search"
-          class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 hidden">
-          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      ))}
+    </div>
+  </div>
+
+  <!-- Main content wrapper (JS removes 'hidden' when data loads) -->
+  <div id="table-wrapper" class="hidden">
+
+    <!-- Mobile: card-based layout (< sm / 640px) -->
+    <div id="mobile-cards" class="block sm:hidden divide-y divide-gray-100">
+      <!-- populated by JS -->
+    </div>
+
+    <!-- Desktop/tablet: scrollable table (≥ sm / 640px) -->
+    <div class="hidden sm:block relative">
+      <div id="table-scroll" class="overflow-x-auto max-h-[70vh] overflow-y-auto">
+        <table class="min-w-full divide-y divide-gray-200 text-sm" id="instances-table">
+          <thead>
+            <tr class="bg-slate-100 border-b-2 border-slate-200">
+              <th scope="col" class="w-10 px-2 py-3 sticky top-0 bg-slate-100 z-10"><span class="sr-only">Details</span></th>
+              <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider sticky top-0 bg-slate-100 cursor-pointer hover:bg-slate-200 z-10 whitespace-nowrap select-none"
+                data-sort="provider" aria-sort="none" tabindex="0">Provider</th>
+              <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider sticky top-0 bg-slate-100 cursor-pointer hover:bg-slate-200 z-10 select-none"
+                data-sort="instanceType" aria-sort="none" tabindex="0" style="min-width:190px">Instance Type</th>
+              <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider sticky top-0 bg-slate-100 cursor-pointer hover:bg-slate-200 z-10 select-none"
+                data-sort="vCPU" aria-sort="none" tabindex="0">vCPU</th>
+              <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider sticky top-0 bg-slate-100 cursor-pointer hover:bg-slate-200 z-10 select-none"
+                data-sort="memoryGiB" aria-sort="none" tabindex="0"
+                title="RAM measured in GiB (gibibytes). 1 GiB ≈ 1.074 GB.">
+                <span class="flex items-center gap-0.5">Memory
+                  <svg class="h-3 w-3 text-gray-400 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd" /></svg>
+                </span>
+              </th>
+              <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider sticky top-0 bg-slate-100 z-10 select-none"
+                data-sort="architecture" aria-sort="none" tabindex="0"
+                title="CPU architecture: x86_64 (Intel/AMD) or arm64 (AWS Graviton, Ampere Altra, Google Tau)">
+                <span class="flex items-center gap-0.5">Arch
+                  <svg class="h-3 w-3 text-gray-400 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd" /></svg>
+                </span>
+              </th>
+              <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider sticky top-0 bg-slate-100 cursor-pointer hover:bg-slate-200 z-10 whitespace-nowrap select-none"
+                data-sort="priceUSD_hourly" aria-sort="ascending" tabindex="0" id="price-col-header">On-Demand/hr</th>
+              <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider sticky top-0 bg-slate-100 z-10 select-none" data-col="savings"
+                title="Best savings % vs on-demand price for the selected commitment term (1yr or 3yr). Switch the pricing term above to see reserved pricing.">
+                <span class="flex items-center gap-0.5">Savings
+                  <svg class="h-3 w-3 text-gray-400 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd" /></svg>
+                </span>
+              </th>
+              <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider sticky top-0 bg-slate-100 cursor-pointer hover:bg-slate-200 z-10 whitespace-nowrap select-none"
+                data-sort="pricePerVCPU" aria-sort="none" tabindex="0"
+                title="Hourly cost per virtual CPU — lower means better value for CPU-intensive workloads">
+                <span class="flex items-center gap-0.5">$/vCPU/hr
+                  <svg class="h-3 w-3 text-gray-400 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd" /></svg>
+                </span>
+              </th>
+              <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider sticky top-0 bg-slate-100 cursor-pointer hover:bg-slate-200 z-10 whitespace-nowrap select-none"
+                data-sort="pricePerGiB" aria-sort="none" tabindex="0" data-col="pricePerGiB"
+                title="Hourly cost per GiB of RAM — lower means better value for memory-intensive workloads">
+                <span class="flex items-center gap-0.5">$/GiB/hr
+                  <svg class="h-3 w-3 text-gray-400 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd" /></svg>
+                </span>
+              </th>
+              <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider sticky top-0 bg-slate-100 z-10 select-none"
+                data-col="regions" title="Number of geographic regions where this instance is available. Each region is an independent geographic area — not an availability zone.">
+                <span class="flex items-center gap-0.5">Regions
+                  <svg class="h-3 w-3 text-gray-400 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd" /></svg>
+                </span>
+              </th>
+              <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider sticky top-0 bg-slate-100 z-10 select-none"
+                data-col="gpu" title="GPU model and count. Enable the GPU column via the Columns toggle.">GPU</th>
+              <th scope="col" class="px-3 py-3 text-center sticky top-0 bg-slate-100 z-10 select-none min-w-[5rem]"
+                title="Select up to 4 instances to compare side-by-side on the Compare page">
+                <span class="flex flex-col items-center leading-tight whitespace-nowrap">
+                  <span class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Compare</span>
+                  <span class="text-[10px] font-normal text-gray-500 normal-case tracking-normal">up to 4</span>
+                </span>
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-100" id="table-body">
+          </tbody>
+        </table>
+      </div>
+      <!-- Horizontal scroll-affordance shadow on right edge -->
+      <div id="scroll-shadow-right"
+        class="pointer-events-none absolute top-0 right-0 bottom-0 w-12 bg-gradient-to-r from-transparent to-slate-100/80 transition-opacity duration-200 opacity-0">
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty state -->
+  <div id="table-empty" class="hidden text-center py-16 px-6">
+    <svg class="mx-auto h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
+    </svg>
+    <h3 class="mt-4 text-base font-semibold text-gray-900">No results found</h3>
+    <p class="mt-1.5 text-sm text-gray-500 max-w-xs mx-auto">No instances match your current filters. Try broadening your search — adjust the vCPU range, memory, price limit, or provider selection.</p>
+    <button id="reset-filters-btn" type="button"
+      class="mt-5 inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-primary-600 bg-primary-50 border border-primary-200 rounded-lg hover:bg-primary-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500">
+      <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+      </svg>
+      Reset all filters
+    </button>
+  </div>
+
+  <!-- Pagination -->
+  <div id="pagination-controls" class="hidden px-6 py-4 border-t border-gray-200">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="text-sm text-gray-500" id="pagination-info">Showing 1–25</div>
+      <div class="flex items-center gap-2">
+        <button id="prev-page"
+          class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+          Prev
+        </button>
+        <div class="flex items-center gap-1.5 text-sm text-gray-700">
+          <span class="sr-only sm:not-sr-only">Page</span>
+          <input type="number" id="page-input" min="1" value="1"
+            class="w-14 text-center border border-gray-300 rounded-md px-1 py-1 text-sm focus:ring-1 focus:ring-primary-500 focus:border-primary-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+            aria-label="Current page" />
+          <span id="page-total">of 1</span>
+        </div>
+        <button id="next-page"
+          class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+          Next
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
           </svg>
         </button>
       </div>
     </div>
   </div>
-
-  <!-- Loading skeleton (shown while data fetches) -->
-  <div id="table-loading" class="p-8 text-center" aria-live="polite" aria-busy="true">
-    <div class="inline-flex flex-col items-center space-y-4">
-      <svg class="animate-spin h-8 w-8 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor"
-          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-        </path>
-      </svg>
-      <p class="text-gray-500 text-sm">Loading instance data...</p>
-    </div>
-  </div>
-
-  <!-- Table (hidden until data loads) -->
-  <div id="table-wrapper" class="hidden overflow-x-auto max-h-[70vh] overflow-y-auto">
-    <table class="min-w-full divide-y divide-gray-200 text-sm" id="instances-table">
-      <thead class="bg-gray-50">
-        <tr>
-          <th class="w-6 px-2 py-3 sticky top-0 bg-gray-50 z-10"></th>
-          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 cursor-pointer hover:bg-gray-100 z-10"
-            data-sort="provider">Provider</th>
-          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 cursor-pointer hover:bg-gray-100 z-10"
-            data-sort="instanceType" style="min-width:180px">Instance Type</th>
-          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 cursor-pointer hover:bg-gray-100 z-10"
-            data-sort="vCPU">vCPU</th>
-          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 cursor-pointer hover:bg-gray-100 z-10"
-            data-sort="memoryGiB">Memory</th>
-          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 z-10"
-            data-sort="architecture">Arch</th>
-          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 cursor-pointer hover:bg-gray-100 z-10"
-            data-sort="priceUSD_hourly" id="price-col-header">On-Demand/hr</th>
-          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 z-10">
-            Savings</th>
-          <!-- Normalized metrics (Stage 8) -->
-          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 cursor-pointer hover:bg-gray-100 z-10"
-            data-sort="pricePerVCPU" title="On-demand $/vCPU/hr (lower = better value)">$/vCPU/hr</th>
-          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 cursor-pointer hover:bg-gray-100 z-10"
-            data-sort="pricePerGiB" title="On-demand $/GiB-RAM/hr (lower = better value)">$/GiB/hr</th>
-          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 z-10">
-            Regions</th>
-          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 z-10">
-            GPU</th>
-          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50 z-10"
-            title="Select up to 4 instances to compare side-by-side">
-            Select</th>
-        </tr>
-      </thead>
-      <tbody class="bg-white divide-y divide-gray-200" id="table-body">
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Empty state -->
-  <div id="table-empty" class="hidden text-center py-12">
-    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-    </svg>
-    <h3 class="mt-2 text-sm font-medium text-gray-900">No instances match your filters</h3>
-    <p class="mt-1 text-sm text-gray-500">Try adjusting your filter criteria.</p>
-  </div>
-
-  <!-- Pagination -->
-  <div id="pagination-controls" class="hidden px-6 py-4 border-t border-gray-200 flex justify-between items-center">
-    <div class="text-sm text-gray-500" id="pagination-info">Showing 1-100</div>
-    <div class="flex items-center space-x-2">
-      <button id="prev-page"
-        class="px-3 py-1 text-sm border border-gray-300 rounded-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-        disabled>Previous</button>
-      <span class="text-sm text-gray-500" id="page-info">Page 1</span>
-      <button id="next-page"
-        class="px-3 py-1 text-sm border border-gray-300 rounded-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
-    </div>
-  </div>
 </div>
 
-<!-- Sticky compare bar: visible when ≥1 instance is selected -->
+<!-- Sticky compare bar -->
 <div id="compare-bar" class="hidden fixed bottom-0 inset-x-0 bg-white border-t border-gray-200 shadow-2xl z-50" role="region" aria-label="Selected instances for comparison">
   <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
     <div class="flex items-center gap-3 min-w-0 flex-1">
@@ -151,24 +333,42 @@
       <div class="flex flex-wrap gap-1.5 min-w-0" id="compare-bar-chips"></div>
     </div>
     <div class="flex items-center gap-3 shrink-0">
-      <button id="compare-bar-clear" class="text-sm text-gray-500 hover:text-gray-700 whitespace-nowrap focus:outline-none">
+      <button id="compare-bar-clear" class="text-sm text-gray-500 hover:text-gray-700 whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:rounded focus-visible:ring-offset-1">
         Clear
       </button>
       <a id="compare-bar-link" href="/compare"
         class="inline-flex items-center gap-1.5 px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 whitespace-nowrap">
         Compare
+        <span id="compare-bar-sr-count" class="sr-only"></span>
       </a>
     </div>
   </div>
 </div>
 
-<style>
+<style is:global>
   .commitment-active {
     background-color: white;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-    color: #1d4ed8; /* blue-700 */
+    color: #1d4ed8;
     font-weight: 600;
   }
+
+  /* Column visibility — toggled via JS classes on #instances-table */
+  #instances-table.hide-col-pricePerGiB [data-col="pricePerGiB"] { display: none; }
+  #instances-table.hide-col-gpu [data-col="gpu"] { display: none; }
+  #instances-table.hide-col-regions [data-col="regions"] { display: none; }
+  #instances-table.hide-col-savings [data-col="savings"] { display: none; }
+
+  /* Zebra stripes (JS-created rows need global styles) */
+  #table-body tr.row-even { background-color: #f8fafc; }
+  #table-body tr.row-even:hover { background-color: #eff6ff; }
+  #table-body tr.row-odd:hover { background-color: #eff6ff; }
+
+  /* Mobile card press state */
+  .mobile-instance-card { transition: background-color 0.1s ease; }
+
+  /* Skip paint for off-screen mobile cards — ~40% rendering speedup on long lists */
+  .mobile-instance-card { content-visibility: auto; contain-intrinsic-size: 0 88px; }
 </style>
 
 <script>
@@ -176,12 +376,12 @@
   import { loadInstance } from '../lib/data-loader';
 
   // ---------------------------------------------------------------------------
-  // Equivalents data shape (from data/equivalents.json)
+  // Equivalents data shape
   // ---------------------------------------------------------------------------
   interface EquivEntry {
     distance: number;
     family: string;
-    instanceType?: string; // representative instance within the family (added by aggregate.py)
+    instanceType?: string;
   }
   interface EquivRecord {
     equivalents?: Record<string, EquivEntry>;
@@ -192,41 +392,110 @@
   // ---------------------------------------------------------------------------
   let allInstances: V3Instance[] = [];
   let filteredInstances: V3Instance[] = [];
+  let baseFilteredInstances: V3Instance[] = [];
   let currentPage = 1;
-  let pageSize = 100;
+  let pageSize = 25;
   let currentSortField = 'priceUSD_hourly';
   let currentSortDir: 'asc' | 'desc' = 'asc';
   let searchTerm = '';
   let activeCommitmentTerm: 'on-demand' | '1yr' | '3yr' = 'on-demand';
+  let bestValueKeys = new Set<string>();
 
-  // Multi-select compare state
   const MAX_COMPARE = 4;
-  const selectedInstances = new Map<string, V3Instance>(); // key: "provider:instanceType"
+  const selectedInstances = new Map<string, V3Instance>();
+
+  // Columns hidden by default — persisted in localStorage
+  const savedHiddenCols: string[] = (() => {
+    try { return JSON.parse(localStorage.getItem('hiddenCols') ?? '["pricePerGiB","gpu"]'); }
+    catch { return ['pricePerGiB', 'gpu']; }
+  })();
+  const hiddenCols = new Set<string>(savedHiddenCols);
 
   // ---------------------------------------------------------------------------
   // DOM refs
   // ---------------------------------------------------------------------------
-  const tableBody = document.getElementById('table-body') as HTMLTableSectionElement;
-  const tableLoading = document.getElementById('table-loading') as HTMLDivElement;
-  const tableWrapper = document.getElementById('table-wrapper') as HTMLDivElement;
-  const tableEmpty = document.getElementById('table-empty') as HTMLDivElement;
+  const tableBody        = document.getElementById('table-body') as HTMLTableSectionElement;
+  const tableLoading     = document.getElementById('table-loading') as HTMLDivElement;
+  const tableWrapper     = document.getElementById('table-wrapper') as HTMLDivElement;
+  const tableEmpty       = document.getElementById('table-empty') as HTMLDivElement;
   const paginationControls = document.getElementById('pagination-controls') as HTMLDivElement;
-  const resultCount = document.getElementById('result-count') as HTMLElement;
-  const paginationInfo = document.getElementById('pagination-info') as HTMLElement;
-  const pageInfo = document.getElementById('page-info') as HTMLElement;
-  const prevPageBtn = document.getElementById('prev-page') as HTMLButtonElement;
-  const nextPageBtn = document.getElementById('next-page') as HTMLButtonElement;
-  const priceColHeader = document.getElementById('price-col-header') as HTMLElement;
+  const resultCount      = document.getElementById('result-count') as HTMLElement;
+  const paginationInfo   = document.getElementById('pagination-info') as HTMLElement;
+  const pageInput        = document.getElementById('page-input') as HTMLInputElement;
+  const pageTotalEl      = document.getElementById('page-total') as HTMLElement;
+  const prevPageBtn      = document.getElementById('prev-page') as HTMLButtonElement;
+  const nextPageBtn      = document.getElementById('next-page') as HTMLButtonElement;
+  const priceColHeader   = document.getElementById('price-col-header') as HTMLElement;
+  const instancesTable   = document.getElementById('instances-table') as HTMLTableElement | null;
+  const mobileCards      = document.getElementById('mobile-cards') as HTMLDivElement;
+  const tableScroll      = document.getElementById('table-scroll') as HTMLDivElement | null;
+  const scrollShadowRight = document.getElementById('scroll-shadow-right') as HTMLDivElement | null;
+  const exportDropdownBtn  = document.getElementById('export-dropdown-btn') as HTMLButtonElement | null;
+  const exportDropdownPanel = document.getElementById('export-dropdown-panel') as HTMLDivElement | null;
+  const exportBtnLabel   = document.getElementById('export-btn-label') as HTMLSpanElement | null;
 
   // ---------------------------------------------------------------------------
-  // Commitment toggle (Stage 8) — DOM-only price recompute, no network request
+  // Column visibility — apply initial hidden state
+  // ---------------------------------------------------------------------------
+  hiddenCols.forEach((col) => instancesTable?.classList.add(`hide-col-${col}`));
+  // Savings column hidden on on-demand tab (default)
+  instancesTable?.classList.add('hide-col-savings');
+
+  // Sync checkboxes to initial state (unchecked = hidden)
+  document.querySelectorAll<HTMLInputElement>('.col-toggle-check').forEach((cb) => {
+    cb.checked = !hiddenCols.has(cb.dataset.col!);
+  });
+
+  // Toggle panel open/close
+  const colToggleBtn   = document.getElementById('col-toggle-btn');
+  const colTogglePanel = document.getElementById('col-toggle-panel');
+
+  colToggleBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    colTogglePanel?.classList.toggle('hidden');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!document.getElementById('col-toggle-container')?.contains(e.target as Node)) {
+      colTogglePanel?.classList.add('hidden');
+    }
+  });
+
+  document.querySelectorAll<HTMLInputElement>('.col-toggle-check').forEach((cb) => {
+    cb.addEventListener('change', () => {
+      const col = cb.dataset.col!;
+      if (cb.checked) {
+        hiddenCols.delete(col);
+        instancesTable?.classList.remove(`hide-col-${col}`);
+      } else {
+        hiddenCols.add(col);
+        instancesTable?.classList.add(`hide-col-${col}`);
+      }
+      localStorage.setItem('hiddenCols', JSON.stringify([...hiddenCols]));
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Scroll shadow (tablet horizontal overflow hint)
+  // ---------------------------------------------------------------------------
+  function updateScrollShadow() {
+    if (!tableScroll || !scrollShadowRight) return;
+    const canScrollRight = tableScroll.scrollWidth > tableScroll.clientWidth + 4;
+    const atRight = tableScroll.scrollLeft >= tableScroll.scrollWidth - tableScroll.clientWidth - 4;
+    scrollShadowRight.style.opacity = (canScrollRight && !atRight) ? '1' : '0';
+  }
+
+  tableScroll?.addEventListener('scroll', updateScrollShadow, { passive: true });
+  window.addEventListener('resize', updateScrollShadow);
+
+  // ---------------------------------------------------------------------------
+  // Commitment toggle
   // ---------------------------------------------------------------------------
   document.querySelectorAll<HTMLButtonElement>('.commitment-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       const term = btn.dataset.term as 'on-demand' | '1yr' | '3yr';
       if (term === activeCommitmentTerm) return;
 
-      // Update active styling
       document.querySelectorAll('.commitment-btn').forEach((b) => {
         b.classList.remove('commitment-active');
         b.classList.add('text-gray-600');
@@ -236,24 +505,28 @@
 
       activeCommitmentTerm = term;
 
-      // Update price column header label
       if (priceColHeader) {
         priceColHeader.textContent =
           term === 'on-demand' ? 'On-Demand/hr' :
-          term === '1yr' ? '1-Yr Effective/hr' : '3-Yr Effective/hr';
+          term === '1yr'       ? '1-Yr Effective/hr' : '3-Yr Effective/hr';
       }
 
-      // Also sync the filter panel commitment radio if present
+      // Show savings column only for commitment terms
+      if (term === 'on-demand') {
+        instancesTable?.classList.add('hide-col-savings');
+      } else {
+        instancesTable?.classList.remove('hide-col-savings');
+      }
+
       const radio = document.querySelector<HTMLInputElement>(`input[name="commitmentTerm"][value="${term}"]`);
       if (radio) radio.checked = true;
 
-      // Rerender — no network, uses already-loaded commitment data
       sortAndRender();
     });
   });
 
   // ---------------------------------------------------------------------------
-  // Event: data is loading
+  // Events from index.astro
   // ---------------------------------------------------------------------------
   window.addEventListener('dataLoading', () => {
     tableLoading.classList.remove('hidden');
@@ -263,20 +536,14 @@
     if (resultCount) resultCount.textContent = 'Loading...';
   });
 
-  // ---------------------------------------------------------------------------
-  // Event: all family data loaded
-  // ---------------------------------------------------------------------------
   window.addEventListener('dataLoaded', (event: Event) => {
     const { instances } = (event as CustomEvent<{ instances: V3Instance[] }>).detail;
     allInstances = instances;
-    filteredInstances = [...allInstances];
+    baseFilteredInstances = [...allInstances];
     currentPage = 1;
     sortAndRender();
   });
 
-  // ---------------------------------------------------------------------------
-  // Event: filters changed (from FilterPanel)
-  // ---------------------------------------------------------------------------
   window.addEventListener('filtersChanged', (event: Event) => {
     const filters = (event as CustomEvent).detail as {
       providers: string[];
@@ -290,9 +557,9 @@
       maxPrice: number;
       gpuOnly: boolean;
       regions: string[];
+      filterCount?: number;
     };
 
-    // Sync commitment term from filter panel
     if (filters.commitmentTerm !== activeCommitmentTerm) {
       activeCommitmentTerm = filters.commitmentTerm;
       document.querySelectorAll<HTMLButtonElement>('.commitment-btn').forEach((b) => {
@@ -306,28 +573,28 @@
       if (priceColHeader) {
         priceColHeader.textContent =
           filters.commitmentTerm === 'on-demand' ? 'On-Demand/hr' :
-          filters.commitmentTerm === '1yr' ? '1-Yr Effective/hr' : '3-Yr Effective/hr';
+          filters.commitmentTerm === '1yr'        ? '1-Yr Effective/hr' : '3-Yr Effective/hr';
+      }
+
+      if (filters.commitmentTerm === 'on-demand') {
+        instancesTable?.classList.add('hide-col-savings');
+      } else {
+        instancesTable?.classList.remove('hide-col-savings');
       }
     }
 
-    // Filter
-    filteredInstances = allInstances.filter((inst) => {
+    baseFilteredInstances = allInstances.filter((inst) => {
       if (filters.providers.length && !filters.providers.includes(inst.provider)) return false;
       if (
         filters.families.length &&
         !filters.families.some((f) => f.provider === inst.provider && f.family === inst.family)
-      )
-        return false;
+      ) return false;
       if ((inst.vCPU ?? 0) < filters.minVCPU || (inst.vCPU ?? 0) > filters.maxVCPU) return false;
       if ((inst.memoryGiB ?? 0) < filters.minMemory || (inst.memoryGiB ?? 0) > filters.maxMemory) return false;
-      if (filters.architecture !== 'any' && inst.architecture !== filters.architecture)
-        return false;
+      if (filters.architecture !== 'any' && inst.architecture !== filters.architecture) return false;
       if (filters.gpuOnly && !inst.gpu) return false;
-
-      // Region filter: show instance only if it's available in at least one selected region
       if (filters.regions?.length && !filters.regions.some((r) => inst.regions?.includes(r))) return false;
 
-      // Price filter uses effective price for the selected commitment term
       const effectivePrice = getEffectivePrice(inst, filters.commitmentTerm);
       if (effectivePrice > filters.maxPrice) return false;
 
@@ -336,12 +603,18 @@
           `${inst.instanceType} ${inst.provider} ${inst.family} ${inst.architecture} ${(inst.regions ?? []).join(' ')}`.toLowerCase();
         if (!haystack.includes(searchTerm)) return false;
       }
-
       return true;
     });
 
     currentPage = 1;
     sortAndRender();
+
+    const filterBadge = document.getElementById('filter-active-badge');
+    if (filterBadge) {
+      const n = filters.filterCount ?? 0;
+      filterBadge.textContent = n > 0 ? `Filters (${n} active)` : '';
+      filterBadge.classList.toggle('hidden', n === 0);
+    }
   });
 
   // ---------------------------------------------------------------------------
@@ -363,7 +636,7 @@
   function formatSmall(n: number | undefined | null): string {
     if (n == null || isNaN(n)) return '—';
     if (n < 0.001) return `$${n.toFixed(6)}`;
-    if (n < 0.01) return `$${n.toFixed(5)}`;
+    if (n < 0.01)  return `$${n.toFixed(5)}`;
     return `$${n.toFixed(4)}`;
   }
 
@@ -387,19 +660,59 @@
 
   function providerColor(provider: string): string {
     const map: Record<string, string> = {
-      aws: 'bg-orange-100 text-orange-800',
-      azure: 'bg-blue-100 text-blue-800',
-      gcp: 'bg-green-100 text-green-800',
-      oci: 'bg-purple-100 text-purple-800',
+      aws:      'bg-amber-100 text-amber-800',
+      azure:    'bg-blue-100 text-blue-800',
+      gcp:      'bg-green-100 text-green-800',
+      oci:      'bg-red-100 text-red-700',
+      ovh:      'bg-indigo-100 text-indigo-800',
+      scaleway: 'bg-purple-100 text-purple-800',
+      vultr:    'bg-cyan-100 text-cyan-800',
+      vast:     'bg-pink-100 text-pink-800',
     };
-    return map[provider] ?? 'bg-gray-100 text-gray-800';
+    return map[provider] ?? 'bg-gray-100 text-gray-700';
+  }
+
+  // ---------------------------------------------------------------------------
+  // Price heatmap — continuous HSL sweep: green (cheapest) → yellow → orange (most expensive)
+  // ---------------------------------------------------------------------------
+  function applyPriceHeatmap() {
+    const rows = Array.from(tableBody.querySelectorAll<HTMLTableRowElement>('tr.instance-row'));
+    if (rows.length < 3) return;
+
+    const cells = rows.map(row => row.querySelector<HTMLElement>('[data-price-heat]'));
+    const prices = cells.map(cell => {
+      const raw = cell?.textContent?.replace('$', '').trim();
+      return raw ? parseFloat(raw) : NaN;
+    });
+
+    const valid = prices.filter(n => !isNaN(n));
+    if (valid.length < 2) return;
+    const min = Math.min(...valid);
+    const max = Math.max(...valid);
+    if (max <= min) return;
+
+    cells.forEach((cell, i) => {
+      if (!cell) return;
+      const n = prices[i];
+      if (isNaN(n)) { cell.style.backgroundColor = ''; cell.style.color = ''; return; }
+
+      const t = (n - min) / (max - min); // 0 = cheapest, 1 = most expensive
+      // Hue: 130° (green) → 28° (orange), sweeping through yellow at 65°
+      const hue = Math.round(130 - t * 102);
+      cell.style.backgroundColor = `hsl(${hue}, 62%, 72%)`;
+      cell.style.color = '#1f2937'; // force dark text regardless of color scheme
+    });
   }
 
   // ---------------------------------------------------------------------------
   // Sort
   // ---------------------------------------------------------------------------
   function sortAndRender() {
-    const sorted = [...filteredInstances].sort((a, b) => {
+    const termFiltered = activeCommitmentTerm === 'on-demand'
+      ? baseFilteredInstances
+      : baseFilteredInstances.filter(inst => inst.commitments?.some(c => c.term === activeCommitmentTerm));
+
+    const sorted = [...termFiltered].sort((a, b) => {
       let av: number | string = 0;
       let bv: number | string = 0;
       if (currentSortField === 'priceUSD_hourly') {
@@ -412,17 +725,13 @@
         av = pricePerGiB(a, activeCommitmentTerm);
         bv = pricePerGiB(b, activeCommitmentTerm);
       } else if (currentSortField === 'provider') {
-        av = a.provider;
-        bv = b.provider;
+        av = a.provider; bv = b.provider;
       } else if (currentSortField === 'instanceType') {
-        av = a.instanceType;
-        bv = b.instanceType;
+        av = a.instanceType; bv = b.instanceType;
       } else if (currentSortField === 'vCPU') {
-        av = a.vCPU ?? 0;
-        bv = b.vCPU ?? 0;
+        av = a.vCPU ?? 0; bv = b.vCPU ?? 0;
       } else if (currentSortField === 'memoryGiB') {
-        av = a.memoryGiB ?? 0;
-        bv = b.memoryGiB ?? 0;
+        av = a.memoryGiB ?? 0; bv = b.memoryGiB ?? 0;
       }
       if (av < bv) return currentSortDir === 'asc' ? -1 : 1;
       if (av > bv) return currentSortDir === 'asc' ? 1 : -1;
@@ -442,8 +751,16 @@
     const end = Math.min(start + effectivePageSize, total);
     const slice = filteredInstances.slice(start, end);
 
-    // Show/hide states
+    // Compute best-value instances (top 3 by $/vCPU/hr) across all filtered results
+    bestValueKeys = new Set<string>();
+    const validForBV = filteredInstances.filter(i => (i.vCPU ?? 0) > 0 && (i.priceUSD_hourly ?? 0) > 0);
+    [...validForBV]
+      .sort((a, b) => pricePerVCPU(a, activeCommitmentTerm) - pricePerVCPU(b, activeCommitmentTerm))
+      .slice(0, 3)
+      .forEach(i => bestValueKeys.add(`${i.provider}:${i.instanceType}`));
+
     tableLoading.classList.add('hidden');
+
     if (total === 0) {
       tableWrapper.classList.add('hidden');
       tableEmpty.classList.remove('hidden');
@@ -455,41 +772,63 @@
     }
 
     if (resultCount) resultCount.textContent = `${total.toLocaleString()} instances`;
-    if (exportCsvBtn) exportCsvBtn.disabled = total === 0;
+    if (exportDropdownBtn) exportDropdownBtn.disabled = total === 0 && selectedInstances.size === 0;
+    updateExportButtonLabel();
 
     const totalPages = effectivePageSize > 0 ? Math.ceil(total / effectivePageSize) : 1;
-    if (pageInfo) pageInfo.textContent = `Page ${currentPage} of ${Math.max(1, totalPages)}`;
+    if (pageInput) { pageInput.value = String(currentPage); pageInput.max = String(Math.max(1, totalPages)); }
+    if (pageTotalEl) pageTotalEl.textContent = `of ${Math.max(1, totalPages)}`;
     if (paginationInfo)
       paginationInfo.textContent = `Showing ${total > 0 ? start + 1 : 0}–${end} of ${total.toLocaleString()} instances`;
     if (prevPageBtn) prevPageBtn.disabled = currentPage === 1;
     if (nextPageBtn) nextPageBtn.disabled = currentPage >= totalPages;
 
+    // Table rows (desktop)
     const fragment = document.createDocumentFragment();
-    slice.forEach((inst) => {
-      fragment.appendChild(buildRow(inst));
-    });
+    slice.forEach((inst, i) => fragment.appendChild(buildRow(inst, i + 1)));
     tableBody.innerHTML = '';
     tableBody.appendChild(fragment);
+
+    // Mobile cards
+    if (mobileCards) {
+      const cardFrag = document.createDocumentFragment();
+      slice.forEach((inst, i) => cardFrag.appendChild(buildCard(inst, i % 2 === 0)));
+      mobileCards.innerHTML = '';
+      mobileCards.appendChild(cardFrag);
+    }
+
+    requestAnimationFrame(() => {
+      updateScrollShadow();
+      applyPriceHeatmap();
+    });
   }
 
   // ---------------------------------------------------------------------------
-  // Row builder (Stage 8: adds $/vCPU, $/GiB columns and Compare link)
+  // Row builder (desktop table)
   // ---------------------------------------------------------------------------
-  function buildRow(inst: V3Instance): HTMLTableRowElement {
+  function buildRow(inst: V3Instance, rowIndex: number): HTMLTableRowElement {
     const tr = document.createElement('tr');
-    tr.className = 'hover:bg-gray-50 instance-row';
+    tr.className = `instance-row ${rowIndex % 2 === 0 ? 'row-even' : 'row-odd'}`;
 
     const effectivePrice = getEffectivePrice(inst, activeCommitmentTerm);
-    const savings = bestSavings(inst, activeCommitmentTerm);
-    const regionCount = inst.regions?.length ?? 0;
-    const gpuText = inst.gpu ? `${inst.gpu.count}x ${inst.gpu.type}` : '-';
-    const pvcpu = pricePerVCPU(inst, activeCommitmentTerm);
-    const pgib = pricePerGiB(inst, activeCommitmentTerm);
+    const savings        = bestSavings(inst, activeCommitmentTerm);
+    const regionCount    = inst.regions?.length ?? 0;
+    const gpuText        = inst.gpu ? `${inst.gpu.count}× ${inst.gpu.type}` : '—';
+    const pvcpu          = pricePerVCPU(inst, activeCommitmentTerm);
+    const pgib           = pricePerGiB(inst, activeCommitmentTerm);
+
+    const savingsHtml = savings !== '-'
+      ? `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-green-100 text-green-800">Save ${savings}</span>`
+      : '';
+
+    const isSelected  = selectedInstances.has(`${inst.provider}:${inst.instanceType}`);
+    const isFull      = selectedInstances.size >= MAX_COMPARE;
+    const isBestValue = bestValueKeys.has(`${inst.provider}:${inst.instanceType}`);
 
     tr.innerHTML = `
-      <td class="w-6 px-2 py-3 text-center">
-        <button class="expand-btn text-gray-400 hover:text-primary-600 focus:outline-hidden"
-          title="Show instance detail"
+      <td class="w-10 px-2 py-2.5 text-center">
+        <button class="expand-btn p-1.5 rounded-md text-gray-400 hover:text-primary-600 hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
+          title="Show instance details"
           data-provider="${inst.provider}"
           data-instance="${inst.instanceType}"
           aria-label="Expand ${inst.instanceType} details">
@@ -498,55 +837,110 @@
           </svg>
         </button>
       </td>
-      <td class="px-3 py-3 whitespace-nowrap">
-        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${providerColor(inst.provider)}">
+      <td class="px-3 py-2.5 whitespace-nowrap">
+        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold leading-snug ${providerColor(inst.provider)}">
           ${inst.provider.toUpperCase()}
         </span>
       </td>
-      <td class="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
-        <div class="max-w-48 truncate" title="${inst.instanceType}">${inst.instanceType}</div>
-        <div class="text-xs text-gray-400">${inst.family}</div>
+      <td class="px-3 py-2.5 whitespace-nowrap">
+        <div class="max-w-48 truncate text-sm font-medium text-gray-900 font-mono" title="${inst.instanceType}">${inst.instanceType}</div>
+        <div class="flex items-center gap-1.5 mt-0.5">
+          <div class="text-xs text-gray-600">${inst.family}</div>
+          ${isBestValue ? '<span class="inline-flex items-center gap-0.5 px-1.5 py-px rounded text-[10px] font-semibold bg-emerald-100 text-emerald-700 cursor-help" title="Best price-per-vCPU in current results — one of the top 3 lowest $/vCPU/hr across all filtered instances">Best Value<svg class="h-2.5 w-2.5 opacity-60 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd" /></svg></span>' : ''}
+        </div>
       </td>
-      <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-900">${inst.vCPU ?? '-'}</td>
-      <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-900">
-        ${inst.memoryGiB != null ? `${inst.memoryGiB} GiB` : '-'}
+      <td class="px-3 py-2.5 whitespace-nowrap text-sm text-gray-900 tabular-nums">${inst.vCPU ?? '—'}</td>
+      <td class="px-3 py-2.5 whitespace-nowrap text-sm text-gray-900 tabular-nums">
+        ${inst.memoryGiB != null ? `${inst.memoryGiB} GiB` : '—'}
       </td>
-      <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
-        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-700">
+      <td class="px-3 py-2.5 whitespace-nowrap">
+        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-700 font-mono">
           ${inst.architecture ?? 'x86_64'}
         </span>
       </td>
-      <td class="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+      <td class="px-3 py-2.5 whitespace-nowrap text-sm font-semibold text-gray-900 tabular-nums font-mono transition-colors duration-200" data-price-heat>
         ${formatUSD(effectivePrice)}
       </td>
-      <td class="px-3 py-3 whitespace-nowrap text-sm ${savings !== '-' ? 'text-green-700 font-medium' : 'text-gray-400'}">
-        ${savings !== '-' ? `Save ${savings}` : '-'}
+      <td class="px-3 py-2.5 whitespace-nowrap" data-col="savings">${savingsHtml}</td>
+      <td class="px-3 py-2.5 whitespace-nowrap text-sm text-gray-700 tabular-nums font-mono">
+        ${isFinite(pvcpu) ? formatSmall(pvcpu) : '—'}
       </td>
-      <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-700">
-        ${isFinite(pvcpu) ? formatSmall(pvcpu) : '-'}
+      <td class="px-3 py-2.5 whitespace-nowrap text-sm text-gray-700 tabular-nums font-mono" data-col="pricePerGiB">
+        ${isFinite(pgib) ? formatSmall(pgib) : '—'}
       </td>
-      <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-700">
-        ${isFinite(pgib) ? formatSmall(pgib) : '-'}
+      <td class="px-3 py-2.5 whitespace-nowrap text-sm text-gray-500" data-col="regions">
+        ${regionCount > 0 ? `${regionCount} region${regionCount !== 1 ? 's' : ''}` : '—'}
       </td>
-      <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
-        ${regionCount} region${regionCount !== 1 ? 's' : ''}
-      </td>
-      <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">${gpuText}</td>
-      <td class="px-3 py-3 text-center">
+      <td class="px-3 py-2.5 whitespace-nowrap text-sm text-gray-500" data-col="gpu">${gpuText}</td>
+      <td class="px-3 py-2.5 text-center">
         <input type="checkbox"
           class="select-row-check h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 cursor-pointer"
           data-key="${inst.provider}:${inst.instanceType}"
-          ${selectedInstances.has(`${inst.provider}:${inst.instanceType}`) ? 'checked' : ''}
-          ${!selectedInstances.has(`${inst.provider}:${inst.instanceType}`) && selectedInstances.size >= MAX_COMPARE ? 'disabled' : ''}
+          ${isSelected ? 'checked' : ''}
+          ${!isSelected && isFull ? 'disabled' : ''}
           title="Add to compare (up to ${MAX_COMPARE})" />
       </td>
     `;
-
     return tr;
   }
 
   // ---------------------------------------------------------------------------
-  // Row expand: lazy-load instance detail + equivalents (Stage 8)
+  // Card builder (mobile)
+  // ---------------------------------------------------------------------------
+  function buildCard(inst: V3Instance, isEven: boolean): HTMLDivElement {
+    const div = document.createElement('div');
+    div.className = `mobile-instance-card px-4 py-3 ${isEven ? 'bg-gray-50' : 'bg-white'}`;
+
+    const effectivePrice = getEffectivePrice(inst, activeCommitmentTerm);
+    const savings        = bestSavings(inst, activeCommitmentTerm);
+    const isSelected     = selectedInstances.has(`${inst.provider}:${inst.instanceType}`);
+    const isFull         = selectedInstances.size >= MAX_COMPARE;
+
+    div.innerHTML = `
+      <div class="flex items-start justify-between gap-3">
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center flex-wrap gap-1.5 mb-1.5">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ${providerColor(inst.provider)}">${inst.provider.toUpperCase()}</span>
+            ${savings !== '-' ? `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-100 text-green-800">Save ${savings}</span>` : ''}
+          </div>
+          <div class="font-medium text-sm text-gray-900 font-mono truncate" title="${inst.instanceType}">${inst.instanceType}</div>
+          <div class="text-xs text-gray-600 mt-0.5">${inst.family}</div>
+          <div class="flex flex-wrap items-center gap-3 mt-2 text-sm">
+            <span class="text-gray-700"><span class="text-[11px] text-gray-400 mr-0.5">vCPU</span>${inst.vCPU ?? '—'}</span>
+            <span class="text-gray-700"><span class="text-[11px] text-gray-400 mr-0.5">RAM</span>${inst.memoryGiB != null ? `${inst.memoryGiB} GiB` : '—'}</span>
+            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-700 font-mono">${inst.architecture ?? 'x86_64'}</span>
+          </div>
+        </div>
+        <div class="flex flex-col items-end gap-2 shrink-0">
+          <div class="text-right">
+            <div class="text-base font-bold text-gray-900 tabular-nums leading-tight">${formatUSD(effectivePrice)}</div>
+            <div class="text-[11px] text-gray-400">/hr</div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button class="expand-btn p-1.5 rounded-md text-gray-400 hover:text-primary-600 hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
+              title="Show instance details"
+              data-provider="${inst.provider}"
+              data-instance="${inst.instanceType}"
+              aria-label="Expand ${inst.instanceType} details">
+              <svg class="w-4 h-4 expand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path class="expand-path" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </button>
+            <input type="checkbox"
+              class="select-row-check h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 cursor-pointer"
+              data-key="${inst.provider}:${inst.instanceType}"
+              ${isSelected ? 'checked' : ''}
+              ${!isSelected && isFull ? 'disabled' : ''}
+              title="Add to compare (up to ${MAX_COMPARE})" />
+          </div>
+        </div>
+      </div>
+    `;
+    return div;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Row expand — desktop table
   // ---------------------------------------------------------------------------
   let equivalentsData: Record<string, EquivRecord> | null = null;
 
@@ -565,11 +959,10 @@
     const btn = (e.target as Element).closest('.expand-btn') as HTMLButtonElement | null;
     if (!btn) return;
 
-    const provider = btn.dataset.provider!;
+    const provider   = btn.dataset.provider!;
     const instanceId = btn.dataset.instance!;
-    const tr = btn.closest('tr') as HTMLTableRowElement;
+    const tr         = btn.closest('tr') as HTMLTableRowElement;
 
-    // Toggle existing detail row
     const existingDetail = tr.nextElementSibling;
     if (existingDetail?.classList.contains('detail-row')) {
       existingDetail.remove();
@@ -578,16 +971,15 @@
       return;
     }
 
-    // Rotate icon to "down"
     const path = btn.querySelector('.expand-path');
     if (path) path.setAttribute('d', 'M19 9l-7 7-7-7');
     btn.disabled = true;
 
     const detailRow = document.createElement('tr');
-    detailRow.className = 'detail-row bg-gray-50';
+    detailRow.className = 'detail-row bg-slate-50';
     detailRow.innerHTML = `
       <td></td>
-      <td colspan="12" class="px-6 py-4">
+      <td colspan="20" class="px-6 py-4">
         <div class="detail-content text-sm text-gray-500 italic">Loading detail...</div>
       </td>
     `;
@@ -608,15 +1000,68 @@
   });
 
   // ---------------------------------------------------------------------------
-  // Multi-select: checkbox change delegation
+  // Row expand — mobile cards
+  // ---------------------------------------------------------------------------
+  mobileCards?.addEventListener('click', async (e: MouseEvent) => {
+    const btn = (e.target as Element).closest('.expand-btn') as HTMLButtonElement | null;
+    if (!btn) return;
+
+    const provider   = btn.dataset.provider!;
+    const instanceId = btn.dataset.instance!;
+    const card = btn.closest('.mobile-instance-card') as HTMLDivElement | null;
+    if (!card) return;
+
+    const existingDetail = card.nextElementSibling;
+    if (existingDetail?.classList.contains('card-detail')) {
+      existingDetail.remove();
+      const path = btn.querySelector('.expand-path');
+      if (path) path.setAttribute('d', 'M9 5l7 7-7 7');
+      return;
+    }
+
+    const path = btn.querySelector('.expand-path');
+    if (path) path.setAttribute('d', 'M19 9l-7 7-7-7');
+    btn.disabled = true;
+
+    const detailDiv = document.createElement('div');
+    detailDiv.className = 'card-detail bg-slate-50 border-t border-gray-200 px-4 py-4';
+    detailDiv.innerHTML = '<div class="detail-content text-sm text-gray-500 italic">Loading detail...</div>';
+    card.insertAdjacentElement('afterend', detailDiv);
+
+    try {
+      const [detail, equivMap] = await Promise.all([
+        loadInstance(provider, instanceId) as Promise<V3InstanceFile>,
+        loadEquivalents(),
+      ]);
+      renderDetail(detailDiv.querySelector('.detail-content') as HTMLElement, detail, equivMap);
+    } catch (err) {
+      const dc = detailDiv.querySelector('.detail-content') as HTMLElement;
+      if (dc) dc.textContent = `Failed to load detail: ${err}`;
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // ---------------------------------------------------------------------------
+  // Multi-select — desktop table
   // ---------------------------------------------------------------------------
   tableBody.addEventListener('change', (e: Event) => {
     const checkbox = (e.target as Element).closest('.select-row-check') as HTMLInputElement | null;
     if (!checkbox) return;
+    handleSelectChange(checkbox);
+  });
 
+  // Multi-select — mobile cards
+  mobileCards?.addEventListener('change', (e: Event) => {
+    const checkbox = (e.target as Element).closest('.select-row-check') as HTMLInputElement | null;
+    if (!checkbox) return;
+    handleSelectChange(checkbox);
+  });
+
+  function handleSelectChange(checkbox: HTMLInputElement) {
     const key = checkbox.dataset.key!;
     const colonIdx = key.indexOf(':');
-    const provider = key.slice(0, colonIdx);
+    const provider     = key.slice(0, colonIdx);
     const instanceType = key.slice(colonIdx + 1);
 
     if (checkbox.checked) {
@@ -632,22 +1077,45 @@
 
     updateCompareBar();
     refreshCheckboxDisabledState();
-  });
+  }
 
   function refreshCheckboxDisabledState() {
     const isFull = selectedInstances.size >= MAX_COMPARE;
     tableBody.querySelectorAll<HTMLInputElement>('.select-row-check').forEach((cb) => {
       if (!cb.checked) cb.disabled = isFull;
     });
+    mobileCards?.querySelectorAll<HTMLInputElement>('.select-row-check').forEach((cb) => {
+      if (!cb.checked) cb.disabled = isFull;
+    });
+  }
+
+  function updateExportButtonLabel() {
+    const n = selectedInstances.size;
+    if (exportBtnLabel) {
+      exportBtnLabel.textContent = n > 0 ? `Export (${n} selected)` : 'Export';
+    }
+    if (exportDropdownBtn) {
+      exportDropdownBtn.title = n > 0
+        ? `Export ${n} selected instance${n !== 1 ? 's' : ''}`
+        : 'Export filtered results';
+    }
+  }
+
+  function getInstancesToExport(): V3Instance[] {
+    if (selectedInstances.size > 0) return Array.from(selectedInstances.values());
+    return filteredInstances;
   }
 
   function updateCompareBar() {
-    const bar = document.getElementById('compare-bar');
+    const bar     = document.getElementById('compare-bar');
     const countEl = document.getElementById('compare-bar-count');
     const chipsEl = document.getElementById('compare-bar-chips');
-    const linkEl = document.getElementById('compare-bar-link') as HTMLAnchorElement | null;
+    const linkEl  = document.getElementById('compare-bar-link') as HTMLAnchorElement | null;
 
     if (!bar) return;
+
+    updateExportButtonLabel();
+    if (exportDropdownBtn) exportDropdownBtn.disabled = filteredInstances.length === 0 && selectedInstances.size === 0;
 
     if (selectedInstances.size === 0) {
       bar.classList.add('hidden');
@@ -669,7 +1137,7 @@
         chip.innerHTML = `
           <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${providerColor(inst.provider)}">${inst.provider.toUpperCase()}</span>
           <span class="font-mono text-gray-800">${inst.instanceType}</span>
-          <button class="remove-chip ml-0.5 text-gray-400 hover:text-red-500 focus:outline-none leading-none" data-key="${key}" title="Remove">×</button>
+          <button class="remove-chip ml-0.5 text-gray-400 hover:text-red-500 focus:outline-none focus-visible:ring-1 focus-visible:ring-primary-500 focus-visible:rounded leading-none" data-key="${key}" aria-label="Remove ${inst.instanceType} from comparison">×</button>
         `;
         chipsEl.appendChild(chip);
       });
@@ -678,18 +1146,28 @@
         btn.addEventListener('click', () => {
           const k = btn.dataset.key!;
           selectedInstances.delete(k);
-          const cb = tableBody.querySelector<HTMLInputElement>(`.select-row-check[data-key="${k}"]`);
-          if (cb) { cb.checked = false; cb.disabled = false; }
+          [tableBody, mobileCards].forEach((container) => {
+            const cb = container?.querySelector<HTMLInputElement>(`.select-row-check[data-key="${k}"]`);
+            if (cb) { cb.checked = false; cb.disabled = false; }
+          });
           updateCompareBar();
           refreshCheckboxDisabledState();
         });
       });
     }
 
+    const srCount = document.getElementById('compare-bar-sr-count');
+    if (srCount) {
+      const n = selectedInstances.size;
+      srCount.textContent = `— ${n} instance${n !== 1 ? 's' : ''} selected`;
+    }
+
+    window.dispatchEvent(new CustomEvent('compareCountChanged', { detail: { count: selectedInstances.size } }));
+
     if (linkEl) {
       const items = [...selectedInstances.entries()].map(([key]) => {
         const colonIdx = key.indexOf(':');
-        const prov = key.slice(0, colonIdx);
+        const prov  = key.slice(0, colonIdx);
         const itype = key.slice(colonIdx + 1);
         return `${prov}:${encodeURIComponent(itype)}`;
       }).join(',');
@@ -699,16 +1177,20 @@
 
   document.getElementById('compare-bar-clear')?.addEventListener('click', () => {
     selectedInstances.clear();
-    tableBody.querySelectorAll<HTMLInputElement>('.select-row-check').forEach((cb) => {
-      cb.checked = false;
-      cb.disabled = false;
+    [tableBody, mobileCards].forEach((container) => {
+      container?.querySelectorAll<HTMLInputElement>('.select-row-check').forEach((cb) => {
+        cb.checked = false;
+        cb.disabled = false;
+      });
     });
     updateCompareBar();
   });
 
   // ---------------------------------------------------------------------------
+  // Render detail (shared by table row and mobile card)
+  // ---------------------------------------------------------------------------
   function renderDetail(container: HTMLElement, detail: V3InstanceFile, equivMap: Record<string, EquivRecord>) {
-    const fmt = (n: number | undefined | null, d = 4) => (n != null && !isNaN(n) ? `$${n.toFixed(d)}` : '—');
+    const fmt    = (n: number | undefined | null, d = 4) => (n != null && !isNaN(n) ? `$${n.toFixed(d)}` : '—');
     const fmtPct = (n: number | undefined | null, d = 1) => (n != null && !isNaN(n) ? `${n.toFixed(d)}%` : '—');
 
     const commitmentRows = (detail.commitments ?? [])
@@ -717,8 +1199,7 @@
         if (a.term !== b.term) return (termOrder[a.term] ?? 2) - (termOrder[b.term] ?? 2);
         return a.effectiveHourlyUSD - b.effectiveHourlyUSD;
       })
-      .map(
-        (c) => `
+      .map((c) => `
         <tr class="border-b border-gray-100">
           <td class="pr-4 py-1 font-medium text-gray-700">${c.term}</td>
           <td class="pr-4 py-1 text-gray-600">${c.payment}</td>
@@ -726,33 +1207,40 @@
           <td class="pr-4 py-1 font-medium text-gray-900">${fmt(c.effectiveHourlyUSD)}/hr</td>
           <td class="pr-4 py-1 text-green-700">Save ${fmtPct(c.savingsVsOnDemandPct)}</td>
         </tr>
-      `
-      )
+      `)
       .join('');
 
-    const regionPricingRows = detail.regionPricing
-      ? Object.entries(detail.regionPricing)
-          .sort((a, b) => a[0].localeCompare(b[0]))
-          .slice(0, 10)
-          .map(
-            ([region, pricing]) => `
-          <tr class="border-b border-gray-100">
-            <td class="pr-4 py-1 font-medium text-gray-700">${region}</td>
-            <td class="pr-4 py-1 text-gray-900">${fmt(pricing.priceUSD_hourly)}/hr</td>
-            <td class="pr-4 py-1 text-gray-600">${fmt(pricing.priceUSD_monthly, 2)}/mo</td>
-          </tr>
-        `
-          )
-          .join('')
+    const availableTerms = new Set((detail.commitments ?? []).map(c => c.term));
+    const commitmentNote = (detail.commitments?.length ?? 0) > 0 && !availableTerms.has('3yr')
+      ? '<p class="text-[11px] text-amber-700 mt-1.5">Only 1-year reservations are available for this instance type.</p>'
+      : (detail.commitments?.length ?? 0) > 0 && !availableTerms.has('1yr')
+      ? '<p class="text-[11px] text-amber-700 mt-1.5">Only 3-year reservations are available for this instance type.</p>'
       : '';
 
-    // Equivalents row (Stage 8) — look up by "{provider}/{family}"
-    const equivKey = `${detail.provider}/${detail.family}`;
+    const allRegionEntries = detail.regionPricing
+      ? Object.entries(detail.regionPricing)
+          .sort((a, b) => a[1].priceUSD_hourly - b[1].priceUSD_hourly) // cheapest first
+      : [];
+
+    const mkRegionRow = ([region, pricing]: [string, { priceUSD_hourly: number; priceUSD_monthly: number }]) => `
+      <tr class="border-b border-gray-100">
+        <td class="pr-4 py-1 font-medium text-gray-700">${region}</td>
+        <td class="pr-4 py-1 text-gray-900">${fmt(pricing.priceUSD_hourly)}/hr</td>
+        <td class="pr-4 py-1 text-gray-600">${fmt(pricing.priceUSD_monthly, 2)}/mo</td>
+      </tr>
+    `;
+
+    const regionPricingRows   = allRegionEntries.slice(0, 10).map(mkRegionRow).join('');
+    const hiddenRegionRows    = allRegionEntries.slice(10).map(mkRegionRow).join('');
+    const hasMoreRegions      = hiddenRegionRows.length > 0;
+    const totalRegionCount    = allRegionEntries.length;
+
+    const equivKey   = `${detail.provider}/${detail.family}`;
     const equivEntry = equivMap[equivKey];
     let equivHtml = '';
     const equivEquivalents = equivEntry?.equivalents;
     if (equivEquivalents) {
-      const providerOrder = ['aws', 'azure', 'gcp', 'oci'].filter((p) => p !== detail.provider);
+      const providerOrder = ['aws', 'azure', 'gcp', 'oci', 'ovh', 'scaleway', 'vultr', 'vast'].filter((p) => p !== detail.provider);
       const equivCells = providerOrder.map((p) => {
         const eq = equivEquivalents[p];
         if (!eq) return `<div class="text-xs text-gray-400">${p.toUpperCase()}: —</div>`;
@@ -768,8 +1256,6 @@
         `;
       });
 
-      // Build a single URL comparing the current instance against all available equivalents.
-      // Prefer instanceType (specific instance) over family (family stub) for each equivalent.
       const allItems = [
         `${detail.provider}:${encodeURIComponent(detail.instanceType)}`,
         ...providerOrder
@@ -779,15 +1265,14 @@
             return `${p}:${encodeURIComponent(eq.instanceType || eq.family)}`;
           }),
       ].join(',');
-      const allCompareUrl = `/compare?items=${allItems}`;
 
       equivHtml = `
         <div class="mt-4 pt-4 border-t border-gray-200">
           <h4 class="font-semibold text-gray-800 mb-2 text-sm">Closest Equivalents (by family)</h4>
-          <div class="flex flex-wrap gap-4">
-            ${equivCells.join('')}
-          </div>
-          <p class="text-xs text-gray-400 mt-1">Matched by closest vCPU + RAM ratio. <a href="${allCompareUrl}" class="text-primary-600 hover:underline">Compare all side-by-side →</a></p>
+          <div class="flex flex-wrap gap-4">${equivCells.join('')}</div>
+          <p class="text-xs text-gray-400 mt-1">Matched by closest vCPU + RAM ratio.
+            <a href="/compare?items=${allItems}" class="text-primary-600 hover:underline">Compare all side-by-side →</a>
+          </p>
         </div>
       `;
     }
@@ -806,12 +1291,12 @@
               <tr><td class="pr-4 py-0.5 text-gray-500">Memory</td><td class="text-gray-800">${detail.memoryGiB} GiB</td></tr>
               ${detail.diskSizeGB ? `<tr><td class="pr-4 py-0.5 text-gray-500">Storage</td><td class="text-gray-800">${detail.diskSizeGB} GB ${detail.diskType ?? ''}</td></tr>` : ''}
               ${detail.networkPerformance ? `<tr><td class="pr-4 py-0.5 text-gray-500">Network</td><td class="text-gray-800">${detail.networkPerformance}</td></tr>` : ''}
-              ${detail.gpu ? `<tr><td class="pr-4 py-0.5 text-gray-500">GPU</td><td class="text-gray-800">${detail.gpu.count}x ${detail.gpu.type} (${detail.gpu.memoryGiB} GiB)</td></tr>` : ''}
+              ${detail.gpu ? `<tr><td class="pr-4 py-0.5 text-gray-500">GPU</td><td class="text-gray-800">${detail.gpu.count}× ${detail.gpu.type} (${detail.gpu.memoryGiB} GiB)</td></tr>` : ''}
               <tr><td class="pr-4 py-0.5 text-gray-500">On-Demand</td><td class="text-gray-800 font-medium">${fmt(detail.priceUSD_hourly)}/hr</td></tr>
               <tr><td class="pr-4 py-0.5 text-gray-500">$/vCPU/hr</td><td class="text-gray-800">${fmt(detail.priceUSD_hourly != null ? detail.priceUSD_hourly / (detail.vCPU || 1) : null, 5)}</td></tr>
               <tr><td class="pr-4 py-0.5 text-gray-500">$/GiB/hr</td><td class="text-gray-800">${fmt(detail.priceUSD_hourly != null ? detail.priceUSD_hourly / (detail.memoryGiB || 1) : null, 5)}</td></tr>
               <tr><td class="pr-4 py-0.5 text-gray-500">Regions</td><td class="text-gray-800">${(detail.regions ?? []).length} available</td></tr>
-              <tr><td class="pr-4 py-0.5 text-gray-500">Updated</td><td class="text-gray-500">${detail.lastUpdated?.split('T')[0] ?? '-'}</td></tr>
+              <tr><td class="pr-4 py-0.5 text-gray-500">Updated</td><td class="text-gray-500">${detail.lastUpdated?.split('T')[0] ?? '—'}</td></tr>
             </tbody>
           </table>
         </div>
@@ -831,13 +1316,14 @@
             </thead>
             <tbody>${commitmentRows}</tbody>
           </table>
+          ${commitmentNote}
         </div>
         ` : '<div><p class="text-xs text-gray-400 italic">No commitment pricing available.</p></div>'}
       </div>
 
       ${regionPricingRows ? `
       <div class="mt-4">
-        <h4 class="font-semibold text-gray-800 mb-2 text-sm">Regional Pricing (top 10)</h4>
+        <h4 class="font-semibold text-gray-800 mb-2 text-sm">Regional Pricing <span class="font-normal text-gray-400 text-xs">(${Math.min(10, totalRegionCount)} cheapest)</span></h4>
         <table class="text-xs">
           <thead>
             <tr class="text-gray-500 border-b border-gray-200">
@@ -847,34 +1333,66 @@
             </tr>
           </thead>
           <tbody>${regionPricingRows}</tbody>
+          ${hasMoreRegions ? `<tbody class="region-rows-hidden hidden">${hiddenRegionRows}</tbody>` : ''}
         </table>
+        ${hasMoreRegions ? `<button class="show-all-regions mt-1.5 text-xs text-primary-600 hover:underline focus:outline-none">Show all ${totalRegionCount} regions →</button>` : ''}
       </div>
       ` : ''}
 
       ${equivHtml}
     `;
+
+    // Wire "Show all regions" toggle
+    container.querySelector<HTMLButtonElement>('.show-all-regions')?.addEventListener('click', function() {
+      container.querySelector('.region-rows-hidden')?.classList.remove('hidden');
+      this.textContent = `Showing all ${totalRegionCount} regions`;
+      this.disabled = true;
+      this.classList.remove('text-primary-600', 'hover:underline');
+      this.classList.add('text-gray-400', 'cursor-default');
+    });
   }
 
   // ---------------------------------------------------------------------------
   // Sort headers
   // ---------------------------------------------------------------------------
-  document.getElementById('instances-table')?.querySelectorAll('th[data-sort]').forEach((th) => {
-    th.addEventListener('click', () => {
+  function updateSortAriaLabels() {
+    document.getElementById('instances-table')?.querySelectorAll<HTMLElement>('th[data-sort]').forEach((th) => {
       const field = th.getAttribute('data-sort')!;
-      if (currentSortField === field) {
-        currentSortDir = currentSortDir === 'asc' ? 'desc' : 'asc';
+      if (field === currentSortField) {
+        th.setAttribute('aria-sort', currentSortDir === 'asc' ? 'ascending' : 'descending');
       } else {
-        currentSortField = field;
-        currentSortDir = 'asc';
+        th.setAttribute('aria-sort', 'none');
       }
-      sortAndRender();
+    });
+  }
+
+  function handleSortClick(th: Element) {
+    const field = th.getAttribute('data-sort')!;
+    if (currentSortField === field) {
+      currentSortDir = currentSortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+      currentSortField = field;
+      currentSortDir   = 'asc';
+    }
+    updateSortAriaLabels();
+    sortAndRender();
+  }
+
+  document.getElementById('instances-table')?.querySelectorAll('th[data-sort]').forEach((th) => {
+    th.addEventListener('click', () => handleSortClick(th));
+    th.addEventListener('keydown', (e: Event) => {
+      const ke = e as KeyboardEvent;
+      if (ke.key === 'Enter' || ke.key === ' ') {
+        ke.preventDefault();
+        handleSortClick(th);
+      }
     });
   });
 
   // ---------------------------------------------------------------------------
   // Search
   // ---------------------------------------------------------------------------
-  const searchInput = document.getElementById('search-input') as HTMLInputElement;
+  const searchInput    = document.getElementById('search-input') as HTMLInputElement;
   const clearSearchBtn = document.getElementById('clear-search') as HTMLButtonElement;
 
   searchInput?.addEventListener('input', () => {
@@ -882,34 +1400,31 @@
     clearSearchBtn?.classList.toggle('hidden', !searchTerm);
     currentPage = 1;
 
-    if (searchTerm) {
-      filteredInstances = allInstances.filter((inst) => {
-        const haystack =
-          `${inst.instanceType} ${inst.provider} ${inst.family} ${inst.architecture} ${(inst.regions ?? []).join(' ')}`.toLowerCase();
-        return haystack.includes(searchTerm);
-      });
-    } else {
-      filteredInstances = [...allInstances];
-    }
+    baseFilteredInstances = searchTerm
+      ? allInstances.filter((inst) => {
+          const haystack =
+            `${inst.instanceType} ${inst.provider} ${inst.family} ${inst.architecture} ${(inst.regions ?? []).join(' ')}`.toLowerCase();
+          return haystack.includes(searchTerm);
+        })
+      : [...allInstances];
+
     sortAndRender();
   });
 
   clearSearchBtn?.addEventListener('click', () => {
-    searchInput.value = '';
-    searchTerm = '';
+    searchInput.value  = '';
+    searchTerm         = '';
     clearSearchBtn.classList.add('hidden');
-    filteredInstances = [...allInstances];
-    currentPage = 1;
+    baseFilteredInstances = [...allInstances];
+    currentPage           = 1;
     sortAndRender();
   });
 
   // ---------------------------------------------------------------------------
-  // Export CSV (Stage F) — client-side only, no dependencies
+  // Export CSV
   // ---------------------------------------------------------------------------
-  const exportCsvBtn = document.getElementById('export-csv-btn') as HTMLButtonElement | null;
-
   function exportCSV() {
-    const rows = filteredInstances;
+    const rows = getInstancesToExport();
     if (!rows.length) return;
 
     const headers = [
@@ -927,17 +1442,14 @@
       if (!matches.length) return { price: '', savings: '' };
       const best = matches.reduce((a, b) => a.effectiveHourlyUSD < b.effectiveHourlyUSD ? a : b);
       return {
-        price: best.effectiveHourlyUSD.toFixed(6),
+        price:   best.effectiveHourlyUSD.toFixed(6),
         savings: best.savingsVsOnDemandPct.toFixed(2),
       };
     }
 
     function csvCell(value: string | number | undefined | null): string {
       const s = String(value ?? '');
-      // Wrap in quotes if it contains a comma, quote, or newline
-      if (s.includes(',') || s.includes('"') || s.includes('\n')) {
-        return `"${s.replace(/"/g, '""')}"`;
-      }
+      if (s.includes(',') || s.includes('"') || s.includes('\n')) return `"${s.replace(/"/g, '""')}"`;
       return s;
     }
 
@@ -960,52 +1472,111 @@
         csvCell(inst.memoryGiB),
         csvCell(inst.gpu ? `${inst.gpu.count}x ${inst.gpu.type}` : ''),
         csvCell(inst.priceUSD_hourly != null ? inst.priceUSD_hourly.toFixed(6) : ''),
-        csvCell(yr1.price),
-        csvCell(yr1.savings),
-        csvCell(yr3.price),
-        csvCell(yr3.savings),
+        csvCell(yr1.price), csvCell(yr1.savings),
+        csvCell(yr3.price), csvCell(yr3.savings),
         csvCell(spotPrice),
         csvCell((inst.regions ?? []).join('|')),
       ].join(','));
     }
 
     const blob = new Blob([lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    const date = new Date().toISOString().slice(0, 10);
-    a.download = `cloudpricefinder-${date}.csv`;
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `cloudpricefinder-${new Date().toISOString().slice(0, 10)}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }
 
-  exportCsvBtn?.addEventListener('click', exportCSV);
+  function exportJSON() {
+    const rows = getInstancesToExport();
+    if (!rows.length) return;
+
+    const data = rows.map((inst) => {
+      const yr1 = (inst.commitments ?? []).filter(c => c.term === '1yr');
+      const yr3 = (inst.commitments ?? []).filter(c => c.term === '3yr');
+      const best1yr = yr1.length ? yr1.reduce((a, b) => a.effectiveHourlyUSD < b.effectiveHourlyUSD ? a : b) : null;
+      const best3yr = yr3.length ? yr3.reduce((a, b) => a.effectiveHourlyUSD < b.effectiveHourlyUSD ? a : b) : null;
+      return {
+        provider: inst.provider,
+        instanceType: inst.instanceType,
+        family: inst.family,
+        architecture: inst.architecture ?? 'x86_64',
+        vCPU: inst.vCPU,
+        memoryGiB: inst.memoryGiB,
+        gpu: inst.gpu ?? null,
+        priceUSD_hourly: inst.priceUSD_hourly,
+        commitment_1yr_hourly: best1yr?.effectiveHourlyUSD ?? null,
+        commitment_1yr_savings_pct: best1yr?.savingsVsOnDemandPct ?? null,
+        commitment_3yr_hourly: best3yr?.effectiveHourlyUSD ?? null,
+        commitment_3yr_savings_pct: best3yr?.savingsVsOnDemandPct ?? null,
+        regions: inst.regions ?? [],
+      };
+    });
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `cloudpricefinder-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // Export dropdown toggle
+  document.getElementById('export-dropdown-btn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    exportDropdownPanel?.classList.toggle('hidden');
+  });
+  document.addEventListener('click', (e) => {
+    if (!document.getElementById('export-dropdown-container')?.contains(e.target as Node)) {
+      exportDropdownPanel?.classList.add('hidden');
+    }
+  });
+
+  document.getElementById('export-csv-btn')?.addEventListener('click', () => {
+    exportDropdownPanel?.classList.add('hidden');
+    exportCSV();
+  });
+  document.getElementById('export-json-btn')?.addEventListener('click', () => {
+    exportDropdownPanel?.classList.add('hidden');
+    exportJSON();
+  });
+
+  // Reset filters button (delegates to FilterPanel via custom event)
+  document.getElementById('reset-filters-btn')?.addEventListener('click', () => {
+    window.dispatchEvent(new CustomEvent('requestClearFilters'));
+  });
 
   // ---------------------------------------------------------------------------
   // Pagination controls
   // ---------------------------------------------------------------------------
   document.getElementById('page-size')?.addEventListener('change', (e) => {
     const val = (e.target as HTMLSelectElement).value;
-    pageSize = val === 'all' ? Infinity : parseInt(val, 10);
+    pageSize    = val === 'all' ? Infinity : parseInt(val, 10);
     currentPage = 1;
     renderPage();
   });
 
   prevPageBtn?.addEventListener('click', () => {
-    if (currentPage > 1) {
-      currentPage--;
-      renderPage();
-    }
+    if (currentPage > 1) { currentPage--; renderPage(); }
   });
 
   nextPageBtn?.addEventListener('click', () => {
     const effectivePageSize = isFinite(pageSize) ? pageSize : filteredInstances.length;
     const totalPages = Math.ceil(filteredInstances.length / effectivePageSize);
-    if (currentPage < totalPages) {
-      currentPage++;
-      renderPage();
-    }
+    if (currentPage < totalPages) { currentPage++; renderPage(); }
+  });
+
+  pageInput?.addEventListener('change', () => {
+    const effectivePageSize = isFinite(pageSize) ? pageSize : filteredInstances.length;
+    const totalPages = Math.max(1, Math.ceil(filteredInstances.length / effectivePageSize));
+    const val = parseInt(pageInput.value, 10);
+    currentPage = isNaN(val) ? 1 : Math.max(1, Math.min(val, totalPages));
+    renderPage();
   });
 </script>

@@ -14,6 +14,18 @@ const {
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const pathname = Astro.url.pathname;
+
+function isActive(href: string) {
+  if (href === '/') return pathname === '/';
+  return pathname.startsWith(href);
+}
+
+const navLinks: Array<{ href: string; label: string; tooltip?: string }> = [
+  { href: '/', label: 'Table' },
+  { href: '/compare', label: 'Compare', tooltip: 'Select instances from the table, then compare them side-by-side on this page' },
+  { href: '/about', label: 'About' },
+];
 ---
 
 <!DOCTYPE html>
@@ -23,6 +35,23 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="canonical" href={canonicalURL} />
+
+    <!-- Dark mode: apply theme before paint to prevent flash -->
+    <script is:inline>
+      (function () {
+        var saved = localStorage.getItem('theme');
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.setAttribute(
+          'data-theme',
+          saved === 'dark' || saved === 'light' ? saved : (prefersDark ? 'dark' : 'light')
+        );
+      })();
+    </script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -50,25 +79,162 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     </style>
   </head>
   <body class="bg-gray-50 min-h-screen flex flex-col">
-    <nav class="bg-white shadow-xs border-b border-gray-200">
-      <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
-        <div class="flex justify-between h-16">
-          <div class="flex items-center">
-            <a href="/" class="flex items-center space-x-2 text-xl font-bold text-primary-600">
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <header class="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-200">
+      <nav aria-label="Main navigation">
+        <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
+          <div class="flex items-center justify-between h-16">
+
+            <!-- Logo / wordmark -->
+            <a
+              href="/"
+              class="flex items-center space-x-2 text-xl font-bold text-primary-600 shrink-0"
+              title="CloudPriceFinder — home"
+              aria-label="CloudPriceFinder home"
+            >
               <img src="/favicon.svg" alt="" class="h-7 w-7" aria-hidden="true" />
               <span>CloudPriceFinder</span>
             </a>
-          </div>
-          <div class="flex items-center space-x-4">
-            <a href="/" class="text-gray-700 hover:text-primary-600">Table</a>
-            <a href="/compare" class="text-gray-700 hover:text-primary-600">Compare</a>
-            <a href="/about" class="text-gray-700 hover:text-primary-600">About</a>
+
+            <!-- Desktop nav links -->
+            <div class="hidden sm:flex items-center gap-1">
+              {navLinks.map(({ href, label, tooltip }) => (
+                <a
+                  href={href}
+                  class:list={[
+                    'px-3 py-2 rounded-md text-sm font-medium transition-colors min-h-[44px] flex items-center gap-1',
+                    isActive(href)
+                      ? 'text-primary-600 bg-primary-50 font-semibold'
+                      : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50',
+                  ]}
+                  aria-current={isActive(href) ? 'page' : undefined}
+                  title={tooltip}
+                >
+                  {label}
+                  {href === '/compare' && (
+                    <>
+                      <span id="nav-compare-badge" class="hidden items-center justify-center min-w-[1.1rem] h-[1.1rem] px-0.5 rounded-full bg-primary-600 text-white text-[10px] font-bold leading-none" aria-hidden="true"></span>
+                      <span id="nav-compare-sr" class="sr-only"></span>
+                    </>
+                  )}
+                  {tooltip && (
+                    <svg class="h-3.5 w-3.5 text-gray-400 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd" />
+                    </svg>
+                  )}
+                </a>
+              ))}
+
+              <!-- GitHub utility link -->
+              <a
+                href="https://github.com/eSKylezZ/cloudpricefinder.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="ml-2 px-3 py-2 rounded-md text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors flex items-center gap-1.5 min-h-[44px]"
+                aria-label="View source on GitHub (opens in new tab)"
+              >
+                <svg class="h-4 w-4 shrink-0" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 0C5.373 0 0 5.373 0 12c0 5.303 3.438 9.8 8.207 11.387.6.11.793-.26.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.09-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+                </svg>
+                GitHub
+              </a>
+
+              <!-- Dark mode toggle -->
+              <button
+                id="theme-toggle"
+                type="button"
+                class="ml-1 p-2 rounded-md text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors min-h-[44px] flex items-center justify-center"
+                aria-label="Switch to dark mode"
+                aria-pressed="false"
+                title="Toggle dark/light mode"
+              >
+                <!-- Moon: shown in light mode -->
+                <svg id="icon-moon" class="h-5 w-5" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+                <!-- Sun: shown in dark mode -->
+                <svg id="icon-sun" class="h-5 w-5 hidden" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Mobile hamburger button -->
+            <button
+              id="mobile-menu-btn"
+              type="button"
+              class="sm:hidden flex items-center justify-center w-11 h-11 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+              aria-controls="mobile-menu"
+              aria-expanded="false"
+              aria-label="Open navigation menu"
+            >
+              <svg id="icon-menu" class="h-6 w-6" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+              <svg id="icon-close" class="h-6 w-6 hidden" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
           </div>
         </div>
-      </div>
-    </nav>
 
-    <main>
+        <!-- Mobile dropdown menu -->
+        <div id="mobile-menu" class="sm:hidden hidden border-t border-gray-100 bg-white">
+          <div class="px-4 py-2 space-y-1">
+            {navLinks.map(({ href, label, tooltip }) => (
+              <a
+                href={href}
+                class:list={[
+                  'flex flex-col px-3 py-3 rounded-md text-base font-medium transition-colors',
+                  isActive(href)
+                    ? 'text-primary-600 bg-primary-50 font-semibold'
+                    : 'text-gray-700 hover:text-primary-600 hover:bg-gray-50',
+                ]}
+                aria-current={isActive(href) ? 'page' : undefined}
+                title={tooltip}
+              >
+                <span class="flex items-center gap-1.5">
+                  {label}
+                  {href === '/compare' && (
+                    <>
+                      <span id="nav-compare-badge-mobile" class="hidden items-center justify-center min-w-[1.1rem] h-[1.1rem] px-0.5 rounded-full bg-primary-600 text-white text-[10px] font-bold leading-none" aria-hidden="true"></span>
+                    </>
+                  )}
+                </span>
+                {tooltip && <span class="text-xs font-normal text-gray-400 mt-0.5">{tooltip}</span>}
+              </a>
+            ))}
+            <a
+              href="https://github.com/eSKylezZ/cloudpricefinder.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="flex items-center gap-2 px-3 py-3 rounded-md text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+            >
+              <svg class="h-5 w-5 shrink-0" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0C5.373 0 0 5.373 0 12c0 5.303 3.438 9.8 8.207 11.387.6.11.793-.26.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.09-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+              </svg>
+              GitHub
+            </a>
+            <button
+              id="theme-toggle-mobile"
+              type="button"
+              class="flex items-center gap-2 px-3 py-3 rounded-md text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors w-full text-left"
+            >
+              <svg class="h-5 w-5 shrink-0 icon-moon-mobile" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+              <svg class="h-5 w-5 shrink-0 icon-sun-mobile hidden" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              <span class="theme-toggle-label">Dark mode</span>
+            </button>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main id="main-content" tabindex="-1">
       <slot />
     </main>
 
@@ -86,6 +252,9 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
           </div>
           <div class="flex items-center space-x-4 text-sm text-gray-500">
             <a href="/about" class="hover:text-primary-600">About</a>
+            <a href="https://github.com/eSKylezZ/cloudpricefinder.com/issues/new" target="_blank" rel="noopener noreferrer" class="hover:text-primary-600">
+              Feedback / Report Issue
+            </a>
             <a href="https://github.com/eSKylezZ/cloudpricefinder.com" class="hover:text-primary-600" target="_blank" rel="noopener noreferrer">
               Open Source on GitHub
             </a>
@@ -93,5 +262,92 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
         </div>
       </div>
     </footer>
+
+    <script>
+      // ── Mobile nav ─────────────────────────────────────────────
+      const btn = document.getElementById('mobile-menu-btn');
+      const menu = document.getElementById('mobile-menu');
+      const iconMenu = document.getElementById('icon-menu');
+      const iconClose = document.getElementById('icon-close');
+
+      btn?.addEventListener('click', () => {
+        const isOpen = !menu?.classList.contains('hidden');
+        if (isOpen) {
+          menu?.classList.add('hidden');
+          btn?.setAttribute('aria-expanded', 'false');
+          iconMenu?.classList.remove('hidden');
+          iconClose?.classList.add('hidden');
+        } else {
+          menu?.classList.remove('hidden');
+          btn?.setAttribute('aria-expanded', 'true');
+          iconMenu?.classList.add('hidden');
+          iconClose?.classList.remove('hidden');
+        }
+      });
+
+      document.addEventListener('click', (e) => {
+        const target = e.target as Node;
+        if (!btn?.contains(target) && !menu?.contains(target)) {
+          menu?.classList.add('hidden');
+          btn?.setAttribute('aria-expanded', 'false');
+          iconMenu?.classList.remove('hidden');
+          iconClose?.classList.add('hidden');
+        }
+      });
+
+      // ── Dark mode toggle ────────────────────────────────────────
+      function isDark() {
+        return document.documentElement.getAttribute('data-theme') === 'dark';
+      }
+
+      function syncThemeIcons() {
+        const dark = isDark();
+        document.getElementById('icon-moon')?.classList.toggle('hidden', dark);
+        document.getElementById('icon-sun')?.classList.toggle('hidden', !dark);
+        document.querySelectorAll('.icon-moon-mobile').forEach(el => el.classList.toggle('hidden', dark));
+        document.querySelectorAll('.icon-sun-mobile').forEach(el => el.classList.toggle('hidden', !dark));
+        document.querySelectorAll('.theme-toggle-label').forEach(el => {
+          el.textContent = dark ? 'Light mode' : 'Dark mode';
+        });
+        const toggleBtn = document.getElementById('theme-toggle');
+        if (toggleBtn) {
+          toggleBtn.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+          toggleBtn.setAttribute('aria-pressed', String(dark));
+        }
+      }
+
+      function applyTheme(theme: string) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        syncThemeIcons();
+      }
+
+      document.getElementById('theme-toggle')?.addEventListener('click', () => {
+        applyTheme(isDark() ? 'light' : 'dark');
+      });
+
+      document.getElementById('theme-toggle-mobile')?.addEventListener('click', () => {
+        applyTheme(isDark() ? 'light' : 'dark');
+      });
+
+      syncThemeIcons();
+
+      // ── Compare count badge ──────────────────────────────────────────────────
+      window.addEventListener('compareCountChanged', (e) => {
+        const n = (e as CustomEvent<{ count: number }>).detail.count;
+        const badge = document.getElementById('nav-compare-badge');
+        const badgeMobile = document.getElementById('nav-compare-badge-mobile');
+        const sr = document.getElementById('nav-compare-sr');
+
+        [badge, badgeMobile].forEach((el) => {
+          if (!el) return;
+          el.textContent = String(n);
+          el.classList.toggle('hidden', n === 0);
+          el.classList.toggle('inline-flex', n > 0);
+        });
+
+        if (sr) sr.textContent = n > 0 ? `— ${n} instance${n !== 1 ? 's' : ''} selected for comparison` : '';
+      });
+    </script>
   </body>
 </html>
