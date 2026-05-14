@@ -9,6 +9,7 @@
     "build-with-data": "npm run fetch-data && npm run build",
     "preview": "astro preview",
     "fetch-data": "python3 scripts/orchestrator.py",
+    "fetch-extras": "python3 scripts/extras/orchestrator.py",
     "fetch-hetzner": "python3 scripts/fetch_hetzner.py",
     "clean": "rm -rf dist .astro data/*.json",
     "type-check": "astro check",

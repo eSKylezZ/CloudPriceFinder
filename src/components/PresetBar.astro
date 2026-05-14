@@ -1,0 +1,140 @@
+---
+// PresetBar — quick-select filter preset pills
+---
+
+<style>
+  #preset-scroll::-webkit-scrollbar { display: none; }
+  #preset-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+
+<div id="preset-bar" class="mb-6">
+  <div
+    id="preset-scroll"
+    class="flex items-center gap-2 overflow-x-auto py-1"
+    role="group"
+    aria-label="Quick filter presets"
+  >
+    <!-- Buttons rendered by script below -->
+  </div>
+</div>
+
+<script>
+  interface PresetFilters {
+    arch?: 'arm64' | 'x86_64';
+    term?: 'on-demand' | '1yr' | '3yr';
+    gpuOnly?: boolean;
+    minVCPU?: number;
+    maxVCPU?: number;
+    minMemory?: number;
+    maxMemory?: number;
+  }
+
+  interface Preset {
+    id: string;
+    label: string;
+    filters: PresetFilters;
+    sort: { field: string; dir: 'asc' | 'desc' };
+  }
+
+  const PRESETS: Preset[] = [
+    {
+      id: 'cheapest-arm',
+      label: '💰 Cheapest ARM',
+      filters: { arch: 'arm64', term: 'on-demand' },
+      sort: { field: 'priceUSD_hourly', dir: 'asc' },
+    },
+    {
+      id: 'best-gpu-value',
+      label: '🖥️ Best GPU Value',
+      filters: { gpuOnly: true },
+      sort: { field: 'pricePerVCPU', dir: 'asc' },
+    },
+    {
+      id: 'budget-web-server',
+      label: '🌐 Budget Web Server',
+      filters: { minVCPU: 1, maxVCPU: 4, minMemory: 1, maxMemory: 8, term: 'on-demand' },
+      sort: { field: 'priceUSD_hourly', dir: 'asc' },
+    },
+    {
+      id: 'memory-optimised',
+      label: '💾 Memory Optimised',
+      filters: { minMemory: 32 },
+      sort: { field: 'pricePerGiB', dir: 'asc' },
+    },
+    {
+      id: 'compute-optimised',
+      label: '⚡ Compute Optimised',
+      filters: { minVCPU: 16 },
+      sort: { field: 'pricePerVCPU', dir: 'asc' },
+    },
+    {
+      id: 'best-value-overall',
+      label: '🏆 Best Value Overall',
+      filters: {},
+      sort: { field: 'pricePerVCPU', dir: 'asc' },
+    },
+  ];
+
+  let activePresetId: string | null = null;
+
+  const container = document.getElementById('preset-scroll');
+
+  // Render pill buttons
+  PRESETS.forEach((preset) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.dataset.presetId = preset.id;
+    btn.textContent = preset.label;
+    btn.className =
+      'preset-btn flex-shrink-0 inline-flex items-center px-4 py-2 rounded-full text-sm font-medium border transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-400';
+    btn.setAttribute('aria-pressed', 'false');
+    container?.appendChild(btn);
+  });
+
+  function setActivePreset(id: string | null) {
+    activePresetId = id;
+    document.querySelectorAll<HTMLButtonElement>('.preset-btn').forEach((btn) => {
+      const isActive = btn.dataset.presetId === id;
+      btn.setAttribute('aria-pressed', String(isActive));
+      if (isActive) {
+        btn.className =
+          'preset-btn flex-shrink-0 inline-flex items-center px-4 py-2 rounded-full text-sm font-medium border transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 border-primary-600 bg-primary-600 text-white hover:bg-primary-700 hover:border-primary-700';
+      } else {
+        btn.className =
+          'preset-btn flex-shrink-0 inline-flex items-center px-4 py-2 rounded-full text-sm font-medium border transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-400';
+      }
+    });
+  }
+
+  container?.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.preset-btn');
+    if (!btn) return;
+    const id = btn.dataset.presetId ?? null;
+
+    if (id === activePresetId) {
+      // Clicking active preset → deselect and reset all filters
+      setActivePreset(null);
+      window.dispatchEvent(new CustomEvent('requestClearFilters'));
+    } else {
+      const preset = PRESETS.find((p) => p.id === id);
+      if (!preset) return;
+      setActivePreset(id);
+      window.dispatchEvent(
+        new CustomEvent('requestPreset', {
+          detail: { id: preset.id, filters: preset.filters, sort: preset.sort },
+        })
+      );
+    }
+  });
+
+  // Deactivate highlight when FilterPanel's Clear All button is used
+  window.addEventListener('presetDeactivated', () => {
+    if (activePresetId !== null) setActivePreset(null);
+  });
+
+  // Restore active preset highlight when loading a shared URL
+  const urlPreset = new URLSearchParams(window.location.search).get('preset');
+  if (urlPreset && PRESETS.some((p) => p.id === urlPreset)) {
+    setActivePreset(urlPreset);
+  }
+</script>

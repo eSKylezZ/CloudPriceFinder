@@ -6,6 +6,10 @@ Uses the AWS Pricing API (public, no auth required) with streaming JSON
 parsing via ijson to keep memory usage bounded even for the large (100+ MB)
 per-region EC2 pricing files.
 
+Side output: aws.storage.raw.json (EBS volume-type pricing) is written
+alongside aws.raw.json — zero extra downloads, extracted from the same
+per-region EC2 pricing files.
+
 Out of scope for v1 (deferred to v3.1+):
 - Spot / capacity-block / dedicated-host SKUs
 - China (cn-north-1, cn-northwest-1) and GovCloud (us-gov-*) regions
@@ -42,6 +46,7 @@ if str(_REPO_ROOT) not in sys.path:
 
 from scripts.utils.data_normalizer import normalize_commitments
 from scripts.utils.data_validator import validate_commitments, validate_instance_data
+from scripts.utils.http_client import HOURS_PER_MONTH, get_json, make_session
 
 logging.basicConfig(
     level=logging.INFO,
@@ -62,8 +67,18 @@ EC2_REGION_INDEX_PATH = "/offers/v1.0/aws/AmazonEC2/current/region_index.json"
 # EC2 region index. Any region code starting with these prefixes is skipped.
 _EXCLUDED_REGION_PREFIXES = ("cn-", "us-gov-")
 
-# OS filter — only Linux on-demand/reserved (RunInstances) for v1
-INCLUDED_OS = {"Linux"}
+# OS filter — Linux, Windows, RHEL, and macOS on-demand/reserved
+INCLUDED_OS = {"Linux", "Windows", "RHEL", "macOS"}
+
+# Maps operating system name → Savings Plan operation code
+OS_SP_OPERATIONS = {
+    "Linux": "RunInstances",
+    "Windows": "RunInstances:0002",
+    "RHEL": "RunInstances:0010",
+}
+
+# Reverse map: Savings Plan operation code → OS name
+_SP_OP_TO_OS: Dict[str, str] = {v: k for k, v in OS_SP_OPERATIONS.items()}
 
 # Term labels used in the AWS Pricing API
 TERM_ON_DEMAND = "OnDemand"
@@ -93,36 +108,17 @@ _GPU_MODELS: Dict[str, Dict[str, Any]] = {
     "inferentia": {"type": "AWS Inferentia", "memoryGiB": 8},
     "trainium": {"type": "AWS Trainium", "memoryGiB": 32},
     "gaudi2": {"type": "Intel Gaudi2", "memoryGiB": 96},
+    "nvidia h200": {"type": "NVIDIA H200", "memoryGiB": 141},
+    "nvidia b200": {"type": "NVIDIA B200", "memoryGiB": 192},
 }
 
 # AWS 'physicalProcessor' strings that indicate ARM64
-_ARM64_HINTS = ("graviton", "arm", "neoverse")
+_ARM64_HINTS = ("graviton", "arm", "neoverse", "apple")
 
 
 # ---------------------------------------------------------------------------
 # HTTP helpers
 # ---------------------------------------------------------------------------
-
-def _make_session() -> requests.Session:
-    session = requests.Session()
-    session.headers.update({"User-Agent": "CloudPriceFinder/3.0 (pricing-data-collector)"})
-    return session
-
-
-def _get_json(session: requests.Session, url: str) -> Dict[str, Any]:
-    """Fetch a URL and parse as JSON with retry logic. For small payloads."""
-    for attempt in range(1, MAX_RETRIES + 1):
-        try:
-            resp = session.get(url, timeout=REQUEST_TIMEOUT)
-            resp.raise_for_status()
-            return resp.json()
-        except requests.RequestException as exc:
-            if attempt == MAX_RETRIES:
-                raise
-            logger.warning(f"Attempt {attempt} failed for {url}: {exc}. Retrying in {RETRY_BACKOFF}s…")
-            time.sleep(RETRY_BACKOFF)
-    raise RuntimeError(f"Failed to fetch {url} after {MAX_RETRIES} attempts")
-
 
 def _stream_response(session: requests.Session, url: str) -> requests.Response:
     """Open a streaming GET request with retry logic."""
@@ -214,11 +210,22 @@ def _parse_gpu_info(
 # AWS Pricing API streaming parser
 # ---------------------------------------------------------------------------
 
-def _stream_ec2_skus(
-    session: requests.Session, url: str
-) -> Generator[Dict[str, Any], None, None]:
+def _download_region_bytes(session: requests.Session, url: str) -> bytes:
+    """Download a per-region pricing file with retry; return raw bytes."""
+    logger.info(f"  Downloading pricing data from {url} …")
+    t0 = time.time()
+    resp = _stream_response(session, url)
+    raw_bytes = resp.content
+    elapsed = time.time() - t0
+    size_mb = len(raw_bytes) / (1024 * 1024)
+    logger.info(f"  Downloaded {size_mb:.1f} MB in {elapsed:.1f}s")
+    return raw_bytes
+
+
+def _parse_ec2_skus(raw_bytes: bytes) -> Generator[Dict[str, Any], None, None]:
     """
-    Stream an EC2 per-region pricing JSON and yield individual SKU product+term dicts.
+    Stream-parse a per-region EC2 pricing JSON (already in memory) and yield
+    one dict per compute SKU that has on-demand pricing.
 
     The per-region JSON structure is:
     {
@@ -229,60 +236,76 @@ def _stream_ec2_skus(
       }
     }
 
-    We parse this in two passes using ijson to avoid loading the full file into memory:
-      Pass 1: collect all products (specs) into a dict keyed by SKU.
-      Pass 2: read on-demand and reserved term pricing, merging with product specs.
-
-    Because ijson streams from the network, we download the content once into an
-    in-memory buffer (bytes), then parse it twice. This keeps memory under 1 GB for
-    the largest regions (~120 MB raw JSON) since we only materialise the final
-    normalised dicts.
+    Three-pass ijson parse (the file is already in memory as raw_bytes):
+      Pass 1: collect all compute products (specs) into a dict keyed by SKU.
+      Pass 2: read on-demand pricing.
+      Pass 3: read reserved term pricing.
 
     Yields one dict per (SKU, operating-system, instance-type) combination with:
       - All product attributes
       - on_demand_hourly: float
       - raw_reservations: list of raw term dicts for reserved pricing
     """
-    logger.info(f"  Downloading pricing data from {url} …")
-    t0 = time.time()
-
-    resp = _stream_response(session, url)
-    raw_bytes = resp.content
-    elapsed = time.time() - t0
-    size_mb = len(raw_bytes) / (1024 * 1024)
-    logger.info(f"  Downloaded {size_mb:.1f} MB in {elapsed:.1f}s")
-
     # --- Pass 1: harvest product attributes ---
     # The `products` key in the EC2 pricing JSON is a dict (object), not an array.
     # ijson.kvitems(stream, "products") iterates over its (sku, value) pairs directly.
+    #
+    # Mac dedicated host pricing model (discovered from API):
+    #   - Bare-metal instance entries (mac1.metal, mac2.metal, mac-m4.metal, …)
+    #     have productFamily="Compute Instance (bare metal)", tenancy="Host",
+    #     operatingSystem="Linux" (placeholder), and on-demand price $0.00.
+    #   - The REAL price is on the corresponding Dedicated Host entries (mac1,
+    #     mac2, mac-m4, …) which have no dot and are normally skipped.
+    # Strategy: track host-entry SKUs in pass 1, collect their on-demand prices
+    # in pass 2, then inject those prices into the bare-metal instance records.
     products: Dict[str, Dict[str, Any]] = {}
+    # mac host type (e.g. "mac1") -> SKU of its Dedicated Host product entry
+    _mac_host_sku: Dict[str, str] = {}
+
     stream1 = io.BytesIO(raw_bytes)
     for sku, attrs in ijson.kvitems(stream1, "products"):
         attributes = attrs.get("attributes", {})
         instance_type = attributes.get("instanceType", "")
         if not instance_type:
             continue
-        # Skip bare family name entries (e.g. "r8ib", "m5", "c7g") — these are
-        # spurious AWS pricing API entries without a size qualifier.  All real
-        # instance types have a dot separator (e.g. "m5.xlarge", "c7g.2xlarge").
+
         if "." not in instance_type:
+            # Track Mac Dedicated Host entries even though they have no dot.
+            if (instance_type.startswith("mac")
+                    and attrs.get("productFamily", "") == "Dedicated Host"):
+                _mac_host_sku[instance_type] = sku
             continue
-        # Skip non-Linux OS (Windows, RHEL, SUSE, SQL, etc.) — we only want Linux on-demand
-        if attributes.get("operatingSystem", "") not in INCLUDED_OS:
-            continue
-        # Skip Spot, DedicatedHost, CapacityBlock, etc. — only RunInstances and Host
+
+        # Skip Spot capacity
         if attributes.get("marketoption", "").lower() in ("spot",):
             continue
+
+        os_name = attributes.get("operatingSystem", "")
+
+        # Mac bare-metal instances always run macOS on a dedicated host.
+        # The API sets operatingSystem="Linux" as a placeholder — override it.
+        if instance_type.startswith("mac"):
+            attributes["operatingSystem"] = "macOS"
+            attributes["tenancy"] = "Host"
+            os_name = "macOS"
+
+        # Skip OS not in INCLUDED_OS (SUSE, SQL Server, etc.)
+        if os_name not in INCLUDED_OS:
+            continue
+
         products[sku] = attributes
 
-    logger.info(f"  Collected {len(products)} Linux product SKUs")
+    logger.info(f"  Collected {len(products)} product SKUs")
+    logger.info(f"  Tracking {len(_mac_host_sku)} Mac dedicated host SKUs for pricing")
 
     # --- Pass 2: harvest on-demand pricing ---
-    # terms.OnDemand is also a dict keyed by SKU.
+    # Also collect prices for Mac Dedicated Host SKUs so we can inject them into
+    # the bare-metal instance records (which have $0 on-demand price).
+    _mac_host_skus_set = set(_mac_host_sku.values())
     on_demand_prices: Dict[str, float] = {}  # sku -> hourly USD
     stream2 = io.BytesIO(raw_bytes)
     for sku, offer_terms in ijson.kvitems(stream2, f"terms.{TERM_ON_DEMAND}"):
-        if sku not in products:
+        if sku not in products and sku not in _mac_host_skus_set:
             continue
         for _term_code, term in offer_terms.items():
             for _dim_code, dim in term.get("priceDimensions", {}).items():
@@ -295,7 +318,17 @@ def _stream_ec2_skus(
                     on_demand_prices[sku] = price
                     break
 
-    logger.info(f"  Collected {len(on_demand_prices)} on-demand price points")
+    # Build instance-type -> host on-demand price lookup.
+    # "mac1" host at $1.083/hr -> "mac1.metal" instance price = $1.083/hr.
+    _mac_instance_price: Dict[str, float] = {
+        f"{host_type}.metal": on_demand_prices[host_sku]
+        for host_type, host_sku in _mac_host_sku.items()
+        if host_sku in on_demand_prices
+    }
+    logger.info(
+        f"  Collected {len(on_demand_prices)} on-demand price points "
+        f"({len(_mac_instance_price)} Mac host prices resolved)"
+    )
 
     # --- Pass 3: harvest reserved pricing ---
     reserved_terms: Dict[str, List[Dict[str, Any]]] = {}  # sku -> list of term dicts
@@ -359,7 +392,13 @@ def _stream_ec2_skus(
     # --- Yield merged records ---
     # Only yield SKUs that have on-demand pricing (i.e. real RunInstances costs).
     for sku, attrs in products.items():
+        instance_type = attrs.get("instanceType", "")
         od_price = on_demand_prices.get(sku)
+
+        # Mac bare-metal instances carry $0 list price — substitute the host price.
+        if (od_price is None or od_price <= 0) and instance_type.startswith("mac"):
+            od_price = _mac_instance_price.get(instance_type)
+
         if od_price is None or od_price <= 0:
             continue
         yield {
@@ -371,12 +410,100 @@ def _stream_ec2_skus(
 
 
 # ---------------------------------------------------------------------------
+# EBS storage pricing extractor
+# ---------------------------------------------------------------------------
+
+def _parse_int_str(val: str) -> Optional[int]:
+    """Extract the first integer from strings like '16000 IOPS', '1,000 MiB/s'."""
+    if not val or val.lower().strip() in ("na", "n/a", ""):
+        return None
+    m = re.search(r"(\d[\d,]*)", val)
+    return int(m.group(1).replace(",", "")) if m else None
+
+
+_EBS_SKIP_USAGE = ("IOPS", "Throughput", "SnapshotUsage")
+_EBS_VOLUME_FAMILY_PREFIXES = ("gp", "io", "sc", "st")
+_EBS_MONTH_HOURS = 730.0
+
+
+def _ebs_volume_family(vol_type: str) -> str:
+    name = vol_type.lower()
+    for prefix in _EBS_VOLUME_FAMILY_PREFIXES:
+        if name.startswith(prefix):
+            return prefix
+    return name
+
+
+def _extract_ebs_records(
+    raw_bytes: bytes,
+    region: str,
+    now_iso: str,
+) -> Dict[str, Dict[str, Any]]:
+    """
+    Two-pass ijson parse of an EC2 per-region pricing file.
+    Returns a dict mapping vol_type -> partial record dict, each containing:
+      instanceType, family, priceUSD_monthly, priceUSD_hourly,
+      maxIops, maxThroughputMBps, storageMedia, regionPricing={region: price}.
+    Only Storage productFamily SKUs with a volumeApiName and a positive
+    on-demand USD price are included.
+    """
+    # Pass 1: collect EBS Storage products
+    products: Dict[str, Dict[str, Any]] = {}
+    stream1 = io.BytesIO(raw_bytes)
+    for sku, prod in ijson.kvitems(stream1, "products"):
+        attrs = prod.get("attributes", {})
+        if prod.get("productFamily") != "Storage":
+            continue
+        vol_type = attrs.get("volumeApiName", "")
+        if not vol_type:
+            continue
+        usage_type = attrs.get("usagetype", "")
+        if any(kw in usage_type for kw in _EBS_SKIP_USAGE):
+            continue
+        products[sku] = attrs
+
+    # Pass 2: extract on-demand (per-GB-month) prices
+    result: Dict[str, Dict[str, Any]] = {}
+    stream2 = io.BytesIO(raw_bytes)
+    for sku, offer_terms in ijson.kvitems(stream2, "terms.OnDemand"):
+        if sku not in products:
+            continue
+        attrs = products[sku]
+        vol_type = attrs["volumeApiName"]
+
+        for _, term in offer_terms.items():
+            for _, dim in term.get("priceDimensions", {}).items():
+                try:
+                    price = float(dim.get("pricePerUnit", {}).get("USD", "0"))
+                except (ValueError, TypeError):
+                    price = 0.0
+                if price <= 0:
+                    continue
+
+                existing = result.get(vol_type)
+                if existing is None or price < existing["regionPricing"][region]:
+                    result[vol_type] = {
+                        "instanceType": vol_type,
+                        "family": _ebs_volume_family(vol_type),
+                        "priceUSD_monthly": round(price, 8),
+                        "priceUSD_hourly": round(price / _EBS_MONTH_HOURS, 8),
+                        "maxIops": _parse_int_str(attrs.get("maxIopsvolume", "")),
+                        "maxThroughputMBps": _parse_int_str(attrs.get("maxThroughputvolume", "")),
+                        "storageMedia": attrs.get("storageMedia") or None,
+                        "regionPricing": {region: price},
+                    }
+                break
+
+    return result
+
+
+# ---------------------------------------------------------------------------
 # Savings Plans streaming parser
 # ---------------------------------------------------------------------------
 
 def _fetch_savings_plans_for_region(
     session: requests.Session, region: str
-) -> Dict[str, List[Dict[str, Any]]]:
+) -> Dict[Tuple[str, str], List[Dict[str, Any]]]:
     """
     Fetch Compute Savings Plan commitments for a given region.
 
@@ -391,10 +518,10 @@ def _fetch_savings_plans_for_region(
       - description: "1 year No Upfront Compute Savings Plan" (used to extract payment option)
       - rates[]: list of { discountedInstanceType, discountedRate.price, discountedUsageType }
 
-    Returns a dict mapping instanceType -> list of raw commitment dicts.
+    Returns a dict mapping (instanceType, operatingSystem) -> list of raw commitment dicts.
     """
     try:
-        region_index_data = _get_json(session, SP_INDEX_URL)
+        region_index_data = get_json(session, SP_INDEX_URL, timeout=REQUEST_TIMEOUT)
     except Exception as exc:
         logger.warning(f"  Could not fetch Savings Plan region index: {exc}. Skipping SP for {region}.")
         return {}
@@ -421,7 +548,7 @@ def _fetch_savings_plans_for_region(
         logger.warning(f"  Failed to download SP data for {region}: {exc}. Skipping.")
         return {}
 
-    result: Dict[str, List[Dict[str, Any]]] = {}
+    result: Dict[Tuple[str, str], List[Dict[str, Any]]] = {}
 
     try:
         data = json.loads(raw_bytes)
@@ -451,17 +578,17 @@ def _fetch_savings_plans_for_region(
                 continue
 
             for rate in term_entry.get("rates", []):
-                # Only standard Linux on-demand shared-tenancy BoxUsage rates.
-                # operation == 'RunInstances' with no suffix = Linux/Unix Shared tenancy.
+                # Only standard shared-tenancy BoxUsage rates for known OS types.
                 usage_type = rate.get("discountedUsageType", "")
                 operation = rate.get("discountedOperation", "")
 
                 # Skip anything that isn't standard shared-tenancy BoxUsage
                 if "BoxUsage" not in usage_type:
                     continue
-                # Only plain 'RunInstances' operation = Linux on-demand (no suffix = Linux/Unix)
-                if operation != "RunInstances":
+                # Only accept known OS operation codes (Linux, Windows, RHEL)
+                if operation not in _SP_OP_TO_OS:
                     continue
+                os_name = _SP_OP_TO_OS[operation]
 
                 # Prefer the explicit discountedInstanceType field
                 instance_type = rate.get("discountedInstanceType", "")
@@ -486,8 +613,9 @@ def _fetch_savings_plans_for_region(
                     "product": "savings-plan",
                     "priceUSD_hourly": price,
                     "upfront_usd": 0.0,
+                    "operatingSystem": os_name,
                 }
-                result.setdefault(instance_type, []).append(entry)
+                result.setdefault((instance_type, os_name), []).append(entry)
 
     except Exception as exc:
         logger.warning(f"  Error parsing SP data for {region}: {exc}")
@@ -505,24 +633,34 @@ def _process_region(
     session: requests.Session,
     region: str,
     region_url: str,
-    savings_plans: Dict[str, List[Dict[str, Any]]],
-) -> List[Dict[str, Any]]:
+    savings_plans: Dict[Tuple[str, str], List[Dict[str, Any]]],
+) -> Tuple[List[Dict[str, Any]], Dict[str, Dict[str, Any]]]:
     """
     Download, stream-parse, and normalise EC2 pricing for one region.
 
-    Returns a list of normalised instance dicts ready for output.
+    Returns (compute_instances, ebs_vol_map).
     """
-    instances_by_type: Dict[str, Dict[str, Any]] = {}
+    now_iso = datetime.now(timezone.utc).isoformat()
+    raw_bytes = _download_region_bytes(session, region_url)
+    ebs_vol_map = _extract_ebs_records(raw_bytes, region, now_iso)
 
-    for raw_sku in _stream_ec2_skus(session, region_url):
+    instances_by_type: Dict[Tuple[str, str, str], Dict[str, Any]] = {}
+
+    for raw_sku in _parse_ec2_skus(raw_bytes):
         attrs = raw_sku["attributes"]
         on_demand_hourly = raw_sku["on_demand_hourly"]
         raw_reservations = raw_sku["raw_reservations"]
         instance_type = attrs.get("instanceType", "")
+        os_name = attrs.get("operatingSystem", "Linux")
 
-        if instance_type in instances_by_type:
+        # Normalise tenancy: "Shared" → shared, "Dedicated" → dedicated, "Host" → host
+        raw_tenancy = attrs.get("tenancy", "Shared").lower()
+        tenancy = raw_tenancy if raw_tenancy in ("shared", "dedicated", "host") else "shared"
+
+        key = (instance_type, os_name, tenancy)
+        if key in instances_by_type:
             # Merge additional reservation terms (same instance in another SKU variant)
-            instances_by_type[instance_type]["_raw_reservations"].extend(raw_reservations)
+            instances_by_type[key]["_raw_reservations"].extend(raw_reservations)
             continue
 
         # Extract specs
@@ -533,8 +671,10 @@ def _process_region(
         gpu_info = _parse_gpu_info(attrs.get("gpu", "0"), attrs.get("gpuMemory", ""))
         family, generation = _extract_family_generation(instance_type)
 
-        instances_by_type[instance_type] = {
+        instances_by_type[key] = {
             "instance_type": instance_type,
+            "operatingSystem": os_name,
+            "tenancy": tenancy,
             "vcpu": vcpu,
             "memory_gib": memory_gib,
             "architecture": architecture,
@@ -548,9 +688,8 @@ def _process_region(
 
     # Build final normalised records
     results: List[Dict[str, Any]] = []
-    now_iso = datetime.now(timezone.utc).isoformat()
 
-    for instance_type, data in instances_by_type.items():
+    for (instance_type, os_name, _), data in instances_by_type.items():
         on_demand_hourly = data["on_demand_hourly"]
 
         # Deduplicate reservations by (term, payment).
@@ -577,7 +716,7 @@ def _process_region(
 
         # Merge savings plan commitments for this instance type.
         # Deduplicate by (term, payment): keep the entry with the lowest price.
-        sp_raw_list = savings_plans.get(instance_type, [])
+        sp_raw_list = savings_plans.get((instance_type, os_name), [])
         if sp_raw_list:
             sp_by_key: Dict[Tuple[str, str], Dict[str, Any]] = {}
             for sp_entry in sp_raw_list:
@@ -602,12 +741,14 @@ def _process_region(
             "provider": "aws",
             "type": "cloud-server",
             "instanceType": instance_type,
+            "operatingSystem": os_name,
+            "tenancy": data["tenancy"],
             "family": data["family"],
             "architecture": data["architecture"],
             "vCPU": data["vcpu"],
             "memoryGiB": data["memory_gib"],
             "priceUSD_hourly": round(on_demand_hourly, 6),
-            "priceUSD_monthly": round(on_demand_hourly * 730, 4),
+            "priceUSD_monthly": round(on_demand_hourly * HOURS_PER_MONTH, 4),
             "commitments": normalised_reservations,
             "regions": [region],
             "source": "aws_pricing_api",
@@ -620,10 +761,13 @@ def _process_region(
         if data["gpu"]:
             record["gpu"] = data["gpu"]
 
+        if os_name == "macOS":
+            record["minimumBillingHours"] = 24
+
         results.append(record)
 
     logger.info(f"  Region {region}: {len(results)} instance types")
-    return results
+    return results, ebs_vol_map
 
 
 # ---------------------------------------------------------------------------
@@ -636,32 +780,35 @@ def _merge_regions(
     """
     Merge per-region records into a single list.
 
-    For the same instanceType appearing in multiple regions:
+    For the same (instanceType, operatingSystem) combination appearing in multiple regions:
     - Union the `regions` list
     - Keep the on-demand price from the first region encountered (prices vary
       by region; we store the primary record per instance type and tag all
       regions; the aggregator (Stage 6) will split by region later)
     - Union the `commitments` list (deduped by term+payment+product)
 
-    For v1, we keep one record per instanceType across all regions, with the
-    `regions` list populated. The per-region price variation is captured in a
+    We keep one record per (instanceType, operatingSystem, tenancy) across all regions,
+    with the `regions` list populated. The per-region price variation is captured in a
     `regionPricing` dict if prices differ.
     """
-    # Master dict: instanceType -> merged record
-    merged: Dict[str, Dict[str, Any]] = {}
+    # Master dict: (instanceType, operatingSystem, tenancy) -> merged record
+    merged: Dict[Tuple[str, str, str], Dict[str, Any]] = {}
 
     for region, instances in per_region.items():
         for inst in instances:
             itype = inst["instanceType"]
+            os_name = inst.get("operatingSystem", "Linux")
+            tenancy = inst.get("tenancy", "shared")
             od = inst["priceUSD_hourly"]
+            merge_key = (itype, os_name, tenancy)
 
-            if itype not in merged:
+            if merge_key not in merged:
                 record = dict(inst)
                 record["regions"] = [region]
                 record["regionPricing"] = {region: od}
-                merged[itype] = record
+                merged[merge_key] = record
             else:
-                existing = merged[itype]
+                existing = merged[merge_key]
                 if region not in existing["regions"]:
                     existing["regions"].append(region)
                 existing.setdefault("regionPricing", {})[region] = od
@@ -676,6 +823,22 @@ def _merge_regions(
                     if key not in existing_keys:
                         existing.setdefault("commitments", []).append(c)
                         existing_keys.add(key)
+
+    # Normalize priceUSD_hourly / priceUSD_monthly to the primary region so all
+    # OS variants use the same reference price.  Without this, each OS variant
+    # inherits the price from whichever region was processed first (alphabetical
+    # order), which can vary wildly across OS variants and makes cross-OS
+    # comparison in the UI meaningless (e.g. Linux $0.71 vs Windows $0.07).
+    _PRIMARY_PRICE_REGIONS = ["us-east-1", "us-east-2", "us-west-2", "eu-west-1"]
+    for record in merged.values():
+        rp = record.get("regionPricing", {})
+        for candidate in _PRIMARY_PRICE_REGIONS:
+            if candidate in rp:
+                price = float(rp[candidate])
+                if price > 0:
+                    record["priceUSD_hourly"] = round(price, 6)
+                    record["priceUSD_monthly"] = round(price * HOURS_PER_MONTH, 4)
+                    break
 
     return list(merged.values())
 
@@ -701,12 +864,12 @@ def fetch_aws_data(
     # Explicit regions from --regions flag; None means discover dynamically.
     explicit_regions = regions
 
-    session = _make_session()
+    session = make_session()
 
     # Step 1: Fetch top-level offer index (small JSON)
     logger.info("Fetching AWS top-level offer index …")
     try:
-        offer_index = _get_json(session, OFFER_INDEX_URL)
+        offer_index = get_json(session, OFFER_INDEX_URL, timeout=REQUEST_TIMEOUT)
     except Exception as exc:
         logger.error(f"Failed to fetch offer index: {exc}")
         raise
@@ -715,7 +878,7 @@ def fetch_aws_data(
     logger.info("Fetching EC2 region index …")
     ec2_region_index_url = PRICING_BASE + EC2_REGION_INDEX_PATH
     try:
-        region_index = _get_json(session, ec2_region_index_url)
+        region_index = get_json(session, ec2_region_index_url, timeout=REQUEST_TIMEOUT)
     except Exception as exc:
         logger.error(f"Failed to fetch EC2 region index: {exc}")
         raise
@@ -764,8 +927,8 @@ def fetch_aws_data(
         savings_plans = _fetch_savings_plans_for_region(session, region)
 
         try:
-            region_instances = _process_region(session, region, region_pricing_url, savings_plans)
-            per_region[region] = region_instances
+            region_instances, ebs_vol_map = _process_region(session, region, region_pricing_url, savings_plans)
+            per_region[region] = (region_instances, ebs_vol_map)
         except Exception as exc:
             logger.error(f"Failed to process region {region}: {exc}")
             # Continue with other regions — don't fail the entire run
@@ -773,9 +936,47 @@ def fetch_aws_data(
     if not per_region:
         raise RuntimeError("No regions were successfully processed. Aborting.")
 
+    # Accumulate EBS pricing across all processed regions
+    _EBS_CANONICAL = ["us-east-1", "us-east-2", "us-west-2", "eu-west-1"]
+    ebs_pricing: Dict[str, Dict[str, float]] = {}
+    ebs_attrs: Dict[str, Dict[str, Any]] = {}
+    for region, (_, ebs_vol_map) in per_region.items():
+        for vol_type, rec in ebs_vol_map.items():
+            price = rec["regionPricing"][region]
+            ebs_pricing.setdefault(vol_type, {})[region] = price
+            ebs_attrs.setdefault(vol_type, rec)
+
+    now_iso = datetime.now(timezone.utc).isoformat()
+    ebs_records: List[Dict[str, Any]] = []
+    for vol_type, region_prices in sorted(ebs_pricing.items()):
+        canonical_price = next(
+            (region_prices[r] for r in _EBS_CANONICAL if r in region_prices),
+            next(iter(region_prices.values())),
+        )
+        attrs = ebs_attrs[vol_type]
+        ebs_records.append({
+            "provider":          "aws",
+            "type":              "cloud-volume",
+            "instanceType":      vol_type,
+            "family":            _ebs_volume_family(vol_type),
+            "priceUSD_monthly":  round(canonical_price, 8),
+            "priceUSD_hourly":   round(canonical_price / _EBS_MONTH_HOURS, 8),
+            "storageGiB":        None,
+            "maxIops":           attrs.get("maxIops"),
+            "maxThroughputMBps": attrs.get("maxThroughputMBps"),
+            "storageMedia":      attrs.get("storageMedia"),
+            "regions":           sorted(region_prices.keys()),
+            "regionPricing":     region_prices,
+            "source":            "aws_pricing_api",
+            "lastUpdated":       now_iso,
+            "pricingModel":      "on-demand",
+        })
+    logger.info(f"EBS: {len(ebs_records)} volume types across {len(ebs_pricing)} regions")
+
     # Step 4: Merge across regions
     logger.info("Merging across regions …")
-    merged = _merge_regions(per_region)
+    compute_per_region = {r: instances for r, (instances, _) in per_region.items()}
+    merged = _merge_regions(compute_per_region)
     logger.info(f"Total unique instance types: {len(merged)}")
 
     # Step 5: Validate a sample
@@ -799,6 +1000,11 @@ def fetch_aws_data(
 
     size_mb = output_path.stat().st_size / (1024 * 1024)
     logger.info(f"Output file size: {size_mb:.1f} MB")
+
+    ebs_output_path = output_path.parent / "aws.storage.raw.json"
+    with open(ebs_output_path, "w", encoding="utf-8") as f:
+        json.dump(ebs_records, f, indent=2, ensure_ascii=False)
+    logger.info(f"Wrote {len(ebs_records)} EBS volume types to {ebs_output_path}")
 
     return merged
 

@@ -1,5 +1,5 @@
 export interface CommitmentPrice {
-  term: 'on-demand' | '1yr' | '3yr';
+  term: 'on-demand' | '1yr' | '2yr' | '3yr';
   payment: 'no-upfront' | 'partial-upfront' | 'all-upfront' | 'flexible';
   product: 'reserved' | 'savings-plan' | 'cud' | 'flex';
   priceUSD_hourly: number;
@@ -61,6 +61,7 @@ export interface CloudInstance {
   // Pricing (standardized to USD/hour)
   priceUSD_hourly: number;
   priceUSD_monthly: number;
+  minimumBillingHours?: number;
   
   // Original pricing (provider currency)
   originalPrice?: {
@@ -119,6 +120,8 @@ export interface CloudInstance {
   architecture: 'x86_64' | 'arm64';
   family: string;
   generation?: string;
+  operatingSystem?: string;
+  tenancy?: 'shared' | 'dedicated' | 'host';
 
   // Technical specifications
   network_speed?: string;
@@ -149,13 +152,16 @@ export interface CloudInstance {
   raw?: Record<string, unknown>;
 }
 
-export type CloudProvider = 
-  | 'aws' 
-  | 'azure' 
-  | 'gcp' 
-  | 'hetzner' 
-  | 'oci' 
-  | 'ovh';
+export type CloudProvider =
+  | 'aws'
+  | 'azure'
+  | 'gcp'
+  | 'hetzner'
+  | 'oci'
+  | 'ovh'
+  | 'scaleway'
+  | 'vultr'
+  | 'vast';
 
 export type InstanceType = 
   | 'cloud-server' 

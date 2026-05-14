@@ -20,10 +20,9 @@ Commitment-pricing note:
 Out of scope for v1 (deferred to v3.1+):
     - OCI Government Cloud regions
     - OCI China regions
-    - Bare Metal shapes (listed but not included in default output)
 
 Usage:
-    python scripts/fetch_oci.py [--output PATH]
+    python scripts/fetch_oci.py [--output PATH] [--baremetal] [--baremetal-output PATH]
 """
 
 from __future__ import annotations
@@ -32,7 +31,6 @@ import argparse
 import json
 import logging
 import sys
-import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -48,6 +46,7 @@ if str(_REPO_ROOT) not in sys.path:
 
 from scripts.utils.data_normalizer import normalize_commitments
 from scripts.utils.data_validator import validate_commitments, validate_instance_data
+from scripts.utils.http_client import HOURS_PER_MONTH, get_json, make_session
 
 logging.basicConfig(
     level=logging.INFO,
@@ -131,6 +130,8 @@ _FLEX_CONFIGS: List[Tuple[int, int]] = [
     (16, 128),
     (32, 256),
     (64, 512),
+    (80, 640),
+    (94, 752),
 ]
 
 _A1_FLEX_CONFIGS: List[Tuple[int, int]] = [
@@ -141,6 +142,7 @@ _A1_FLEX_CONFIGS: List[Tuple[int, int]] = [
     (16, 96),
     (32, 192),
     (80, 512),
+    (160, 1024),
 ]
 
 # GPU shape configurations: (gpu_count, ocpu, memory_gib)
@@ -152,7 +154,26 @@ _GPU_SHAPES: Dict[str, Dict[str, Any]] = {
     "BM.GPU4.8":   {"gpu_type": "NVIDIA A100 40GB", "gpu_count": 8, "ocpu": 64, "memory_gib": 2048, "price_per_gpu": 4.0, "arch": "x86_64"},
     "BM.GPU.A10.4":{"gpu_type": "NVIDIA A10", "gpu_count": 4, "ocpu": 64, "memory_gib": 1024, "price_per_gpu": 2.0, "arch": "x86_64"},
     "BM.GPU.H100.8":{"gpu_type": "NVIDIA H100", "gpu_count": 8, "ocpu": 112, "memory_gib": 2048, "price_per_gpu": 10.0, "arch": "x86_64"},
+    "VM.GPU.A10.1":  {"gpu_type": "NVIDIA A10",  "gpu_count": 1, "ocpu": 15, "memory_gib": 240,  "price_per_gpu": 2.0,  "arch": "x86_64"},
+    "VM.GPU.A10.2":  {"gpu_type": "NVIDIA A10",  "gpu_count": 2, "ocpu": 30, "memory_gib": 480,  "price_per_gpu": 2.0,  "arch": "x86_64"},
+    "BM.GPU.A100.2": {"gpu_type": "NVIDIA A100 80GB", "gpu_count": 2, "ocpu": 32, "memory_gib": 1024, "price_per_gpu": 4.0, "arch": "x86_64"},
 }
+
+# Non-GPU bare metal compute shapes: (shape_name, ocpu, memory_gib, ocpu_key_substr,
+# gib_key_substr, arch, family, gen, disk_type).
+# Each shape uses the same per-OCPU and per-GiB pricing keys as its VM flex counterpart.
+_BM_COMPUTE_SHAPES: List[Tuple[str, int, int, str, Optional[str], str, str, str, Optional[str]]] = [
+    ("BM.Standard.E2.64",   64,  512,  "Standard - E2",                  None,                       "x86_64", "standard",  "E2", None),
+    ("BM.Standard.E3.128",  128, 2048, "Standard - E3 - OCPU",           "Standard - E3 - Memory",   "x86_64", "standard",  "E3", None),
+    ("BM.Standard.E4.128",  128, 2048, "Standard - E4 - OCPU",           "Standard - E4  - Memory",  "x86_64", "standard",  "E4", None),
+    ("BM.Standard.E5.192",  192, 2304, "Standard - E5 - OCPU",           "Standard - E5 - Memory",   "x86_64", "standard",  "E5", None),
+    ("BM.Standard.A1.160",  160, 1024, "Standard - A1 - OCPU",           "Standard - A1 - Memory",   "arm64",  "standard",  "A1", None),
+    ("BM.Standard.A2.160",  160, 1536, "Standard - A2 OCPU",             "Standard - A2 Memory",     "arm64",  "standard",  "A2", None),
+    ("BM.Optimized3.36",    36,  512,  "Optimized - X9 - OCPU",          "Optimized - X9 - Memory",  "x86_64", "optimized", "X9", None),
+    ("BM.DenseIO2.52",      52,  768,  "Virtual Machine Dense I/O - X7", None,                       "x86_64", "denseio",   "X7", "NVMe SSD"),
+    ("BM.DenseIO.E4.128",   128, 2048, "Dense I/O - E4 - OCPU",          "Dense I/O - E4 - Memory",  "x86_64", "denseio",   "E4", "NVMe SSD"),
+    ("BM.DenseIO.E5.128",   128, 2048, "Dense I/O - E5 OCPU",            "Dense I/O - E5 Memory",    "x86_64", "denseio",   "E5", "NVMe SSD"),
+]
 
 # Commitment pricing note (per Stage 4 requirements)
 _COMMITMENT_NOTE = (
@@ -166,29 +187,6 @@ _COMMITMENT_NOTE = (
 # ---------------------------------------------------------------------------
 # HTTP helpers
 # ---------------------------------------------------------------------------
-
-def _make_session() -> requests.Session:
-    session = requests.Session()
-    session.headers.update({
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "application/json, text/plain, */*",
-    })
-    return session
-
-
-def _get_json(session: requests.Session, url: str) -> Any:
-    """Fetch URL with retry logic."""
-    for attempt in range(1, MAX_RETRIES + 1):
-        try:
-            resp = session.get(url, timeout=REQUEST_TIMEOUT)
-            resp.raise_for_status()
-            return resp.json()
-        except requests.RequestException as exc:
-            if attempt == MAX_RETRIES:
-                raise
-            logger.warning(f"Attempt {attempt} failed for {url}: {exc}. Retrying in {RETRY_BACKOFF}s...")
-            time.sleep(RETRY_BACKOFF)
-    raise RuntimeError(f"Failed to fetch {url} after {MAX_RETRIES} attempts")
 
 
 # ---------------------------------------------------------------------------
@@ -262,6 +260,7 @@ def _build_flex_instance(
     memory_gib: int,
     price_per_ocpu: float,
     price_per_gib: float,
+    timestamp: str,
     is_free_tier: bool = False,
     is_bare_metal: bool = False,
     disk_type: Optional[str] = None,
@@ -272,7 +271,7 @@ def _build_flex_instance(
     vcpu = ocpu if architecture == "arm64" else ocpu * 2
 
     hourly = round(ocpu * price_per_ocpu + memory_gib * price_per_gib, 6)
-    monthly = round(hourly * 730.44, 4)
+    monthly = round(hourly * HOURS_PER_MONTH, 4)
 
     instance_type = f"{shape_name}.{ocpu}OCPU.{memory_gib}GB"
 
@@ -308,7 +307,7 @@ def _build_flex_instance(
             + (" (Free Tier Eligible)" if is_free_tier else "")
             + (" (Bare Metal)" if is_bare_metal else "")
         ),
-        "lastUpdated": datetime.now(timezone.utc).isoformat(),
+        "lastUpdated": timestamp,
         "raw": {
             "shape": shape_name,
             "ocpu": ocpu,
@@ -336,13 +335,14 @@ def _build_gpu_instance(
     ocpu: int,
     memory_gib: int,
     price_per_gpu: float,
+    timestamp: str,
     architecture: str = "x86_64",
 ) -> Dict[str, Any]:
     """Construct a v3 CloudInstance record for a fixed GPU shape."""
     vcpu = ocpu * 2  # GPU shapes are x86_64
 
     hourly = round(gpu_count * price_per_gpu, 6)
-    monthly = round(hourly * 730.44, 4)
+    monthly = round(hourly * HOURS_PER_MONTH, 4)
 
     # Determine family/generation from shape name
     parts = shape_name.split(".")
@@ -392,7 +392,7 @@ def _build_gpu_instance(
         "commitments": [],
         "source": "oci_cetools_pricing_api",
         "description": f"Oracle Cloud {shape_name} — {gpu_count}x {gpu_type}, {ocpu} OCPU, {memory_gib} GiB RAM",
-        "lastUpdated": datetime.now(timezone.utc).isoformat(),
+        "lastUpdated": timestamp,
         "raw": {
             "shape": shape_name,
             "gpu_type": gpu_type,
@@ -413,12 +413,12 @@ def _build_gpu_instance(
 
 class OCIFetcher:
     def __init__(self) -> None:
-        self.session = _make_session()
+        self.session = make_session()
 
     def fetch_all(self) -> List[Dict[str, Any]]:
         """Fetch all OCI compute instances from the cetools API."""
         logger.info("Fetching OCI pricing from cetools API...")
-        raw_data = _get_json(self.session, OCI_PRICING_URL)
+        raw_data = get_json(self.session, OCI_PRICING_URL)
 
         if not isinstance(raw_data, dict) or "items" not in raw_data:
             raise ValueError(f"Unexpected API response structure: {type(raw_data)}")
@@ -463,6 +463,7 @@ class OCIFetcher:
         # ---------------------------------------------------------------------------
         # Build flex shape instances
         # ---------------------------------------------------------------------------
+        timestamp = datetime.now(timezone.utc).isoformat()
         instances: List[Dict[str, Any]] = []
 
         # Shape definitions: (display_name_fragment_ocpu, display_name_fragment_mem, shape_prefix, is_free, configs)
@@ -530,6 +531,7 @@ class OCIFetcher:
                     memory_gib=memory_gib,
                     price_per_ocpu=price_ocpu,
                     price_per_gib=price_gib,
+                    timestamp=timestamp,
                     is_free_tier=is_free,
                     disk_type=disk_type,
                     disk_note=disk_note,
@@ -571,7 +573,7 @@ class OCIFetcher:
             disk_type = "NVMe SSD" if "DenseIO" in shape_name else None
 
             hourly = round(ocpu * price_ocpu, 6)
-            monthly = round(hourly * 730.44, 4)
+            monthly = round(hourly * HOURS_PER_MONTH, 4)
             vcpu = ocpu if arch == "arm64" else ocpu * 2
 
             inst: Dict[str, Any] = {
@@ -600,7 +602,7 @@ class OCIFetcher:
                 "source": "oci_cetools_pricing_api",
                 "description": f"Oracle Cloud {shape_name} — {ocpu} OCPU, {memory_gib} GiB RAM"
                     + (f" ({note})" if note else ""),
-                "lastUpdated": datetime.now(timezone.utc).isoformat(),
+                "lastUpdated": timestamp,
                 "raw": {
                     "shape": shape_name,
                     "ocpu": ocpu,
@@ -641,11 +643,112 @@ class OCIFetcher:
                 ocpu=cfg["ocpu"],
                 memory_gib=cfg["memory_gib"],
                 price_per_gpu=price_per_gpu,
+                timestamp=timestamp,
                 architecture=cfg["arch"],
             )
             instances.append(inst)
 
         logger.info(f"Built {len(instances)} OCI compute instances")
+        return instances
+
+    def fetch_baremetal(self) -> List[Dict[str, Any]]:
+        """Fetch OCI bare metal compute shapes (non-GPU) from the cetools API.
+
+        Uses the same API endpoint as fetch_all() and the same per-OCPU / per-GiB
+        pricing keys.  Output type is "dedicated-server".
+        """
+        logger.info("Fetching OCI bare metal pricing from cetools API...")
+        raw_data = get_json(self.session, OCI_PRICING_URL)
+
+        if not isinstance(raw_data, dict) or "items" not in raw_data:
+            raise ValueError(f"Unexpected API response structure: {type(raw_data)}")
+
+        items = raw_data["items"]
+        compute_items = [
+            i for i in items
+            if i.get("serviceCategory", "") in VM_CATEGORIES
+        ]
+
+        ocpu_prices: Dict[str, float] = {}
+        gib_prices: Dict[str, float] = {}
+
+        for item in compute_items:
+            name = item["displayName"]
+            metric = item.get("metricName", "")
+            price = _get_usd_price(item, range_min=3000) if "A1" in name.upper() else _get_usd_price(item)
+
+            if price is None:
+                continue
+
+            metric_lower = metric.lower()
+            if "ocpu" in metric_lower:
+                ocpu_prices[name] = price
+            elif "gigabyte" in metric_lower or "gigabytes" in metric_lower:
+                gib_prices[name] = price
+
+        timestamp = datetime.now(timezone.utc).isoformat()
+        instances: List[Dict[str, Any]] = []
+
+        for (shape_name, ocpu, memory_gib, ocpu_substr, gib_substr, arch, family, gen, disk_type) in _BM_COMPUTE_SHAPES:
+            ocpu_key = next((k for k in ocpu_prices if ocpu_substr in k), None)
+            if ocpu_key is None:
+                logger.warning(f"No OCPU price for BM shape {shape_name} (substr: {ocpu_substr!r})")
+                continue
+
+            price_ocpu = ocpu_prices[ocpu_key]
+            price_gib = 0.0
+            if gib_substr:
+                gib_key = next((k for k in gib_prices if gib_substr in k), None)
+                if gib_key:
+                    price_gib = gib_prices[gib_key]
+
+            vcpu = ocpu if arch == "arm64" else ocpu * 2
+            hourly = round(ocpu * price_ocpu + memory_gib * price_gib, 6)
+            monthly = round(hourly * HOURS_PER_MONTH, 4)
+
+            inst: Dict[str, Any] = {
+                "provider": "oci",
+                "type": "dedicated-server",
+                "instanceType": shape_name,
+                "vCPU": vcpu,
+                "memoryGiB": float(memory_gib),
+                "architecture": arch,
+                "family": family,
+                "generation": gen,
+                "priceUSD_hourly": hourly,
+                "priceUSD_monthly": monthly,
+                "regions": _REGION_CODES,
+                "locationDetails": [
+                    {
+                        "code": r["code"],
+                        "city": r["name"].split("(")[-1].rstrip(")") if "(" in r["name"] else r["name"],
+                        "country": r["country"],
+                        "countryCode": r["countryCode"],
+                        "region": r["code"],
+                    }
+                    for r in OCI_REGIONS
+                ],
+                "commitments": [],
+                "source": "oci_cetools_pricing_api",
+                "description": f"Oracle Cloud {shape_name} — {ocpu} OCPU, {memory_gib} GiB RAM (Bare Metal)",
+                "lastUpdated": timestamp,
+                "raw": {
+                    "shape": shape_name,
+                    "ocpu": ocpu,
+                    "memory_gib": memory_gib,
+                    "price_per_ocpu_hourly": price_ocpu,
+                    "price_per_gib_hourly": price_gib,
+                    "bare_metal": True,
+                    "note": _COMMITMENT_NOTE,
+                },
+            }
+
+            if disk_type:
+                inst["diskType"] = disk_type
+
+            instances.append(inst)
+
+        logger.info(f"Built {len(instances)} OCI bare metal compute instances")
         return instances
 
 
@@ -674,6 +777,17 @@ def main(argv: Optional[List[str]] = None) -> int:
         "--output",
         default="data/providers/oci.raw.json",
         help="Output JSON file path (default: data/providers/oci.raw.json)",
+    )
+    parser.add_argument(
+        "--baremetal",
+        action="store_true",
+        default=False,
+        help="Also fetch OCI bare metal shapes and write to --baremetal-output",
+    )
+    parser.add_argument(
+        "--baremetal-output",
+        default="data/providers/oci.baremetal.raw.json",
+        help="Output path for bare metal shapes (default: data/providers/oci.baremetal.raw.json)",
     )
     args = parser.parse_args(argv)
 
@@ -726,6 +840,27 @@ def main(argv: Optional[List[str]] = None) -> int:
         f"(OCI does not expose per-shape commitment pricing publicly — on-demand only)"
     )
 
+    # Bare metal output — only when --baremetal is passed; VM path above is unchanged
+    if args.baremetal:
+        logger.info("=== OCI Bare Metal shapes ===")
+        bm_instances = fetcher.fetch_baremetal()
+        valid_bm = _validate_output(bm_instances)
+        logger.info(f"Valid bare metal instances: {len(valid_bm)}/{len(bm_instances)}")
+
+        if len(valid_bm) < 10:
+            logger.warning(
+                f"Only {len(valid_bm)} bare metal instances collected (expected >=10); "
+                "check price key substrs in _BM_COMPUTE_SHAPES"
+            )
+
+        bm_path = Path(args.baremetal_output)
+        bm_path.parent.mkdir(parents=True, exist_ok=True)
+
+        with bm_path.open("w", encoding="utf-8") as f:
+            json.dump(valid_bm, f, indent=2, ensure_ascii=False)
+
+        logger.info(f"Wrote {len(valid_bm)} bare metal instances to {bm_path}")
+
     return 0
 
 
@@ -737,6 +872,13 @@ def fetch_oci_data() -> List[Dict[str, Any]]:
     """Entry point for the orchestrator."""
     fetcher = OCIFetcher()
     instances = fetcher.fetch_all()
+    return _validate_output(instances)
+
+
+def fetch_oci_baremetal_data() -> List[Dict[str, Any]]:
+    """Entry point for the orchestrator — bare metal shapes only."""
+    fetcher = OCIFetcher()
+    instances = fetcher.fetch_baremetal()
     return _validate_output(instances)
 
 

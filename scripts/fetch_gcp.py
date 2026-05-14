@@ -62,6 +62,7 @@ if str(_REPO_ROOT) not in sys.path:
 
 from scripts.utils.data_normalizer import normalize_commitments
 from scripts.utils.data_validator import validate_commitments, validate_instance_data
+from scripts.utils.http_client import HOURS_PER_MONTH
 
 logging.basicConfig(
     level=logging.INFO,
@@ -384,6 +385,50 @@ _MACHINE_SPECS: List[Tuple[str, int, float, str, int, str, float]] = [
     ("a3-edgegpu-8g",   104, 936.0,"x86_64", 8,  "H100",  80.0),
     ("a3-ultragpu-8g",  208,2952.0,"x86_64", 8,  "H100", 141.0),
 
+    # --- C4 compute-optimized (Intel Emerald Rapids) ---
+    ("c4-standard-2",    2,   8.0,  "x86_64", 0, "", 0),
+    ("c4-standard-4",    4,  16.0,  "x86_64", 0, "", 0),
+    ("c4-standard-8",    8,  32.0,  "x86_64", 0, "", 0),
+    ("c4-standard-16",  16,  64.0,  "x86_64", 0, "", 0),
+    ("c4-standard-32",  32, 128.0,  "x86_64", 0, "", 0),
+    ("c4-standard-48",  48, 192.0,  "x86_64", 0, "", 0),
+    ("c4-standard-96",  96, 384.0,  "x86_64", 0, "", 0),
+    ("c4-standard-192",192, 768.0,  "x86_64", 0, "", 0),
+    ("c4-highmem-2",     2,  16.0,  "x86_64", 0, "", 0),
+    ("c4-highmem-4",     4,  32.0,  "x86_64", 0, "", 0),
+    ("c4-highmem-8",     8,  64.0,  "x86_64", 0, "", 0),
+    ("c4-highmem-16",   16, 128.0,  "x86_64", 0, "", 0),
+    ("c4-highmem-32",   32, 256.0,  "x86_64", 0, "", 0),
+    ("c4-highmem-48",   48, 384.0,  "x86_64", 0, "", 0),
+    ("c4-highmem-96",   96, 768.0,  "x86_64", 0, "", 0),
+    ("c4-highmem-192", 192,1536.0,  "x86_64", 0, "", 0),
+
+    # --- N4 general-purpose (Intel Emerald Rapids) ---
+    ("n4-standard-2",    2,   8.0,  "x86_64", 0, "", 0),
+    ("n4-standard-4",    4,  16.0,  "x86_64", 0, "", 0),
+    ("n4-standard-8",    8,  32.0,  "x86_64", 0, "", 0),
+    ("n4-standard-16",  16,  64.0,  "x86_64", 0, "", 0),
+    ("n4-standard-32",  32, 128.0,  "x86_64", 0, "", 0),
+    ("n4-standard-48",  48, 192.0,  "x86_64", 0, "", 0),
+    ("n4-standard-64",  64, 256.0,  "x86_64", 0, "", 0),
+    ("n4-standard-80",  80, 320.0,  "x86_64", 0, "", 0),
+    ("n4-highcpu-2",     2,   2.0,  "x86_64", 0, "", 0),
+    ("n4-highcpu-4",     4,   4.0,  "x86_64", 0, "", 0),
+    ("n4-highcpu-8",     8,   8.0,  "x86_64", 0, "", 0),
+    ("n4-highcpu-16",   16,  16.0,  "x86_64", 0, "", 0),
+    ("n4-highcpu-32",   32,  32.0,  "x86_64", 0, "", 0),
+    ("n4-highcpu-48",   48,  48.0,  "x86_64", 0, "", 0),
+    ("n4-highcpu-64",   64,  64.0,  "x86_64", 0, "", 0),
+    ("n4-highcpu-80",   80,  80.0,  "x86_64", 0, "", 0),
+    ("n4-highmem-2",     2,  16.0,  "x86_64", 0, "", 0),
+    ("n4-highmem-4",     4,  32.0,  "x86_64", 0, "", 0),
+    ("n4-highmem-8",     8,  64.0,  "x86_64", 0, "", 0),
+    ("n4-highmem-16",   16, 128.0,  "x86_64", 0, "", 0),
+    ("n4-highmem-32",   32, 256.0,  "x86_64", 0, "", 0),
+    ("n4-highmem-48",   48, 384.0,  "x86_64", 0, "", 0),
+    ("n4-highmem-64",   64, 512.0,  "x86_64", 0, "", 0),
+    ("n4-highmem-80",   80, 640.0,  "x86_64", 0, "", 0),
+
     # --- G2 GPU (NVIDIA L4) ---
     ("g2-standard-4",   4,  16.0,  "x86_64", 1,  "L4",    24.0),
     ("g2-standard-8",   8,  32.0,  "x86_64", 1,  "L4",    24.0),
@@ -450,6 +495,8 @@ _FAMILY_SKU_MAP: Dict[str, str] = {
     "a2":   "A2",
     "a3":   "A3",
     "g2":   "G2",
+    "c4":   "C4",
+    "n4":   "N4",
 }
 
 # ---------------------------------------------------------------------------
@@ -691,6 +738,8 @@ _CUD_TOKEN_TO_FAMILY: Dict[str, str] = {
     "a2":                     "a2",
     "a3":                     "a3",
     "g2":                     "g2",
+    "c4":                     "c4",
+    "n4":                     "n4",
 }
 
 # On-demand SKU description prefixes → family prefix.
@@ -736,6 +785,10 @@ _OD_DESC_TO_FAMILY: Dict[str, str] = {
     "a3 ":                            "a3",
     "g2 instance":                    "g2",
     "g2 ":                            "g2",
+    "c4 instance":                    "c4",
+    "c4 ":                            "c4",
+    "n4 instance":                    "n4",
+    "n4 ":                            "n4",
 }
 
 
@@ -1286,7 +1339,7 @@ def build_instances(
             "family": family,
             "generation": generation,
             "priceUSD_hourly": od_hourly,
-            "priceUSD_monthly": round(od_hourly * 24 * 30, 4),
+            "priceUSD_monthly": round(od_hourly * HOURS_PER_MONTH, 4),
             "commitments": commitments,
             "regions": applicable_regions,
             "source": "gcp_billing_catalog_api",

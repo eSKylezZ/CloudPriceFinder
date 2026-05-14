@@ -32,7 +32,6 @@ except ImportError:
             HETZNER_VERSION = "unavailable"
 from utils.currency_converter import convert_currency
 from utils.data_validator import validate_instance_data
-from utils.data_normalizer import normalize_instance_data
 
 # Configure logging
 logging.basicConfig(
@@ -47,7 +46,7 @@ OUTPUT_FILE = DATA_DIR / "all_instances.json"  # Keep for backward compatibility
 SUMMARY_FILE = DATA_DIR / "summary.json"
 PROVIDERS_DIR = DATA_DIR / "providers"
 MAX_WORKERS = 4
-TIMEOUT_SECONDS = 300  # 5 minutes per provider
+TIMEOUT_SECONDS = 1200  # 20 minutes total — AWS alone can take 700+ seconds
 
 # Provider Configuration - CENTRAL CONTROL FOR DATA FETCHING
 # Set 'enabled': False to skip fetching and use existing data files
@@ -72,13 +71,17 @@ PROVIDER_CONFIG = {
         'enabled': True,
         'description': 'Oracle Cloud Infrastructure'
     },
+    'oci_baremetal': {
+        'enabled': False,  # extras — enable manually
+        'description': 'Oracle Cloud Infrastructure Bare Metal'
+    },
     # v3.1 — disabled for v1 launch
     'hetzner': {
         'enabled': False,  # v3.1 — disabled for v1 launch
         'description': 'Hetzner Cloud and Dedicated Servers'
     },
     'ovh': {
-        'enabled': False,  # v3.1 — disabled for v1 launch
+        'enabled': True,  # v3.1 — disabled for v1 launch
         'description': 'OVH Cloud'
     },
     'digitalocean': {
@@ -90,11 +93,11 @@ PROVIDER_CONFIG = {
         'description': 'Linode / Akamai Cloud'
     },
     'scaleway': {
-        'enabled': False,  # v3.1 — disabled for v1 launch
+        'enabled': True,  # v3.1 — disabled for v1 launch
         'description': 'Scaleway'
     },
     'vultr': {
-        'enabled': False,  # v3.1 — disabled for v1 launch
+        'enabled': True,  # v3.1 — disabled for v1 launch
         'description': 'Vultr'
     },
     'contabo': {
@@ -102,7 +105,7 @@ PROVIDER_CONFIG = {
         'description': 'Contabo'
     },
     'vast': {
-        'enabled': False,  # v3.1 — marketplace snapshot, disabled for v1 launch
+        'enabled': True,  # v3.1 — marketplace snapshot, disabled for v1 launch
         'description': 'Vast.ai GPU Marketplace'
     },
 }
@@ -117,6 +120,7 @@ class CloudDataOrchestrator:
             'azure': self._fetch_azure,
             'gcp': self._fetch_gcp,
             'oci': self._fetch_oci,
+            'oci_baremetal': self._fetch_oci_baremetal,
             'ovh': self._fetch_ovh,
             'vultr': self._fetch_vultr,
             'vast': self._fetch_vast,
@@ -188,6 +192,15 @@ class CloudDataOrchestrator:
                 sys.path.insert(0, _repo_root)
             from scripts.fetch_gcp import fetch_gcp_data
             api_key = os.environ.get("GCP_API_KEY", "").strip() or None
+            if not api_key:
+                env_path = Path(_repo_root) / ".env"
+                if env_path.exists():
+                    with open(env_path) as _fh:
+                        for _line in _fh:
+                            _line = _line.strip()
+                            if _line.startswith("GCP_API_KEY="):
+                                api_key = _line.split("=", 1)[1].strip().strip('"').strip("'") or None
+                                break
             if api_key:
                 logger.info("GCP_API_KEY found — using API key auth.")
             else:
@@ -209,6 +222,16 @@ class CloudDataOrchestrator:
             logger.error(f"OCI fetch failed: {e}")
             raise
     
+    def _fetch_oci_baremetal(self) -> List[Dict[str, Any]]:
+        """Fetch OCI bare metal compute shapes."""
+        try:
+            logger.info("Fetching Oracle Cloud Infrastructure bare metal data...")
+            from fetch_oci import fetch_oci_baremetal_data
+            return fetch_oci_baremetal_data()
+        except Exception as e:
+            logger.error(f"OCI bare metal fetch failed: {e}")
+            raise
+
     def _fetch_ovh(self) -> List[Dict[str, Any]]:
         """Fetch OVHcloud compute and bare-metal pricing data."""
         try:
@@ -369,16 +392,36 @@ class CloudDataOrchestrator:
                 }
                 
                 # Collect results with timeout
-                for future in concurrent.futures.as_completed(future_to_provider, timeout=TIMEOUT_SECONDS):
-                    provider, data, error = future.result()
-                    
-                    if error:
-                        self.errors[provider] = error
-                        # Fallback to existing data if fetch fails
-                        logger.warning(f"Failed to fetch {provider} data, attempting to load existing data...")
-                        self.results[provider] = self._load_existing_data(provider)
-                    else:
-                        self.results[provider] = data
+                try:
+                    for future in concurrent.futures.as_completed(future_to_provider, timeout=TIMEOUT_SECONDS):
+                        provider, data, error = future.result()
+
+                        if error:
+                            self.errors[provider] = error
+                            logger.warning(f"Failed to fetch {provider} data, attempting to load existing data...")
+                            self.results[provider] = self._load_existing_data(provider)
+                        else:
+                            self.results[provider] = data
+                except concurrent.futures.TimeoutError:
+                    # Collect any futures that finished but weren't iterated yet, then fall back for the rest
+                    for future, provider in future_to_provider.items():
+                        if provider in self.results:
+                            continue
+                        if future.done():
+                            try:
+                                _, data, error = future.result(timeout=0)
+                                if error:
+                                    self.errors[provider] = error
+                                    self.results[provider] = self._load_existing_data(provider)
+                                else:
+                                    self.results[provider] = data
+                            except Exception as e:
+                                self.errors[provider] = str(e)
+                                self.results[provider] = self._load_existing_data(provider)
+                        else:
+                            logger.error(f"⏱️ {provider}: timed out after {TIMEOUT_SECONDS}s, falling back to existing data")
+                            self.errors[provider] = f"Timed out after {TIMEOUT_SECONDS}s"
+                            self.results[provider] = self._load_existing_data(provider)
         else:
             logger.info("No providers enabled for fetching, using only existing data")
         

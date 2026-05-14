@@ -2,6 +2,8 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ComparisonTable from '../components/ComparisonTable.astro';
 import FilterPanel from '../components/FilterPanel.astro';
+import PresetBar from '../components/PresetBar.astro';
+import ServiceCategoryBar from '../components/ServiceCategoryBar.astro';
 ---
 
 <BaseLayout
@@ -198,6 +200,12 @@ import FilterPanel from '../components/FilterPanel.astro';
       </div>
     </div>
 
+    <!-- Service category selector -->
+    <ServiceCategoryBar />
+
+    <!-- Preset filter shortcuts -->
+    <PresetBar />
+
     <!-- Main Content -->
     <div id="comparison" class="lg:grid lg:grid-cols-5 2xl:grid-cols-6 gap-6 lg:gap-8 scroll-mt-20">
       <!-- Filters Sidebar -->
@@ -264,6 +272,16 @@ import FilterPanel from '../components/FilterPanel.astro';
       if (summary) summary.classList.remove('hidden');
 
       document.getElementById('refresh-data')?.addEventListener('click', () => location.reload());
+
+      // Hide the preset bar when a non-compute service category is active
+      const presetBar = document.getElementById('preset-bar');
+      window.addEventListener('serviceCategoryChanged', (e) => {
+        const { category } = (e as CustomEvent<{ category: string }>).detail;
+        if (presetBar) presetBar.style.display = category === 'compute' ? '' : 'none';
+      });
+      // Apply on initial load if URL has a non-compute category
+      const initCat = new URLSearchParams(window.location.search).get('cat');
+      if (initCat && initCat !== 'compute' && presetBar) presetBar.style.display = 'none';
 
       // -----------------------------------------------------------------------
       // Broadcast index to filter panel and table

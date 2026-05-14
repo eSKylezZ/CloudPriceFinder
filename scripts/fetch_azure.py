@@ -12,10 +12,11 @@ Stage 3 extensions:
 """
 
 import json
+import os
 import re
 import sys
-import os
-from datetime import datetime
+from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import requests
@@ -24,11 +25,16 @@ import requests
 # Path setup
 # ---------------------------------------------------------------------------
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'utils'))
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
 from data_normalizer import normalize_commitments
 from azure_regions import get_country_from_azure_region, create_location_detail
 from azure_services import (
     is_dedicated_host_service,
 )
+from scripts.utils.http_client import HOURS_PER_MONTH
 
 # ---------------------------------------------------------------------------
 # Azure Retail Prices API
@@ -240,7 +246,7 @@ def fetch_azure_data() -> List[Dict[str, Any]]:
     Retail Prices API and return a list of normalised instance dicts
     in v3 schema format with commitments[].
     """
-    now = datetime.utcnow().isoformat()
+    now = datetime.now(timezone.utc).isoformat()
 
     # ------------------------------------------------------------------
     # 1. Fetch Consumption rows (on-demand pricing)
@@ -263,6 +269,7 @@ def fetch_azure_data() -> List[Dict[str, Any]]:
     # ------------------------------------------------------------------
     # consumption_groups: key -> instance dict (will grow commitments[])
     consumption_groups: Dict[Tuple[str, str], Dict[str, Any]] = {}
+    windows_groups: Dict[Tuple[str, str], Dict[str, Any]] = {}
 
     skipped_windows_sql = 0
     skipped_devtest = 0
@@ -285,10 +292,14 @@ def fetch_azure_data() -> List[Dict[str, Any]]:
             skipped_devtest += 1
             continue
 
-        # Skip Windows and SQL variants (prefer Linux on-demand)
-        if 'Windows' in meter_name or 'SQL' in meter_name:
+        # Skip SQL variants
+        if 'SQL' in meter_name:
             skipped_windows_sql += 1
             continue
+
+        is_windows = 'Windows' in meter_name
+        target_groups = windows_groups if is_windows else consumption_groups
+        os_label = 'Windows' if is_windows else 'Linux'
 
         # Skip Spot and Low Priority pricing — those are not standard on-demand.
         sku_display: str = item.get('skuName', '') or ''
@@ -313,11 +324,11 @@ def fetch_azure_data() -> List[Dict[str, Any]]:
         loc_detail = create_location_detail(region, country)
 
         hourly = float(item.get('unitPrice', 0) or 0)
-        monthly = round(hourly * 730.44, 4)
+        monthly = round(hourly * HOURS_PER_MONTH, 4)
 
         key = (sku_name, region)
-        if key not in consumption_groups:
-            consumption_groups[key] = {
+        if key not in target_groups:
+            target_groups[key] = {
                 'provider': 'azure',
                 'type': 'cloud-server',
                 'instanceType': sku_name,
@@ -327,6 +338,7 @@ def fetch_azure_data() -> List[Dict[str, Any]]:
                 'priceUSD_monthly': monthly,
                 'architecture': detect_architecture(sku_name),
                 'family': extract_family(sku_name),
+                'operatingSystem': os_label,
                 'commitments': [],
                 'regions': [country] if country else [],
                 'locationDetails': [loc_detail],
@@ -345,14 +357,15 @@ def fetch_azure_data() -> List[Dict[str, Any]]:
             }
         else:
             # If same SKU+region appears again with a lower price, keep lower
-            existing = consumption_groups[key]
+            existing = target_groups[key]
             if hourly > 0 and (existing['priceUSD_hourly'] == 0 or hourly < existing['priceUSD_hourly']):
                 existing['priceUSD_hourly'] = hourly
                 existing['priceUSD_monthly'] = monthly
 
     unique_regions_seen = len({region for (_, region) in consumption_groups})
-    print(f"Consumption groups built: {len(consumption_groups)} (across {unique_regions_seen} regions — no region filter applied, Azure API is global)", flush=True)
-    print(f"  Skipped — Windows/SQL: {skipped_windows_sql}, DevTest: {skipped_devtest}, "
+    print(f"Consumption groups built: {len(consumption_groups)} Linux + {len(windows_groups)} Windows "
+          f"(across {unique_regions_seen} regions — no region filter applied, Azure API is global)", flush=True)
+    print(f"  Skipped — SQL: {skipped_windows_sql}, DevTest: {skipped_devtest}, "
           f"no SKU: {skipped_no_sku}, no specs: {skipped_no_specs}", flush=True)
 
     # ------------------------------------------------------------------
@@ -368,10 +381,14 @@ def fetch_azure_data() -> List[Dict[str, Any]]:
         meter_name: str = item.get('meterName', '') or ''
         reservation_term: str = item.get('reservationTerm', '') or ''
 
-        # Skip Windows/SQL reservations
-        if 'Windows' in meter_name or 'SQL' in meter_name:
+        # Skip SQL reservations
+        if 'SQL' in meter_name:
             skipped_res_windows_sql += 1
             continue
+
+        is_windows = 'Windows' in meter_name
+        target_groups = windows_groups if is_windows else consumption_groups
+        os_label = 'Windows' if is_windows else 'Linux'
 
         if not sku_name or not region:
             reservation_unmatched += 1
@@ -384,7 +401,7 @@ def fetch_azure_data() -> List[Dict[str, Any]]:
             continue
 
         key = (sku_name, region)
-        base = consumption_groups.get(key)
+        base = target_groups.get(key)
         if base is None:
             # No matching consumption entry; create a bare base so the
             # reservation is still represented (on-demand price = 0).
@@ -393,10 +410,7 @@ def fetch_azure_data() -> List[Dict[str, Any]]:
                 reservation_unmatched += 1
                 continue
 
-            if region.lower() in china_region_map:
-                country = china_region_map[region.lower()]
-            else:
-                country = get_country_from_azure_region(region)
+            country = get_country_from_azure_region(region)
             loc_detail = create_location_detail(region, country)
 
             base = {
@@ -409,6 +423,7 @@ def fetch_azure_data() -> List[Dict[str, Any]]:
                 'priceUSD_monthly': 0.0,
                 'architecture': detect_architecture(sku_name),
                 'family': extract_family(sku_name),
+                'operatingSystem': os_label,
                 'commitments': [],
                 'regions': [country] if country else [],
                 'locationDetails': [loc_detail],
@@ -422,7 +437,7 @@ def fetch_azure_data() -> List[Dict[str, Any]]:
                     'armRegionName': region,
                 },
             }
-            consumption_groups[key] = base
+            target_groups[key] = base
 
         # Azure Retail Prices API returns the *total* reservation cost for the
         # term (despite unitOfMeasure saying "1 Hour").  We must amortise it.
@@ -452,7 +467,7 @@ def fetch_azure_data() -> List[Dict[str, Any]]:
 
     print(f"Reservations merged: {reservation_matched} matched, "
           f"{reservation_unmatched} unmatched/skipped, "
-          f"{skipped_res_windows_sql} Windows/SQL skipped.", flush=True)
+          f"{skipped_res_windows_sql} SQL skipped.", flush=True)
 
     # ------------------------------------------------------------------
     # 5. Collapse per-region groups into per-SKU instances
@@ -537,8 +552,73 @@ def fetch_azure_data() -> List[Dict[str, Any]]:
 
         per_sku[sku_name] = agg
 
-    instances = list(per_sku.values())
-    print(f"Final unique SKU count (global): {len(instances)}", flush=True)
+    # ------------------------------------------------------------------
+    # 5b. Collapse Windows per-region groups into per-SKU instances
+    # ------------------------------------------------------------------
+    windows_sku_region_map: Dict[str, Dict[str, Dict[str, Any]]] = {}
+    for (sku_name, region), inst in windows_groups.items():
+        windows_sku_region_map.setdefault(sku_name, {})[region] = inst
+
+    windows_per_sku: Dict[str, Dict[str, Any]] = {}
+    for sku_name, region_data in windows_sku_region_map.items():
+        if CANONICAL_REGION in region_data:
+            canonical_inst = region_data[CANONICAL_REGION]
+        else:
+            canonical_inst = next(iter(region_data.values()))
+
+        canonical_od = canonical_inst['priceUSD_hourly']
+
+        agg = {
+            **canonical_inst,
+            'regions': [],
+            'locationDetails': [],
+            'commitments': list(canonical_inst.get('commitments', [])),
+            'regionPricing': {},
+        }
+
+        seen_locs: set = set()
+        seen_countries: set = set()
+        for region, inst in region_data.items():
+            od = inst['priceUSD_hourly']
+            if od > 0:
+                agg['regionPricing'][region] = od
+            for country in inst.get('regions', []):
+                if country not in seen_countries:
+                    agg['regions'].append(country)
+                    seen_countries.add(country)
+            for ld in inst.get('locationDetails', []):
+                code = ld['code']
+                if code not in seen_locs:
+                    agg['locationDetails'].append(ld)
+                    seen_locs.add(code)
+
+        normalised_commitments = []
+        seen_term_payment: set = set()
+        for c in agg['commitments']:
+            key = (c['term'], c['payment'])
+            if key in seen_term_payment:
+                continue
+            seen_term_payment.add(key)
+            effective = c.get('effectiveHourlyUSD', c.get('priceUSD_hourly', 0))
+            if canonical_od > 0:
+                savings = max(0.0, min(100.0,
+                    (1.0 - effective / canonical_od) * 100.0))
+            else:
+                savings = 0.0
+            normalised_commitments.append({
+                'term': c['term'],
+                'payment': c['payment'],
+                'product': c['product'],
+                'priceUSD_hourly': c['priceUSD_hourly'],
+                'effectiveHourlyUSD': round(effective, 8),
+                'savingsVsOnDemandPct': round(savings, 2),
+            })
+        agg['commitments'] = normalised_commitments
+
+        windows_per_sku[sku_name] = agg
+
+    instances = list(per_sku.values()) + list(windows_per_sku.values())
+    print(f"Final unique SKU count (global): {len(per_sku)} Linux + {len(windows_per_sku)} Windows = {len(instances)} total", flush=True)
 
     # ------------------------------------------------------------------
     # 6. Basic validation: drop instances with no price and no specs

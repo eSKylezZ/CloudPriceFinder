@@ -72,6 +72,7 @@ const navLinks: Array<{ href: string; label: string; tooltip?: string }> = [
     <meta name="twitter:image" content={new URL(ogImage, Astro.site)} />
 
     <title>{title}</title>
+    <slot name="head" />
     <style>
       /* Critical CSS for faster rendering */
       .table-loading { min-height: 200px; }
@@ -242,7 +243,7 @@ const navLinks: Array<{ href: string; label: string; tooltip?: string }> = [
       <div class="max-w-full mx-auto py-6 px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
         <!-- Disclaimer -->
         <div class="mb-4 text-xs text-gray-500 bg-gray-50 rounded-lg border border-gray-200 px-4 py-3">
-          Pricing is fetched from public provider APIs. Always verify with the provider before purchasing.
+          Pricing is fetched periodically from public provider APIs and web scraping where required. Always verify with the provider before purchasing.
           We are not affiliated with AWS, Azure, GCP, or OCI.
         </div>
         <div class="flex flex-col sm:flex-row justify-between items-center gap-2">

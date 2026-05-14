@@ -195,7 +195,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-xs font-medium ${providerColor[item.provider] ?? 'bg-gray-100 text-gray-700'}">
             ${item.provider.toUpperCase()}
           </span>
-          <span class="text-sm font-mono text-gray-800">${item.instanceType}</span>
+          <span class="text-sm font-mono text-gray-800">${item.detail?.instanceType ?? item.instanceType}</span>
           ${item.error ? `<span class="text-xs text-red-600" title="${item.error}">!</span>` : ''}
           <button class="remove-item-btn text-gray-400 hover:text-red-500 focus:outline-hidden"
             data-idx="${idx}" title="Remove">
@@ -477,19 +477,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${providerBadge[item.provider] ?? 'bg-gray-100 text-gray-700'}">
                   ${item.provider.toUpperCase()}
                 </span>
-                <span class="font-mono text-gray-800 text-sm">${item.instanceType}</span>
+                <span class="font-mono text-gray-800 text-sm">${item.detail?.instanceType ?? item.instanceType}</span>
               </div>
               <div class="flex items-center gap-0.5 shrink-0">
                 <button class="col-move-btn p-1 rounded text-gray-300 hover:text-gray-600 hover:bg-gray-100 transition-colors ${isFirst ? 'invisible' : ''}"
                   data-col-idx="${colIdx}" data-dir="left"
-                  title="Move column left" aria-label="Move ${item.instanceType} left">
+                  title="Move column left" aria-label="Move ${item.detail?.instanceType ?? item.instanceType} left">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
                   </svg>
                 </button>
                 <button class="col-move-btn p-1 rounded text-gray-300 hover:text-gray-600 hover:bg-gray-100 transition-colors ${isLast ? 'invisible' : ''}"
                   data-col-idx="${colIdx}" data-dir="right"
-                  title="Move column right" aria-label="Move ${item.instanceType} right">
+                  title="Move column right" aria-label="Move ${item.detail?.instanceType ?? item.instanceType} right">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
                   </svg>
@@ -662,7 +662,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
           const tr2 = document.createElement('tr');
           tr2.className = 'bg-white';
-          let cells2 = `<td class="px-4 py-2 text-xs font-medium text-gray-400 align-top border-b border-gray-100 whitespace-nowrap">${item.provider.toUpperCase()}: ${item.instanceType}</td>`;
+          let cells2 = `<td class="px-4 py-2 text-xs font-medium text-gray-400 align-top border-b border-gray-100 whitespace-nowrap">${item.provider.toUpperCase()}: ${item.detail?.instanceType ?? item.instanceType}</td>`;
           // Fill empty cells for other columns
           for (let i = 0; i < loaded.length; i++) {
             if (loaded[i] !== item) {

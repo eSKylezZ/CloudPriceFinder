@@ -34,6 +34,16 @@
   .filter-scroll::-webkit-scrollbar { width: 4px; }
   .filter-scroll::-webkit-scrollbar-track { background: transparent; }
   .filter-scroll::-webkit-scrollbar-thumb { background-color: #d1d5db; border-radius: 2px; }
+
+  /* On very small screens move the FAB to bottom-left so it doesn't
+     overlap the compare checkboxes that live in the right column of
+     every mobile card row. */
+  @media (max-width: 639px) {
+    #filter-fab {
+      right: auto;
+      left: 1.5rem;
+    }
+  }
 </style>
 
 <!-- FAB: visible on mobile/tablet only (< xl) -->
@@ -60,7 +70,7 @@
 <div id="filter-backdrop" class="lg:hidden hidden fixed inset-0 bg-black/40 z-40"></div>
 
 <!-- Filter panel: drawer on mobile/tablet, sidebar card on xl+ -->
-<div id="filter-panel-wrapper" class="bg-white border border-gray-200 shadow-xs lg:rounded-lg">
+<div id="filter-panel-wrapper" class="bg-white border border-gray-200 shadow-xs lg:rounded-lg lg:h-full">
 
   <!-- Drawer header (mobile/tablet only) -->
   <div class="lg:hidden sticky top-0 bg-white z-10 flex items-center justify-between px-4 py-3 border-b border-gray-100">
@@ -99,18 +109,7 @@
       </div>
     </div>
 
-    <!-- Instance Family -->
-    <div id="family-filter-section">
-      <label class="block text-sm font-medium text-gray-700 mb-2">Instance Family</label>
-      <div
-        class="filter-scroll space-y-1 max-h-52 overflow-y-auto rounded-md border border-gray-100 p-2 bg-gray-50/60"
-        id="family-checkboxes"
-      >
-        <div class="text-xs text-gray-400 italic">Loading families...</div>
-      </div>
-    </div>
-
-    <!-- Region -->
+    <!-- Region (shown for all categories) -->
     <div id="region-filter-section">
       <div class="flex items-center justify-between mb-2">
         <label class="block text-sm font-medium text-gray-700">Region</label>
@@ -140,6 +139,20 @@
         id="region-checkboxes"
       >
         <div class="text-xs text-gray-400 italic">Loading regions...</div>
+      </div>
+    </div>
+
+    <!-- Compute-only filters (hidden when a non-compute category is active) -->
+    <div id="compute-only-filters" class="space-y-5">
+
+    <!-- Instance Family -->
+    <div id="family-filter-section">
+      <label class="block text-sm font-medium text-gray-700 mb-2">Instance Family</label>
+      <div
+        class="filter-scroll space-y-1 max-h-52 overflow-y-auto rounded-md border border-gray-100 p-2 bg-gray-50/60"
+        id="family-checkboxes"
+      >
+        <div class="text-xs text-gray-400 italic">Loading families...</div>
       </div>
     </div>
 
@@ -223,6 +236,33 @@
       </label>
     </div>
 
+    <!-- Tenancy — grouped box -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">Tenancy</label>
+      <div class="bg-gray-50 rounded-lg border border-gray-100 p-3 space-y-2">
+        <label class="flex items-center cursor-pointer">
+          <input type="radio" name="tenancy" value="any" checked
+            class="border-gray-300 text-primary-600 focus:ring-primary-500" />
+          <span class="ml-2 text-sm text-gray-700">Any</span>
+        </label>
+        <label class="flex items-center cursor-pointer">
+          <input type="radio" name="tenancy" value="shared"
+            class="border-gray-300 text-primary-600 focus:ring-primary-500" />
+          <span class="ml-2 text-sm text-gray-700">Shared</span>
+        </label>
+        <label class="flex items-center cursor-pointer">
+          <input type="radio" name="tenancy" value="dedicated"
+            class="border-gray-300 text-primary-600 focus:ring-primary-500" />
+          <span class="ml-2 text-sm text-gray-700">Dedicated Instance</span>
+        </label>
+        <label class="flex items-center cursor-pointer">
+          <input type="radio" name="tenancy" value="host"
+            class="border-gray-300 text-primary-600 focus:ring-primary-500" />
+          <span class="ml-2 text-sm text-gray-700">Dedicated Host</span>
+        </label>
+      </div>
+    </div>
+
     <!-- Architecture — grouped box -->
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-2">Architecture</label>
@@ -245,6 +285,40 @@
       </div>
     </div>
 
+    <!-- Operating System -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">Operating System</label>
+      <div class="bg-gray-50 rounded-lg border border-gray-100 p-3 space-y-2">
+        <label class="flex items-center cursor-pointer">
+          <input type="radio" name="operatingSystem" value="Linux" checked
+            class="border-gray-300 text-primary-600 focus:ring-primary-500" />
+          <span class="ml-2 text-sm text-gray-700">Linux</span>
+        </label>
+        <label class="flex items-center cursor-pointer">
+          <input type="radio" name="operatingSystem" value="Windows"
+            class="border-gray-300 text-primary-600 focus:ring-primary-500" />
+          <span class="ml-2 text-sm text-gray-700">Windows</span>
+        </label>
+        <label class="flex items-center cursor-pointer">
+          <input type="radio" name="operatingSystem" value="RHEL"
+            class="border-gray-300 text-primary-600 focus:ring-primary-500" />
+          <span class="ml-2 text-sm text-gray-700">RHEL</span>
+        </label>
+        <label class="flex items-center cursor-pointer">
+          <input type="radio" name="operatingSystem" value="macOS"
+            class="border-gray-300 text-primary-600 focus:ring-primary-500" />
+          <span class="ml-2 text-sm text-gray-700">macOS <span class="text-gray-400 text-xs">(Mac only)</span></span>
+        </label>
+        <label class="flex items-center cursor-pointer">
+          <input type="radio" name="operatingSystem" value="any"
+            class="border-gray-300 text-primary-600 focus:ring-primary-500" />
+          <span class="ml-2 text-sm text-gray-700">Any</span>
+        </label>
+      </div>
+    </div>
+
+    </div><!-- /compute-only-filters -->
+
     <!-- Action Buttons -->
     <div class="pt-4 border-t border-gray-200">
       <button
@@ -263,10 +337,17 @@
   import type { V3Index, V3ProviderEntry } from '../types';
 
   let indexData: V3Index | null = null;
+  let currentCategory: string = (() => {
+    const p = new URLSearchParams(window.location.search).get('cat');
+    return p ?? 'compute';
+  })();
 
   // Tracks user's explicit intent so selections survive provider list re-renders
   const uncheckedFamilies = new Set<string>(); // families the user has manually unchecked
   const checkedRegions    = new Set<string>(); // regions the user has manually checked
+
+  let activePresetId: string | null = null;
+  let activePresetSort: { field: string; dir: 'asc' | 'desc' } | null = null;
 
   // ── Drawer / FAB ─────────────────────────────────────────────────────────────
 
@@ -308,6 +389,12 @@
 
     const arch = document.querySelector<HTMLInputElement>('input[name="architecture"]:checked')?.value;
     if (arch && arch !== 'any') n++;
+
+    const os = document.querySelector<HTMLInputElement>('input[name="operatingSystem"]:checked')?.value;
+    if (os && os !== 'Linux') n++;
+
+    const tenancy = document.querySelector<HTMLInputElement>('input[name="tenancy"]:checked')?.value;
+    if (tenancy && tenancy !== 'any') n++;
 
     const minV = parseFloat((document.getElementById('min-vcpu') as HTMLInputElement)?.value || '1');
     const maxV = parseFloat((document.getElementById('max-vcpu') as HTMLInputElement)?.value || '1024');
@@ -380,6 +467,12 @@
   document.querySelectorAll<HTMLInputElement>('input[name="architecture"]').forEach((el) => {
     el.addEventListener('change', () => { applyFilters(); updateBadges(); });
   });
+  document.querySelectorAll<HTMLInputElement>('input[name="operatingSystem"]').forEach((el) => {
+    el.addEventListener('change', () => { applyFilters(); updateBadges(); });
+  });
+  document.querySelectorAll<HTMLInputElement>('input[name="tenancy"]').forEach((el) => {
+    el.addEventListener('change', () => { applyFilters(); updateBadges(); });
+  });
   document.getElementById('gpu-only')?.addEventListener('change', () => { applyFilters(); updateBadges(); });
 
   // ── URL state persistence ────────────────────────────────────────────────────
@@ -398,6 +491,12 @@
 
     const arch = document.querySelector<HTMLInputElement>('input[name="architecture"]:checked')?.value;
     if (arch && arch !== 'any') params.set('arch', arch);
+
+    const os = document.querySelector<HTMLInputElement>('input[name="operatingSystem"]:checked')?.value;
+    if (os && os !== 'Linux') params.set('os', os);
+
+    const ten = document.querySelector<HTMLInputElement>('input[name="tenancy"]:checked')?.value;
+    if (ten && ten !== 'any') params.set('tenancy', ten);
 
     const minV = (document.getElementById('min-vcpu') as HTMLInputElement)?.value;
     const maxV = (document.getElementById('max-vcpu') as HTMLInputElement)?.value;
@@ -420,6 +519,12 @@
     // Persist unchecked families (shorter URL than listing all checked ones)
     if (uncheckedFamilies.size > 0) {
       params.set('excludeFamilies', Array.from(uncheckedFamilies).join(','));
+    }
+
+    if (activePresetId) params.set('preset', activePresetId);
+    if (activePresetSort) {
+      params.set('sortField', activePresetSort.field);
+      params.set('sortDir', activePresetSort.dir);
     }
 
     const newURL = new URL(window.location.href);
@@ -453,6 +558,18 @@
     const arch = params.get('arch');
     if (arch) {
       const radio = document.querySelector<HTMLInputElement>(`input[name="architecture"][value="${arch}"]`);
+      if (radio) radio.checked = true;
+    }
+
+    const os = params.get('os');
+    if (os) {
+      const radio = document.querySelector<HTMLInputElement>(`input[name="operatingSystem"][value="${os}"]`);
+      if (radio) radio.checked = true;
+    }
+
+    const ten = params.get('tenancy');
+    if (ten) {
+      const radio = document.querySelector<HTMLInputElement>(`input[name="tenancy"][value="${ten}"]`);
       if (radio) radio.checked = true;
     }
 
@@ -492,12 +609,54 @@
       });
     }
 
+    const presetId = params.get('preset');
+    if (presetId) activePresetId = presetId;
+
+    const sortField = params.get('sortField');
+    const sortDir   = params.get('sortDir');
+    if (sortField) activePresetSort = { field: sortField, dir: sortDir === 'desc' ? 'desc' : 'asc' };
+
     updateRangeDisplays();
     applyFilters();
     updateBadges();
   }
 
   // ── Index loading ────────────────────────────────────────────────────────────
+
+  // ── Category visibility ──────────────────────────────────────────────────────
+
+  function setComputeFiltersVisible(visible: boolean) {
+    const el = document.getElementById('compute-only-filters');
+    if (el) el.style.display = visible ? '' : 'none';
+  }
+
+  window.addEventListener('serviceCategoryChanged', (event: Event) => {
+    const { category } = (event as CustomEvent<{ category: string }>).detail;
+    currentCategory = category;
+    setComputeFiltersVisible(category === 'compute');
+  });
+
+  window.addEventListener('computeProviderCountsUpdated', (event: Event) => {
+    if (currentCategory !== 'compute') return;
+    const { providerCounts } = (event as CustomEvent<{ providerCounts: Record<string, number> }>).detail;
+    const container = document.getElementById('provider-checkboxes');
+    if (!container) return;
+    container.querySelectorAll<HTMLLabelElement>('label').forEach((label) => {
+      const checkbox = label.querySelector<HTMLInputElement>('input[name="provider"]');
+      if (!checkbox) return;
+      const countSpan = label.querySelector<HTMLElement>('span:last-child');
+      if (countSpan) {
+        const count = providerCounts[checkbox.value] ?? 0;
+        countSpan.textContent = `(${count.toLocaleString()})`;
+      }
+    });
+  });
+
+  // Apply on initial load if URL has a non-compute category
+  (() => {
+    const initCat = new URLSearchParams(window.location.search).get('cat');
+    if (initCat && initCat !== 'compute') setComputeFiltersVisible(false);
+  })();
 
   window.addEventListener('indexLoaded', (event: Event) => {
     const { index } = (event as CustomEvent<{ index: V3Index }>).detail;
@@ -507,6 +666,27 @@
     populateRegions(index.providers);
     updateBadges();
     readURLState();
+  });
+
+  window.addEventListener('productProvidersLoaded', (event: Event) => {
+    const { providerCounts } = (event as CustomEvent<{ providerCounts: Record<string, number> | null }>).detail;
+    const container = document.getElementById('provider-checkboxes');
+    if (!container) return;
+    container.querySelectorAll<HTMLLabelElement>('label').forEach((label) => {
+      const checkbox = label.querySelector<HTMLInputElement>('input[name="provider"]');
+      if (!checkbox) return;
+      const providerId = checkbox.value;
+      const countSpan = label.querySelector<HTMLElement>('span:last-child');
+      if (providerCounts === null) {
+        const provider = indexData?.providers.find((p) => p.id === providerId);
+        if (countSpan) countSpan.textContent = provider ? `(${provider.instanceCount.toLocaleString()})` : '';
+        label.style.display = '';
+      } else {
+        const count = providerCounts[providerId] ?? 0;
+        if (countSpan) countSpan.textContent = `(${count.toLocaleString()})`;
+        label.style.display = count === 0 ? 'none' : '';
+      }
+    });
   });
 
   function populateProviders(index: V3Index) {
@@ -704,6 +884,12 @@
     const architecture =
       document.querySelector<HTMLInputElement>('input[name="architecture"]:checked')?.value ?? 'any';
 
+    const operatingSystem =
+      document.querySelector<HTMLInputElement>('input[name="operatingSystem"]:checked')?.value ?? 'Linux';
+
+    const tenancy =
+      document.querySelector<HTMLInputElement>('input[name="tenancy"]:checked')?.value ?? 'any';
+
     const minVCPU   = parseFloat((document.getElementById('min-vcpu')   as HTMLInputElement)?.value || '1');
     const maxVCPU   = parseFloat((document.getElementById('max-vcpu')   as HTMLInputElement)?.value || '1024');
     const minMemory = parseFloat((document.getElementById('min-memory') as HTMLInputElement)?.value || '0.5');
@@ -718,13 +904,17 @@
 
     window.dispatchEvent(
       new CustomEvent('filtersChanged', {
-        detail: { providers, families, commitmentTerm, architecture, minVCPU, maxVCPU, minMemory, maxMemory, maxPrice, gpuOnly, regions, filterCount: countActiveFilters() },
+        detail: {
+          providers, families, commitmentTerm, architecture, operatingSystem, tenancy, minVCPU, maxVCPU,
+          minMemory, maxMemory, maxPrice, gpuOnly, regions, filterCount: countActiveFilters(),
+          ...(activePresetSort ? { sortField: activePresetSort.field, sortDir: activePresetSort.dir } : {}),
+        },
       })
     );
     writeFilterStateToURL();
   }
 
-  function clearFilters() {
+  function resetFilterInputsToDefaults() {
     uncheckedFamilies.clear();
     checkedRegions.clear();
 
@@ -734,6 +924,8 @@
     document.querySelectorAll<HTMLInputElement>('input[name="region"]').forEach((el) => {
       el.checked = false;
     });
+    const gpuCb = document.getElementById('gpu-only') as HTMLInputElement;
+    if (gpuCb) gpuCb.checked = false;
 
     const regionSearchEl = document.getElementById('region-search') as HTMLInputElement | null;
     if (regionSearchEl) regionSearchEl.value = '';
@@ -746,6 +938,12 @@
 
     const anyArch = document.querySelector<HTMLInputElement>('input[name="architecture"][value="any"]');
     if (anyArch) anyArch.checked = true;
+
+    const linuxOS = document.querySelector<HTMLInputElement>('input[name="operatingSystem"][value="Linux"]');
+    if (linuxOS) linuxOS.checked = true;
+
+    const anyTenancy = document.querySelector<HTMLInputElement>('input[name="tenancy"][value="any"]');
+    if (anyTenancy) anyTenancy.checked = true;
 
     const maxPriceInput = document.getElementById('max-price') as HTMLInputElement;
     if (maxPriceInput) maxPriceInput.value = '';
@@ -760,12 +958,80 @@
     if (maxMem) maxMem.value = '65536';
 
     updateRangeDisplays();
+  }
+
+  function clearFilters() {
+    if (activePresetId !== null) {
+      activePresetId = null;
+      activePresetSort = null;
+      window.dispatchEvent(new CustomEvent('presetDeactivated'));
+      window.dispatchEvent(new CustomEvent('requestResetSort'));
+    }
+    resetFilterInputsToDefaults();
     applyFilters();
     window.history.replaceState({}, '', window.location.pathname);
   }
 
   window.addEventListener('requestClearFilters', () => {
     clearFilters();
+    updateBadges();
+  });
+
+  window.addEventListener('requestPreset', (event: Event) => {
+    const { id, filters, sort } = (event as CustomEvent<{
+      id: string;
+      filters: {
+        arch?: string;
+        term?: string;
+        gpuOnly?: boolean;
+        minVCPU?: number;
+        maxVCPU?: number;
+        minMemory?: number;
+        maxMemory?: number;
+      };
+      sort: { field: string; dir: 'asc' | 'desc' };
+    }>).detail;
+
+    activePresetId   = id;
+    activePresetSort = sort;
+
+    // Reset all inputs to defaults, then apply preset overrides
+    resetFilterInputsToDefaults();
+
+    if (filters.arch) {
+      const radio = document.querySelector<HTMLInputElement>(`input[name="architecture"][value="${filters.arch}"]`);
+      if (radio) radio.checked = true;
+    }
+
+    if (filters.term) {
+      const radio = document.querySelector<HTMLInputElement>(`input[name="commitmentTerm"][value="${filters.term}"]`);
+      if (radio) radio.checked = true;
+    }
+
+    if (filters.gpuOnly) {
+      const gpuCb = document.getElementById('gpu-only') as HTMLInputElement;
+      if (gpuCb) gpuCb.checked = true;
+    }
+
+    if (filters.minVCPU !== undefined) {
+      const el = document.getElementById('min-vcpu') as HTMLInputElement;
+      if (el) el.value = String(filters.minVCPU);
+    }
+    if (filters.maxVCPU !== undefined) {
+      const el = document.getElementById('max-vcpu') as HTMLInputElement;
+      if (el) el.value = String(filters.maxVCPU);
+    }
+    if (filters.minMemory !== undefined) {
+      const el = document.getElementById('min-memory') as HTMLInputElement;
+      if (el) el.value = String(filters.minMemory);
+    }
+    if (filters.maxMemory !== undefined) {
+      const el = document.getElementById('max-memory') as HTMLInputElement;
+      if (el) el.value = String(filters.maxMemory);
+    }
+
+    updateRangeDisplays();
+    applyFilters();
     updateBadges();
   });
 </script>

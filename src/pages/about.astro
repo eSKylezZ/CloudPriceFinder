@@ -57,7 +57,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         informed decisions quickly.
       </p>
       <p class="text-gray-600 leading-relaxed">
-        There are no ads, no upselling, and no tracking. Data is refreshed weekly via GitHub Actions
+        There are no ads, no upselling, and no tracking. Data is refreshed periodically
         and served as a static site on Cloudflare Pages.
       </p>
     </div>
@@ -141,7 +141,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       </h2>
       <ul class="space-y-3">
         {[
-          "Real pricing data fetched weekly from public provider APIs — no guesswork, no hardcoded values",
+          "Real pricing data fetched periodically from public provider APIs and web scraping where required — no guesswork, no hardcoded values",
           "On-demand, 1-year, and 3-year commitment pricing in one view",
           "Normalized metrics: $/vCPU/hr and $/GiB-RAM/hr for fair comparison",
           "Side-by-side comparison of up to 4 instances across providers",
@@ -173,7 +173,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
         <div>
           <h3 class="font-semibold text-gray-800 mb-1">Data Collection</h3>
-          <p>Pricing data is fetched weekly using Python scripts that call the official public pricing APIs for each provider. No scraping is used — all data comes from documented, machine-readable API endpoints.</p>
+          <p>Pricing data is collected periodically using Python scripts. Official public pricing APIs are used where available; web scraping is used where no machine-readable API endpoint exists.</p>
         </div>
 
         <div>
@@ -206,7 +206,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
         <div>
           <h3 class="font-semibold text-gray-800 mb-1">Data Freshness</h3>
-          <p>Data is refreshed weekly. The "Last Updated" date shown on the homepage reflects when the data was last collected. Pricing changes made by providers between updates will not be reflected until the next refresh.</p>
+          <p>Data is refreshed periodically. The "Last Updated" date shown on the homepage reflects when the data was last collected. Pricing changes made by providers between updates will not be reflected until the next refresh.</p>
         </div>
 
         <div>
@@ -308,7 +308,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       </div>
       <p class="mt-5 text-xs text-gray-400 border-t border-gray-100 pt-4">
         Prices are converted to USD for comparison. Original currencies are preserved in the raw data.
-        Data is refreshed weekly and may not reflect the latest provider changes. Always verify with the provider before purchasing.
+        Data is refreshed periodically and may not reflect the latest provider changes. Always verify with the provider before purchasing.
       </p>
     </div>
 
@@ -321,7 +321,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <div>
           <p class="font-semibold text-yellow-800 text-sm mb-1">Pricing accuracy disclaimer</p>
           <p class="text-yellow-700 text-sm leading-relaxed">
-            Pricing is fetched weekly from public provider APIs and may not reflect the latest changes.
+            Pricing is fetched periodically from public provider APIs and web scraping where required, and may not reflect the latest changes.
             Some instance types or regions may be missing. Always verify pricing directly with your cloud
             provider before making purchasing decisions. CloudPriceFinder is not affiliated with AWS, Azure, GCP, OCI, OVH, Scaleway, Vultr, or VAST.
           </p>

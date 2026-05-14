@@ -32,7 +32,6 @@ import argparse
 import json
 import logging
 import sys
-import time
 import urllib.parse
 from datetime import datetime, timezone
 from pathlib import Path
@@ -48,6 +47,7 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from scripts.utils.data_validator import validate_instance_data
+from scripts.utils.http_client import HOURS_PER_MONTH, get_json, make_session
 
 logging.basicConfig(
     level=logging.INFO,
@@ -86,12 +86,20 @@ def _derive_family(gpu_name: str) -> str:
       everything else                -> gpu-other
     """
     upper = gpu_name.upper()
-    if "H100" in upper or "H200" in upper or "B100" in upper or "B200" in upper:
+    if "H200" in upper or "B100" in upper or "B200" in upper or "GB200" in upper:
+        return "gpu-h100"  # H/B-series Hopper/Blackwell tier
+    if "H100" in upper:
         return "gpu-h100"
     if "A100" in upper:
         return "gpu-a100"
-    if "L40" in upper or "A6000" in upper or "6000" in upper:
+    if "L40S" in upper:
         return "gpu-professional"
+    if "L40" in upper and "L40S" not in upper:
+        return "gpu-professional"
+    if "A6000" in upper or ("6000" in upper and "RTX" in upper):
+        return "gpu-professional"
+    if "5090" in upper or "5080" in upper:
+        return "gpu-consumer"
     if "4090" in upper or "3090" in upper:
         return "gpu-consumer"
     return "gpu-other"
@@ -100,36 +108,6 @@ def _derive_family(gpu_name: str) -> str:
 # ---------------------------------------------------------------------------
 # HTTP helpers
 # ---------------------------------------------------------------------------
-
-def _make_session() -> requests.Session:
-    session = requests.Session()
-    session.headers.update({
-        "User-Agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/120.0.0.0 Safari/537.36"
-        ),
-        "Accept": "application/json, text/plain, */*",
-    })
-    return session
-
-
-def _get_json(session: requests.Session, url: str, params: Dict[str, str]) -> Any:
-    """Fetch URL with retry logic."""
-    for attempt in range(1, MAX_RETRIES + 1):
-        try:
-            resp = session.get(url, params=params, timeout=REQUEST_TIMEOUT)
-            resp.raise_for_status()
-            return resp.json()
-        except requests.RequestException as exc:
-            if attempt == MAX_RETRIES:
-                raise
-            logger.warning(
-                f"Attempt {attempt} failed for {url}: {exc}. "
-                f"Retrying in {RETRY_BACKOFF}s..."
-            )
-            time.sleep(RETRY_BACKOFF)
-    raise RuntimeError(f"Failed to fetch {url} after {MAX_RETRIES} attempts")
 
 
 # ---------------------------------------------------------------------------
@@ -140,7 +118,6 @@ def _build_instance(offer: Dict[str, Any], timestamp: str) -> Dict[str, Any]:
     """Convert a single Vast.ai offer dict into a v3 CloudInstance record."""
     gpu_name: str = offer["gpu_name"]
     num_gpus: int = int(offer["num_gpus"])
-    geolocation: str = offer.get("geolocation") or "unknown"
     dph: float = float(offer["dph_total"])
     cpu_cores: int = int(offer.get("cpu_cores") or 0)
     # Vast.ai API returns cpu_ram and gpu_ram in MiB; convert to GiB
@@ -148,9 +125,13 @@ def _build_instance(offer: Dict[str, Any], timestamp: str) -> Dict[str, Any]:
     disk_space: float = float(offer.get("disk_space") or 0)
     gpu_ram: float = round(float(offer.get("gpu_ram") or 0) / 1024, 2)
 
+    geo = offer.get("geolocation") or "unknown"
+    country_code = (offer.get("country") or geo)[:2].upper()
+    city = offer.get("city") or geo
+
     instance_type = f"{gpu_name.replace(' ', '_')}x{num_gpus}"
     family = _derive_family(gpu_name)
-    monthly = round(dph * 730.44, 4)
+    monthly = round(dph * HOURS_PER_MONTH, 4)
 
     return {
         "provider": "vast",
@@ -162,20 +143,20 @@ def _build_instance(offer: Dict[str, Any], timestamp: str) -> Dict[str, Any]:
         "priceUSD_hourly": dph,
         "priceUSD_monthly": monthly,
         "family": family,
-        "architecture": "x86_64",
+        "architecture": "arm64" if "arm" in (offer.get("cpu_arch") or "").lower() else "x86_64",
         "gpu": {
             "count": num_gpus,
             "type": gpu_name,
             "memoryGiB": gpu_ram,
         },
-        "regions": [geolocation],
+        "regions": [geo],
         "locationDetails": [
             {
-                "code": geolocation,
-                "city": "",
-                "country": geolocation,
-                "countryCode": geolocation,
-                "region": geolocation,
+                "code": geo,
+                "city": city,
+                "country": geo,
+                "countryCode": country_code,
+                "region": geo,
             }
         ],
         "commitments": [],
@@ -202,7 +183,7 @@ def _build_instance(offer: Dict[str, Any], timestamp: str) -> Dict[str, Any]:
 
 class VastFetcher:
     def __init__(self) -> None:
-        self.session = _make_session()
+        self.session = make_session()
 
     def fetch_all(self) -> List[Dict[str, Any]]:
         """Fetch and de-duplicate Vast.ai GPU marketplace offers."""
@@ -218,7 +199,7 @@ class VastFetcher:
         )
         params = {"q": query}
 
-        raw = _get_json(self.session, VAST_API_URL, params)
+        raw = get_json(self.session, VAST_API_URL, params)
         if not isinstance(raw, dict) or "offers" not in raw:
             raise ValueError(f"Unexpected API response shape: {list(raw.keys()) if isinstance(raw, dict) else type(raw)}")
 

@@ -10,6 +10,14 @@
   --font-mono: 'IBM Plex Mono', 'Fira Code', ui-monospace, monospace;
 }
 
+/* Prevent any overflowing child from producing a horizontal scrollbar at
+   narrow viewports (e.g. 768 px tablet). Applied to html (not body) so
+   that position:fixed children remain viewport-relative on all browsers
+   including iOS Safari < 16. */
+html {
+  overflow-x: hidden;
+}
+
 /* ── Base Typography ─────────────────────────────────────────── */
 body {
   font-family: var(--font-sans);
@@ -86,6 +94,20 @@ body {
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .hover\:bg-gray-50:hover,
   :root:not([data-theme="light"]) .hover\:bg-gray-100:hover { background-color: #283548; }
+}
+
+/* ── Badge dark overrides (JS-injected + static legend badges) ── */
+/* bg-*-100 CSS vars go dark in dark mode but text-*-700 has no var override,
+   making both bg and text dark. Use compound selectors (safe: chips use -800). */
+[data-theme="dark"] .bg-emerald-100.text-emerald-700 { background-color: #022c22; color: #6ee7b7; }
+[data-theme="dark"] .bg-blue-100.text-blue-700       { background-color: #172554; color: #93c5fd; }
+[data-theme="dark"] .bg-purple-100.text-purple-700   { background-color: #2e1065; color: #d8b4fe; }
+[data-theme="dark"] .bg-yellow-100.text-yellow-700   { background-color: #422006; color: #fde68a; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .bg-emerald-100.text-emerald-700 { background-color: #022c22; color: #6ee7b7; }
+  :root:not([data-theme="light"]) .bg-blue-100.text-blue-700       { background-color: #172554; color: #93c5fd; }
+  :root:not([data-theme="light"]) .bg-purple-100.text-purple-700   { background-color: #2e1065; color: #d8b4fe; }
+  :root:not([data-theme="light"]) .bg-yellow-100.text-yellow-700   { background-color: #422006; color: #fde68a; }
 }
 
 /* ── Hardcoded-background dark overrides (JS-generated rows) ─── */

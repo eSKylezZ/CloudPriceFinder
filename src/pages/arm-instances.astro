@@ -1,0 +1,89 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { loadAllInstances, fmtPrice } from '../lib/seo-instances';
+
+const LABEL: Record<string, string> = { aws: 'AWS', azure: 'Azure', gcp: 'GCP', oci: 'OCI' };
+const BADGE: Record<string, string> = {
+  aws: 'bg-orange-50 text-orange-700',
+  azure: 'bg-blue-50 text-blue-700',
+  gcp: 'bg-green-50 text-green-700',
+  oci: 'bg-red-50 text-red-700',
+};
+
+const top20 = loadAllInstances()
+  .filter(i => i.architecture === 'arm64' && i.vCPU > 0)
+  .sort((a, b) => a.priceUSD_hourly / a.vCPU - b.priceUSD_hourly / b.vCPU)
+  .slice(0, 20);
+
+const title = 'ARM64 Cloud Instances Price Comparison — CloudPriceFinder';
+const description =
+  'Compare ARM64 cloud instances across AWS (Graviton), Azure (Ampere Altra), Google Cloud (Tau T2A), and Oracle Cloud (Ampere A1). Sorted by price per vCPU per hour.';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'ARM64 Cloud Instances — Price Comparison',
+  description,
+  numberOfItems: top20.length,
+  itemListElement: top20.map((inst, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: `${LABEL[inst.provider] ?? inst.provider} ${inst.instanceType} — $${(inst.priceUSD_hourly / inst.vCPU).toFixed(5)}/vCPU/hr`,
+    description: `${inst.vCPU} vCPU, ${inst.memoryGiB} GiB RAM, ${fmtPrice(inst.priceUSD_hourly)}`,
+  })),
+};
+---
+
+<BaseLayout {title} {description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} slot="head" />
+
+  <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-8">
+    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
+      ARM64 Cloud Instances — Price Comparison
+    </h1>
+    <p class="text-gray-600 mb-6 max-w-2xl">
+      Top 20 most cost-effective ARM64 instances across AWS (Graviton), Azure (Ampere Altra),
+      Google Cloud (Tau T2A), and Oracle Cloud (Ampere A1), sorted by price per vCPU/hr.
+    </p>
+
+    <div class="overflow-x-auto rounded-lg border border-gray-200 shadow-sm mb-6">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-gray-50 border-b-2 border-gray-200">
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-10">#</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Provider</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Instance</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">vCPU</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">RAM (GiB)</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">On-Demand/hr</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">$/vCPU/hr</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {top20.map((inst, i) => (
+            <tr class="hover:bg-gray-50 transition-colors">
+              <td class="px-4 py-3 text-gray-400 text-xs">{i + 1}</td>
+              <td class="px-4 py-3">
+                <span class={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${BADGE[inst.provider] ?? 'bg-gray-100 text-gray-700'}`}>
+                  {LABEL[inst.provider] ?? inst.provider}
+                </span>
+              </td>
+              <td class="px-4 py-3 font-mono font-medium text-gray-900">{inst.instanceType}</td>
+              <td class="px-4 py-3 text-gray-700">{inst.vCPU}</td>
+              <td class="px-4 py-3 text-gray-700">{inst.memoryGiB ?? '—'}</td>
+              <td class="px-4 py-3 font-semibold text-emerald-700">{fmtPrice(inst.priceUSD_hourly)}</td>
+              <td class="px-4 py-3 text-gray-600 font-mono text-xs">${(inst.priceUSD_hourly / inst.vCPU).toFixed(5)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <a
+      href="/?arch=arm64"
+      class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition-colors"
+    >
+      View all ARM64 instances →
+    </a>
+  </div>
+</BaseLayout>

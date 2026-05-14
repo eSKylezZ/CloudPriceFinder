@@ -2,13 +2,13 @@
 // ComparisonTable v3
 ---
 
-<div class="bg-white rounded-lg shadow-xs border border-gray-200">
+<div class="bg-white rounded-lg shadow-xs border border-gray-200 lg:h-full lg:flex lg:flex-col">
   <!-- Table Header -->
-  <div class="px-4 sm:px-6 py-4 border-b border-gray-200 space-y-3">
+  <div class="px-4 sm:px-6 py-4 border-b border-gray-200 space-y-3 lg:shrink-0">
     <!-- Row 1: title + controls -->
-    <div class="flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-3 min-w-0 flex-1">
-        <h2 class="text-lg font-semibold text-gray-900 shrink-0">Instance Comparison</h2>
+    <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-3">
+      <div class="flex items-center gap-3 min-w-0">
+        <h2 id="table-title" class="text-lg font-semibold text-gray-900">Instance Comparison</h2>
         <span id="filter-active-badge" class="hidden px-2 py-0.5 bg-amber-100 text-amber-800 text-xs font-semibold rounded-full whitespace-nowrap" aria-live="polite"></span>
         <span class="text-sm text-gray-500" id="result-count" aria-live="polite" aria-atomic="true">Loading...</span>
       </div>
@@ -37,6 +37,10 @@
           </button>
           <div id="col-toggle-panel" class="hidden absolute right-0 top-full mt-1 z-30 bg-white border border-gray-200 rounded-lg shadow-lg p-3 w-44 space-y-1.5">
             <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider pb-1.5 border-b border-gray-100">Show / Hide</p>
+            <label class="flex items-center gap-2 cursor-pointer select-none py-0.5">
+              <input type="checkbox" class="col-toggle-check rounded-sm border-gray-300 text-primary-600 focus:ring-primary-500" data-col="monthly" checked />
+              <span class="text-sm text-gray-700">$/mo</span>
+            </label>
             <label class="flex items-center gap-2 cursor-pointer select-none py-0.5">
               <input type="checkbox" class="col-toggle-check rounded-sm border-gray-300 text-primary-600 focus:ring-primary-500" data-col="pricePerGiB" />
               <span class="text-sm text-gray-700">$/GiB/hr</span>
@@ -89,7 +93,7 @@
     </div>
 
     <!-- Commitment toggle -->
-    <div class="flex items-center space-x-1 bg-gray-100 rounded-lg p-1 w-fit" role="group" aria-label="Pricing term">
+    <div id="commitment-toggle" class="flex items-center space-x-1 bg-gray-100 rounded-lg p-1 w-fit" role="group" aria-label="Pricing term">
       <button class="commitment-btn px-3 py-1 text-sm rounded-md font-medium transition-colors commitment-active focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-1"
         data-term="on-demand">On-Demand</button>
       <button class="commitment-btn px-3 py-1 text-sm rounded-md font-medium transition-colors text-gray-600 hover:bg-white hover:shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-1"
@@ -132,6 +136,7 @@
             <th class="px-3 py-3 text-left"><div class="h-3 bg-slate-300 rounded w-16"></div></th>
             <th class="px-3 py-3 text-left"><div class="h-3 bg-slate-300 rounded w-10"></div></th>
             <th class="px-3 py-3 text-left"><div class="h-3 bg-slate-300 rounded w-24"></div></th>
+            <th class="px-3 py-3 text-left"><div class="h-3 bg-slate-300 rounded w-12"></div></th>
             <th class="px-3 py-3 text-left"><div class="h-3 bg-slate-300 rounded w-14"></div></th>
             <th class="px-3 py-3 text-left"><div class="h-3 bg-slate-300 rounded w-16"></div></th>
             <th class="px-3 py-3 text-left"><div class="h-3 bg-slate-300 rounded w-16"></div></th>
@@ -152,6 +157,7 @@
               <td class="px-3 py-3"><div class="h-4 w-8 bg-gray-200 rounded"></div></td>
               <td class="px-3 py-3"><div class="h-4 w-16 bg-gray-200 rounded"></div></td>
               <td class="px-3 py-3"><div class="h-5 w-14 bg-gray-200 rounded"></div></td>
+              <td class="px-3 py-3"><div class="h-4 w-16 bg-gray-200 rounded"></div></td>
               <td class="px-3 py-3"><div class="h-4 w-16 bg-gray-200 rounded"></div></td>
               <td class="px-3 py-3"><div class="h-5 w-14 bg-green-100 rounded-full"></div></td>
               <td class="px-3 py-3"><div class="h-4 w-16 bg-gray-200 rounded"></div></td>
@@ -192,7 +198,7 @@
   </div>
 
   <!-- Main content wrapper (JS removes 'hidden' when data loads) -->
-  <div id="table-wrapper" class="hidden">
+  <div id="table-wrapper" class="hidden lg:flex-1 lg:min-h-0">
 
     <!-- Mobile: card-based layout (< sm / 640px) -->
     <div id="mobile-cards" class="block sm:hidden divide-y divide-gray-100">
@@ -200,8 +206,8 @@
     </div>
 
     <!-- Desktop/tablet: scrollable table (≥ sm / 640px) -->
-    <div class="hidden sm:block relative">
-      <div id="table-scroll" class="overflow-x-auto max-h-[70vh] overflow-y-auto">
+    <div class="hidden sm:block relative lg:h-full lg:flex lg:flex-col">
+      <div id="table-scroll" class="overflow-x-auto max-h-[70vh] lg:max-h-none lg:flex-1 overflow-y-auto">
         <table class="min-w-full divide-y divide-gray-200 text-sm" id="instances-table">
           <thead>
             <tr class="bg-slate-100 border-b-2 border-slate-200">
@@ -228,6 +234,9 @@
               </th>
               <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider sticky top-0 bg-slate-100 cursor-pointer hover:bg-slate-200 z-10 whitespace-nowrap select-none"
                 data-sort="priceUSD_hourly" aria-sort="ascending" tabindex="0" id="price-col-header">On-Demand/hr</th>
+              <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider sticky top-0 bg-slate-100 cursor-pointer hover:bg-slate-200 z-10 whitespace-nowrap select-none" data-col="monthly"
+                data-sort="priceUSD_monthly" aria-sort="none" tabindex="0"
+                title="Estimated monthly cost based on 730 hours (hourly × 730)">$/mo</th>
               <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider sticky top-0 bg-slate-100 z-10 select-none" data-col="savings"
                 title="Best savings % vs on-demand price for the selected commitment term (1yr or 3yr). Switch the pricing term above to see reserved pricing.">
                 <span class="flex items-center gap-0.5">Savings
@@ -277,7 +286,7 @@
   </div>
 
   <!-- Empty state -->
-  <div id="table-empty" class="hidden text-center py-16 px-6">
+  <div id="table-empty" class="hidden text-center py-16 px-6 lg:flex-1">
     <svg class="mx-auto h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
         d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
@@ -293,8 +302,96 @@
     </button>
   </div>
 
+  <!-- Service category coming-soon state -->
+  <div id="service-coming-soon" class="hidden text-center py-16 px-6">
+    <div class="mx-auto max-w-md">
+      <div id="cs-icon" class="text-5xl mb-4" aria-hidden="true"></div>
+      <h3 id="cs-title" class="text-xl font-bold text-gray-900 mb-2"></h3>
+      <p id="cs-desc" class="text-sm text-gray-500 mb-6"></p>
+      <ul id="cs-features" class="text-left space-y-2 mb-8 inline-block text-sm text-gray-600"></ul>
+      <div>
+        <button id="cs-back-btn" type="button"
+          class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-primary-600 bg-primary-50 border border-primary-200 rounded-lg hover:bg-primary-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500">
+          <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back to Compute
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Products table (block-storage, databases, ai-ml tabs) -->
+  <div id="products-section" class="hidden">
+    <!-- Block Storage Cost Estimator card (shown only for block-storage category) -->
+    <div id="block-storage-calculator" class="hidden mx-4 mt-4 mb-3 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="flex-1 min-w-0">
+          <p class="text-xs font-semibold text-blue-700 uppercase tracking-wide mb-0.5">Cost Estimator</p>
+          <p class="text-xs text-gray-500">Enter a volume size to calculate the estimated monthly cost for each volume type.</p>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <label class="text-sm text-gray-600 whitespace-nowrap font-medium" for="storage-gib-input">Volume size</label>
+          <input type="number" id="storage-gib-input" min="1" max="65536" value="100"
+            class="w-24 border border-blue-300 rounded-lg px-2 py-1.5 text-sm text-right font-mono focus:ring-2 focus:ring-blue-400 focus:border-blue-400 bg-white" />
+          <span class="text-sm text-gray-600 font-medium">GiB</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="products-loading" class="py-10 text-center text-sm text-gray-500">
+      <svg class="mx-auto mb-2 h-5 w-5 animate-spin text-primary-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      Loading data…
+    </div>
+    <!-- Mobile: card layout (< sm) -->
+    <div id="products-mobile-cards" class="block sm:hidden divide-y divide-gray-100">
+      <!-- populated by JS -->
+    </div>
+    <!-- Desktop: scrollable table (≥ sm) -->
+    <div id="products-table-wrapper" class="hidden sm:block overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200 text-sm" id="products-table">
+        <thead id="products-thead"></thead>
+        <tbody id="products-tbody" class="bg-white divide-y divide-gray-100"></tbody>
+      </table>
+    </div>
+    <div id="products-empty" class="hidden text-center py-16 px-6">
+      <svg class="mx-auto h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+          d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
+      </svg>
+      <h3 class="mt-4 text-base font-semibold text-gray-900">No results found</h3>
+      <p class="mt-1.5 text-sm text-gray-500 max-w-xs mx-auto">No items match your current filters. Try adjusting your provider or region selection.</p>
+    </div>
+    <div id="products-pagination" class="hidden px-6 py-4 border-t border-gray-200">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div id="products-pagination-info" class="text-sm text-gray-500"></div>
+        <div class="flex items-center gap-2">
+          <button id="products-prev-btn"
+            class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Prev
+          </button>
+          <span id="products-page-info" class="text-sm text-gray-700"></span>
+          <button id="products-next-btn"
+            class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+            Next
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Pagination -->
-  <div id="pagination-controls" class="hidden px-6 py-4 border-t border-gray-200">
+  <div id="pagination-controls" class="hidden px-6 py-4 border-t border-gray-200 lg:shrink-0">
     <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
       <div class="text-sm text-gray-500" id="pagination-info">Showing 1–25</div>
       <div class="flex items-center gap-2">
@@ -323,22 +420,45 @@
       </div>
     </div>
   </div>
+
+  <!-- Badge legend -->
+  <div id="badge-legend" class="hidden px-4 sm:px-6 py-2.5 border-t border-gray-100 bg-gray-50/60 lg:shrink-0">
+    <div class="flex flex-wrap items-center gap-x-5 gap-y-1.5">
+      <span class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider shrink-0">Badges (current results):</span>
+      <span class="flex items-center gap-1.5 text-xs text-gray-600">
+        <span class="inline-flex items-center px-1.5 py-px rounded text-[10px] font-semibold bg-emerald-100 text-emerald-700">Best Value</span>
+        Lowest $/vCPU/hr
+      </span>
+      <span class="flex items-center gap-1.5 text-xs text-gray-600">
+        <span class="inline-flex items-center px-1.5 py-px rounded text-[10px] font-semibold bg-blue-100 text-blue-700">Cheapest</span>
+        Lowest price/hr
+      </span>
+      <span class="flex items-center gap-1.5 text-xs text-gray-600">
+        <span class="inline-flex items-center px-1.5 py-px rounded text-[10px] font-semibold bg-purple-100 text-purple-700">Best Memory/$/hr</span>
+        Lowest $/GiB RAM/hr
+      </span>
+      <span class="flex items-center gap-1.5 text-xs text-gray-600">
+        <span class="inline-flex items-center px-1.5 py-px rounded text-[10px] font-semibold bg-yellow-100 text-yellow-700">Most Regions</span>
+        Most geographic regions
+      </span>
+    </div>
+  </div>
 </div>
 
-<!-- Sticky compare bar -->
-<div id="compare-bar" class="hidden fixed bottom-0 inset-x-0 bg-white border-t border-gray-200 shadow-2xl z-50" role="region" aria-label="Selected instances for comparison">
-  <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
-    <div class="flex items-center gap-3 min-w-0 flex-1">
-      <span class="text-sm font-semibold text-gray-800 whitespace-nowrap" id="compare-bar-count"></span>
-      <div class="flex flex-wrap gap-1.5 min-w-0" id="compare-bar-chips"></div>
-    </div>
+<!-- Sticky compare tray — slides up from bottom via CSS transform -->
+<div id="compare-bar"
+  class="fixed bottom-0 inset-x-0 bg-white border-t border-gray-200 shadow-2xl z-50 transition-transform duration-300 ease-in-out translate-y-full"
+  role="region" aria-label="Selected instances for comparison" aria-hidden="true">
+  <div class="w-full max-w-[800px] mx-auto px-4 sm:px-6 py-3 flex flex-wrap sm:flex-nowrap items-center gap-x-4 gap-y-2">
+    <div class="flex flex-wrap gap-1.5 min-w-0 flex-1" id="compare-bar-chips"></div>
     <div class="flex items-center gap-3 shrink-0">
-      <button id="compare-bar-clear" class="text-sm text-gray-500 hover:text-gray-700 whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:rounded focus-visible:ring-offset-1">
-        Clear
+      <button id="compare-bar-clear"
+        class="text-sm text-gray-500 hover:text-gray-700 whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:rounded focus-visible:ring-offset-1">
+        Clear all
       </button>
       <a id="compare-bar-link" href="/compare"
-        class="inline-flex items-center gap-1.5 px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 whitespace-nowrap">
-        Compare
+        class="inline-flex items-center gap-1.5 px-4 py-2 bg-primary-600 text-white text-sm font-semibold rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 whitespace-nowrap">
+        Compare Now →
         <span id="compare-bar-sr-count" class="sr-only"></span>
       </a>
     </div>
@@ -354,6 +474,7 @@
   }
 
   /* Column visibility — toggled via JS classes on #instances-table */
+  #instances-table.hide-col-monthly [data-col="monthly"] { display: none; }
   #instances-table.hide-col-pricePerGiB [data-col="pricePerGiB"] { display: none; }
   #instances-table.hide-col-gpu [data-col="gpu"] { display: none; }
   #instances-table.hide-col-regions [data-col="regions"] { display: none; }
@@ -373,7 +494,7 @@
 
 <script>
   import type { V3Instance, V3InstanceFile } from '../types';
-  import { loadInstance } from '../lib/data-loader';
+  import { loadInstance, loadInstanceForOS } from '../lib/data-loader';
 
   // ---------------------------------------------------------------------------
   // Equivalents data shape
@@ -390,8 +511,68 @@
   // ---------------------------------------------------------------------------
   // State
   // ---------------------------------------------------------------------------
+  // Service category — initialized from URL so it's reliable before any events fire
+  let activeServiceCategory: string = (() => {
+    const p = new URLSearchParams(window.location.search).get('cat');
+    return p ?? 'compute';
+  })();
+
+  // Apply initial title and commitment toggle visibility based on URL category
+  (() => {
+    if (activeServiceCategory === 'compute') return;
+    const titleEl = document.getElementById('table-title');
+    const commitmentToggle = document.getElementById('commitment-toggle');
+    const INIT_TITLES: Record<string, string> = {
+      'block-storage': 'Block Storage Comparison',
+      'databases': 'Database Comparison',
+      'ai-ml': 'AI / ML Comparison',
+      'object-storage': 'Object Storage Comparison',
+    };
+    if (titleEl) titleEl.textContent = INIT_TITLES[activeServiceCategory] ?? 'Comparison';
+    if (commitmentToggle) commitmentToggle.style.display = 'none';
+    const colToggleContainer = document.getElementById('col-toggle-container');
+    if (colToggleContainer) colToggleContainer.style.display = 'none';
+  })();
+
+  const COMING_SOON: Record<string, { icon: string; title: string; description: string; features: string[] }> = {
+    'block-storage': {
+      icon: '💾',
+      title: 'Block Storage Comparison — Coming Soon',
+      description: 'Compare managed block storage across AWS, Azure, GCP, OCI, and more.',
+      features: [
+        'EBS, Azure Managed Disks, GCP Persistent Disks, OCI Block Volumes',
+        '$/GiB/month by storage tier (SSD, HDD, premium)',
+        'IOPS and throughput limits at each price point',
+        'Snapshot and backup pricing',
+      ],
+    },
+    'databases': {
+      icon: '🗄️',
+      title: 'Managed Database Comparison — Coming Soon',
+      description: 'Compare managed relational and NoSQL database instance pricing.',
+      features: [
+        'AWS RDS, Azure SQL Database, Cloud SQL, OCI Autonomous DB',
+        'Multi-AZ / High-Availability premium costs',
+        'Storage-included vs. separately-billed instances',
+        '1-year and 3-year reserved instance discounts',
+      ],
+    },
+    'ai-ml': {
+      icon: '🤖',
+      title: 'AI / ML Compute Comparison — Coming Soon',
+      description: 'Compare instances optimized for AI training and inference.',
+      features: [
+        'SageMaker, Vertex AI, Azure ML, and bare-metal GPU options',
+        'GPU memory, model, and count per instance',
+        'Spot / preemptible pricing for training workloads',
+        'Inference-optimized vs. training-optimized tiers',
+      ],
+    },
+  };
+
   let allInstances: V3Instance[] = [];
   let filteredInstances: V3Instance[] = [];
+  let panelFilteredInstances: V3Instance[] = []; // panel filters only, no search term
   let baseFilteredInstances: V3Instance[] = [];
   let currentPage = 1;
   let pageSize = 25;
@@ -399,7 +580,17 @@
   let currentSortDir: 'asc' | 'desc' = 'asc';
   let searchTerm = '';
   let activeCommitmentTerm: 'on-demand' | '1yr' | '3yr' = 'on-demand';
-  let bestValueKeys = new Set<string>();
+  let activeRegions: string[] = [];
+
+  const PROVIDER_PRIMARY: Record<string, string> = {
+    aws: 'us-east-1', azure: 'eastus', gcp: 'us-central1',
+    oci: 'us-ashburn-1', ovh: 'BHS', scaleway: 'fr-par',
+    vultr: 'ewr', vast: 'global',
+  };
+  let badgeBestValue   = new Set<string>(); // lowest $/vCPU/hr
+  let badgeCheapest    = new Set<string>(); // lowest absolute price/hr
+  let badgeBestMemory  = new Set<string>(); // lowest $/GiB/hr
+  let badgeMostRegions = new Set<string>(); // highest region count
 
   const MAX_COMPARE = 4;
   const selectedInstances = new Map<string, V3Instance>();
@@ -526,9 +717,55 @@
   });
 
   // ---------------------------------------------------------------------------
+  // Service category helpers
+  // ---------------------------------------------------------------------------
+  function showComingSoon(category: string) {
+    const data = COMING_SOON[category];
+    if (!data) return;
+
+    const csDiv  = document.getElementById('service-coming-soon')!;
+    const icon   = document.getElementById('cs-icon')!;
+    const title  = document.getElementById('cs-title')!;
+    const desc   = document.getElementById('cs-desc')!;
+    const feats  = document.getElementById('cs-features')!;
+
+    icon.textContent  = data.icon;
+    title.textContent = data.title;
+    desc.textContent  = data.description;
+    feats.innerHTML   = data.features
+      .map((f) => `<li class="flex items-start gap-2"><span class="mt-0.5 text-primary-500 shrink-0">✓</span><span>${f}</span></li>`)
+      .join('');
+
+    tableLoading.classList.add('hidden');
+    tableWrapper.classList.add('hidden');
+    tableEmpty.classList.add('hidden');
+    paginationControls.classList.add('hidden');
+    document.getElementById('badge-legend')?.classList.add('hidden');
+    csDiv.classList.remove('hidden');
+
+    if (resultCount) resultCount.textContent = '';
+  }
+
+  function hideComingSoon() {
+    document.getElementById('service-coming-soon')?.classList.add('hidden');
+    if (allInstances.length > 0) {
+      sortAndRender();
+    } else {
+      tableLoading.classList.remove('hidden');
+    }
+  }
+
+  // ---------------------------------------------------------------------------
   // Events from index.astro
   // ---------------------------------------------------------------------------
   window.addEventListener('dataLoading', () => {
+    if (activeServiceCategory !== 'compute') {
+      // product categories load their own data; only show coming-soon for tabs with no data
+      if (!CATEGORY_PRODUCT_KEY[activeServiceCategory]) {
+        showComingSoon(activeServiceCategory);
+      }
+      return;
+    }
     tableLoading.classList.remove('hidden');
     tableWrapper.classList.add('hidden');
     tableEmpty.classList.add('hidden');
@@ -539,17 +776,93 @@
   window.addEventListener('dataLoaded', (event: Event) => {
     const { instances } = (event as CustomEvent<{ instances: V3Instance[] }>).detail;
     allInstances = instances;
+
+    if (activeServiceCategory !== 'compute') {
+      if (CATEGORY_PRODUCT_KEY[activeServiceCategory]) {
+        void showProductsTable(activeServiceCategory);
+      } else {
+        showComingSoon(activeServiceCategory);
+      }
+      return;
+    }
+
+    panelFilteredInstances = [...allInstances];
     baseFilteredInstances = [...allInstances];
     currentPage = 1;
     sortAndRender();
+
+    const initCounts: Record<string, number> = {};
+    for (const inst of panelFilteredInstances) {
+      initCounts[inst.provider] = (initCounts[inst.provider] ?? 0) + 1;
+    }
+    window.dispatchEvent(new CustomEvent('computeProviderCountsUpdated', {
+      detail: { providerCounts: initCounts },
+    }));
+  });
+
+  const CATEGORY_TITLES: Record<string, string> = {
+    'compute': 'Instance Comparison',
+    'block-storage': 'Block Storage Comparison',
+    'databases': 'Database Comparison',
+    'ai-ml': 'AI / ML Comparison',
+    'object-storage': 'Object Storage Comparison',
+  };
+
+  const SEARCH_PLACEHOLDERS: Record<string, string> = {
+    'compute':        'Search instances (e.g. m7i, arm64, us-east-1...)',
+    'block-storage':  'Search volumes (e.g. gp3, ssd, premium...)',
+    'databases':      'Search databases (e.g. mysql, postgres, db.r5...)',
+    'ai-ml':          'Search models (e.g. gpt-4, claude, gemini...)',
+    'object-storage': 'Search storage classes (e.g. standard, glacier...)',
+  };
+
+  window.addEventListener('serviceCategoryChanged', (event: Event) => {
+    const { category } = (event as CustomEvent<{ category: string }>).detail;
+    activeServiceCategory = category;
+
+    const titleEl = document.getElementById('table-title');
+    if (titleEl) titleEl.textContent = CATEGORY_TITLES[category] ?? 'Comparison';
+
+    const commitmentToggle = document.getElementById('commitment-toggle');
+    if (commitmentToggle) commitmentToggle.style.display = category === 'compute' ? '' : 'none';
+    const colToggleContainer = document.getElementById('col-toggle-container');
+    if (colToggleContainer) colToggleContainer.style.display = category === 'compute' ? '' : 'none';
+
+    // Reset and update search bar for the new category
+    if (searchInput) {
+      searchInput.value = '';
+      searchInput.placeholder = SEARCH_PLACEHOLDERS[category] ?? 'Search...';
+    }
+    searchTerm = '';
+    clearSearchBtn?.classList.add('hidden');
+
+    if (category === 'compute') {
+      hideProductsSection();
+      hideComingSoon();
+    } else if (CATEGORY_PRODUCT_KEY[category]) {
+      void showProductsTable(category);
+    } else {
+      hideProductsSection();
+      showComingSoon(category);
+    }
   });
 
   window.addEventListener('filtersChanged', (event: Event) => {
+    if (activeServiceCategory !== 'compute') {
+      if (allProductItems.length > 0) {
+        const { providers, regions } = (event as CustomEvent<{ providers: string[]; regions: string[] }>).detail;
+        applyAndRenderProducts(providers, regions);
+      }
+      return;
+    }
+
     const filters = (event as CustomEvent).detail as {
       providers: string[];
       families: { provider: string; family: string }[];
       commitmentTerm: 'on-demand' | '1yr' | '3yr';
       architecture: string;
+      operatingSystem: string;
+      tenancy: string;
       minVCPU: number;
       maxVCPU: number;
       minMemory: number;
@@ -558,7 +871,15 @@
       gpuOnly: boolean;
       regions: string[];
       filterCount?: number;
+      sortField?: string;
+      sortDir?: 'asc' | 'desc';
     };
+
+    if (filters.sortField) {
+      currentSortField = filters.sortField;
+      currentSortDir   = filters.sortDir ?? 'asc';
+      updateSortAriaLabels();
+    }
 
     if (filters.commitmentTerm !== activeCommitmentTerm) {
       activeCommitmentTerm = filters.commitmentTerm;
@@ -583,7 +904,9 @@
       }
     }
 
-    baseFilteredInstances = allInstances.filter((inst) => {
+    activeRegions = filters.regions ?? [];
+
+    panelFilteredInstances = allInstances.filter((inst) => {
       if (filters.providers.length && !filters.providers.includes(inst.provider)) return false;
       if (
         filters.families.length &&
@@ -593,21 +916,48 @@
       if ((inst.memoryGiB ?? 0) < filters.minMemory || (inst.memoryGiB ?? 0) > filters.maxMemory) return false;
       if (filters.architecture !== 'any' && inst.architecture !== filters.architecture) return false;
       if (filters.gpuOnly && !inst.gpu) return false;
+      if (filters.tenancy && filters.tenancy !== 'any') {
+        const instTenancy = inst.tenancy ?? 'shared';
+        if (instTenancy !== filters.tenancy) return false;
+      }
       if (filters.regions?.length && !filters.regions.some((r) => inst.regions?.includes(r))) return false;
+
+      const targetOS = filters.operatingSystem ?? 'Linux';
+      if (targetOS !== 'any') {
+        const instOS = inst.operatingSystem ?? 'Linux';
+        if (targetOS === 'Linux') {
+          // Linux filter also matches instances with no operatingSystem (non-AWS providers)
+          if (instOS !== 'Linux') return false;
+        } else {
+          if (instOS !== targetOS) return false;
+        }
+      }
 
       const effectivePrice = getEffectivePrice(inst, filters.commitmentTerm);
       if (effectivePrice > filters.maxPrice) return false;
 
-      if (searchTerm) {
-        const haystack =
-          `${inst.instanceType} ${inst.provider} ${inst.family} ${inst.architecture} ${(inst.regions ?? []).join(' ')}`.toLowerCase();
-        if (!haystack.includes(searchTerm)) return false;
-      }
       return true;
     });
 
+    baseFilteredInstances = searchTerm
+      ? panelFilteredInstances.filter((inst) => {
+          const haystack =
+            `${inst.instanceType} ${inst.provider} ${inst.family} ${inst.architecture} ${inst.operatingSystem ?? ''} ${(inst.regions ?? []).join(' ')}`.toLowerCase();
+          return haystack.includes(searchTerm);
+        })
+      : [...panelFilteredInstances];
+
     currentPage = 1;
     sortAndRender();
+
+    // Dispatch per-provider counts (reflects all active filters including region)
+    const computeProviderCounts: Record<string, number> = {};
+    for (const inst of panelFilteredInstances) {
+      computeProviderCounts[inst.provider] = (computeProviderCounts[inst.provider] ?? 0) + 1;
+    }
+    window.dispatchEvent(new CustomEvent('computeProviderCountsUpdated', {
+      detail: { providerCounts: computeProviderCounts },
+    }));
 
     const filterBadge = document.getElementById('filter-active-badge');
     if (filterBadge) {
@@ -648,6 +998,57 @@
   function pricePerGiB(inst: V3Instance, term: 'on-demand' | '1yr' | '3yr'): number {
     if (!inst.memoryGiB || inst.memoryGiB === 0) return Infinity;
     return getEffectivePrice(inst, term) / inst.memoryGiB;
+  }
+
+  function computeBadges(instances: V3Instance[]) {
+    badgeBestValue.clear();
+    badgeCheapest.clear();
+    badgeBestMemory.clear();
+    badgeMostRegions.clear();
+
+    const EPS = 1e-9;
+
+    const instKey = (i: V3Instance) => `${i.provider}:${i.instanceType}:${i.operatingSystem ?? 'Linux'}`;
+
+    const withVCPU = instances.filter(i => (i.vCPU ?? 0) > 0 && getEffectivePrice(i, activeCommitmentTerm) > 0);
+    if (withVCPU.length) {
+      const vals = withVCPU.map(i => pricePerVCPU(i, activeCommitmentTerm));
+      const min  = Math.min(...vals);
+      withVCPU.forEach((i, idx) => { if (vals[idx] - min < EPS) badgeBestValue.add(instKey(i)); });
+    }
+
+    const withPrice = instances.filter(i => getEffectivePrice(i, activeCommitmentTerm) > 0);
+    if (withPrice.length) {
+      const vals = withPrice.map(i => getEffectivePrice(i, activeCommitmentTerm));
+      const min  = Math.min(...vals);
+      withPrice.forEach((i, idx) => { if (vals[idx] - min < EPS) badgeCheapest.add(instKey(i)); });
+    }
+
+    const withMem = instances.filter(i => (i.memoryGiB ?? 0) > 0 && getEffectivePrice(i, activeCommitmentTerm) > 0);
+    if (withMem.length) {
+      const vals = withMem.map(i => pricePerGiB(i, activeCommitmentTerm));
+      const min  = Math.min(...vals);
+      withMem.forEach((i, idx) => { if (vals[idx] - min < EPS) badgeBestMemory.add(instKey(i)); });
+    }
+
+    const withReg = instances.filter(i => (i.regions?.length ?? 0) > 0);
+    if (withReg.length) {
+      const max = Math.max(...withReg.map(i => i.regions!.length));
+      withReg.forEach(i => { if ((i.regions?.length ?? 0) >= max) badgeMostRegions.add(instKey(i)); });
+    }
+  }
+
+  function buildBadgeHtml(key: string): string {
+    const badges: string[] = [];
+    if (badgeBestValue.has(key))
+      badges.push('<span class="inline-flex items-center px-1.5 py-px rounded text-[10px] font-semibold bg-emerald-100 text-emerald-700 cursor-help whitespace-nowrap" title="Lowest $/vCPU/hr in current filtered results">Best Value</span>');
+    if (badgeCheapest.has(key))
+      badges.push('<span class="inline-flex items-center px-1.5 py-px rounded text-[10px] font-semibold bg-blue-100 text-blue-700 cursor-help whitespace-nowrap" title="Lowest on-demand price/hr in current filtered results">Cheapest</span>');
+    if (badgeBestMemory.has(key))
+      badges.push('<span class="inline-flex items-center px-1.5 py-px rounded text-[10px] font-semibold bg-purple-100 text-purple-700 cursor-help whitespace-nowrap" title="Lowest $/GiB RAM per hour in current filtered results">Best Memory/$/hr</span>');
+    if (badgeMostRegions.has(key))
+      badges.push('<span class="inline-flex items-center px-1.5 py-px rounded text-[10px] font-semibold bg-yellow-100 text-yellow-700 cursor-help whitespace-nowrap" title="Available in the most regions in current filtered results">Most Regions</span>');
+    return badges.join('');
   }
 
   function bestSavings(inst: V3Instance, term: 'on-demand' | '1yr' | '3yr'): string {
@@ -715,7 +1116,7 @@
     const sorted = [...termFiltered].sort((a, b) => {
       let av: number | string = 0;
       let bv: number | string = 0;
-      if (currentSortField === 'priceUSD_hourly') {
+      if (currentSortField === 'priceUSD_hourly' || currentSortField === 'priceUSD_monthly') {
         av = getEffectivePrice(a, activeCommitmentTerm);
         bv = getEffectivePrice(b, activeCommitmentTerm);
       } else if (currentSortField === 'pricePerVCPU') {
@@ -751,24 +1152,22 @@
     const end = Math.min(start + effectivePageSize, total);
     const slice = filteredInstances.slice(start, end);
 
-    // Compute best-value instances (top 3 by $/vCPU/hr) across all filtered results
-    bestValueKeys = new Set<string>();
-    const validForBV = filteredInstances.filter(i => (i.vCPU ?? 0) > 0 && (i.priceUSD_hourly ?? 0) > 0);
-    [...validForBV]
-      .sort((a, b) => pricePerVCPU(a, activeCommitmentTerm) - pricePerVCPU(b, activeCommitmentTerm))
-      .slice(0, 3)
-      .forEach(i => bestValueKeys.add(`${i.provider}:${i.instanceType}`));
+    // Compute winner badges across the full filtered result set
+    computeBadges(filteredInstances);
 
     tableLoading.classList.add('hidden');
 
+    const badgeLegend = document.getElementById('badge-legend');
     if (total === 0) {
       tableWrapper.classList.add('hidden');
       tableEmpty.classList.remove('hidden');
       paginationControls.classList.add('hidden');
+      badgeLegend?.classList.add('hidden');
     } else {
       tableWrapper.classList.remove('hidden');
       tableEmpty.classList.add('hidden');
       paginationControls.classList.remove('hidden');
+      badgeLegend?.classList.remove('hidden');
     }
 
     if (resultCount) resultCount.textContent = `${total.toLocaleString()} instances`;
@@ -821,9 +1220,18 @@
       ? `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-green-100 text-green-800">Save ${savings}</span>`
       : '';
 
-    const isSelected  = selectedInstances.has(`${inst.provider}:${inst.instanceType}`);
-    const isFull      = selectedInstances.size >= MAX_COMPARE;
-    const isBestValue = bestValueKeys.has(`${inst.provider}:${inst.instanceType}`);
+    const instOS     = inst.operatingSystem ?? 'Linux';
+    const instKey    = `${inst.provider}:${inst.instanceType}:${instOS}`;
+    const isSelected = selectedInstances.has(instKey);
+    const isFull     = selectedInstances.size >= MAX_COMPARE;
+    const badgeHtml  = buildBadgeHtml(instKey);
+    const osBadgeHtml = instOS !== 'Linux'
+      ? `<span class="inline-flex items-center px-1.5 py-px rounded text-[10px] font-semibold ${instOS === 'Windows' ? 'bg-blue-50 text-blue-700 dark:bg-blue-400/20 dark:text-blue-300' : 'bg-red-50 text-red-700 dark:bg-red-400/20 dark:text-red-300'}">${instOS}</span>`
+      : '';
+    const instTenancy = inst.tenancy ?? 'shared';
+    const tenancyBadgeHtml = instTenancy !== 'shared'
+      ? `<span class="inline-flex items-center px-1.5 py-px rounded text-[10px] font-semibold ${instTenancy === 'host' ? 'bg-purple-50 text-purple-700 dark:bg-purple-400/20 dark:text-purple-300' : 'bg-indigo-50 text-indigo-700 dark:bg-indigo-400/20 dark:text-indigo-300'}">${instTenancy === 'host' ? 'Host' : 'Dedicated'}</span>`
+      : '';
 
     tr.innerHTML = `
       <td class="w-10 px-2 py-2.5 text-center">
@@ -831,6 +1239,8 @@
           title="Show instance details"
           data-provider="${inst.provider}"
           data-instance="${inst.instanceType}"
+          data-os="${instOS}"
+          data-tenancy="${inst.tenancy ?? 'shared'}"
           aria-label="Expand ${inst.instanceType} details">
           <svg class="w-4 h-4 expand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path class="expand-path" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -843,11 +1253,13 @@
         </span>
       </td>
       <td class="px-3 py-2.5 whitespace-nowrap">
-        <div class="max-w-48 truncate text-sm font-medium text-gray-900 font-mono" title="${inst.instanceType}">${inst.instanceType}</div>
-        <div class="flex items-center gap-1.5 mt-0.5">
-          <div class="text-xs text-gray-600">${inst.family}</div>
-          ${isBestValue ? '<span class="inline-flex items-center gap-0.5 px-1.5 py-px rounded text-[10px] font-semibold bg-emerald-100 text-emerald-700 cursor-help" title="Best price-per-vCPU in current results — one of the top 3 lowest $/vCPU/hr across all filtered instances">Best Value<svg class="h-2.5 w-2.5 opacity-60 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd" /></svg></span>' : ''}
+        <div class="flex items-center gap-1.5">
+          <div class="max-w-48 truncate text-sm font-medium text-gray-900 font-mono" title="${inst.instanceType}">${inst.instanceType}</div>
+          ${osBadgeHtml}
+          ${tenancyBadgeHtml}
         </div>
+        <div class="text-xs text-gray-600 mt-0.5">${inst.family}</div>
+        ${badgeHtml ? `<div class="flex flex-wrap gap-1 mt-0.5">${badgeHtml}</div>` : ''}
       </td>
       <td class="px-3 py-2.5 whitespace-nowrap text-sm text-gray-900 tabular-nums">${inst.vCPU ?? '—'}</td>
       <td class="px-3 py-2.5 whitespace-nowrap text-sm text-gray-900 tabular-nums">
@@ -860,6 +1272,9 @@
       </td>
       <td class="px-3 py-2.5 whitespace-nowrap text-sm font-semibold text-gray-900 tabular-nums font-mono transition-colors duration-200" data-price-heat>
         ${formatUSD(effectivePrice)}
+      </td>
+      <td class="px-3 py-2.5 whitespace-nowrap text-sm text-gray-700 tabular-nums font-mono" data-col="monthly">
+        ${formatUSD(effectivePrice * 730, 2)}
       </td>
       <td class="px-3 py-2.5 whitespace-nowrap" data-col="savings">${savingsHtml}</td>
       <td class="px-3 py-2.5 whitespace-nowrap text-sm text-gray-700 tabular-nums font-mono">
@@ -893,18 +1308,31 @@
 
     const effectivePrice = getEffectivePrice(inst, activeCommitmentTerm);
     const savings        = bestSavings(inst, activeCommitmentTerm);
-    const isSelected     = selectedInstances.has(`${inst.provider}:${inst.instanceType}`);
+    const cardOS         = inst.operatingSystem ?? 'Linux';
+    const cardKey        = `${inst.provider}:${inst.instanceType}:${cardOS}`;
+    const isSelected     = selectedInstances.has(cardKey);
     const isFull         = selectedInstances.size >= MAX_COMPARE;
+    const cardBadgeHtml  = buildBadgeHtml(cardKey);
+    const cardOsBadge    = cardOS !== 'Linux'
+      ? `<span class="inline-flex items-center px-1.5 py-px rounded text-[10px] font-semibold ${cardOS === 'Windows' ? 'bg-blue-50 text-blue-700 dark:bg-blue-400/20 dark:text-blue-300' : 'bg-red-50 text-red-700 dark:bg-red-400/20 dark:text-red-300'}">${cardOS}</span>`
+      : '';
+    const cardTenancy = inst.tenancy ?? 'shared';
+    const cardTenancyBadge = cardTenancy !== 'shared'
+      ? `<span class="inline-flex items-center px-1.5 py-px rounded text-[10px] font-semibold ${cardTenancy === 'host' ? 'bg-purple-50 text-purple-700 dark:bg-purple-400/20 dark:text-purple-300' : 'bg-indigo-50 text-indigo-700 dark:bg-indigo-400/20 dark:text-indigo-300'}">${cardTenancy === 'host' ? 'Host' : 'Dedicated'}</span>`
+      : '';
 
     div.innerHTML = `
       <div class="flex items-start justify-between gap-3">
         <div class="flex-1 min-w-0">
           <div class="flex items-center flex-wrap gap-1.5 mb-1.5">
             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ${providerColor(inst.provider)}">${inst.provider.toUpperCase()}</span>
+            ${cardOsBadge}
+            ${cardTenancyBadge}
             ${savings !== '-' ? `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-100 text-green-800">Save ${savings}</span>` : ''}
           </div>
           <div class="font-medium text-sm text-gray-900 font-mono truncate" title="${inst.instanceType}">${inst.instanceType}</div>
           <div class="text-xs text-gray-600 mt-0.5">${inst.family}</div>
+          ${cardBadgeHtml ? `<div class="flex flex-wrap gap-1 mt-1">${cardBadgeHtml}</div>` : ''}
           <div class="flex flex-wrap items-center gap-3 mt-2 text-sm">
             <span class="text-gray-700"><span class="text-[11px] text-gray-400 mr-0.5">vCPU</span>${inst.vCPU ?? '—'}</span>
             <span class="text-gray-700"><span class="text-[11px] text-gray-400 mr-0.5">RAM</span>${inst.memoryGiB != null ? `${inst.memoryGiB} GiB` : '—'}</span>
@@ -921,6 +1349,8 @@
               title="Show instance details"
               data-provider="${inst.provider}"
               data-instance="${inst.instanceType}"
+              data-os="${cardOS}"
+              data-tenancy="${inst.tenancy ?? 'shared'}"
               aria-label="Expand ${inst.instanceType} details">
               <svg class="w-4 h-4 expand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path class="expand-path" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -928,7 +1358,7 @@
             </button>
             <input type="checkbox"
               class="select-row-check h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 cursor-pointer"
-              data-key="${inst.provider}:${inst.instanceType}"
+              data-key="${cardKey}"
               ${isSelected ? 'checked' : ''}
               ${!isSelected && isFull ? 'disabled' : ''}
               title="Add to compare (up to ${MAX_COMPARE})" />
@@ -985,12 +1415,17 @@
     `;
     tr.insertAdjacentElement('afterend', detailRow);
 
+    const rowOS  = btn.dataset.os ?? 'Linux';
+    const rowTenancy = btn.dataset.tenancy ?? 'shared';
     try {
       const [detail, equivMap] = await Promise.all([
-        loadInstance(provider, instanceId) as Promise<V3InstanceFile>,
+        loadInstance(provider, instanceId, rowOS, rowTenancy) as Promise<V3InstanceFile>,
         loadEquivalents(),
       ]);
-      renderDetail(detailRow.querySelector('.detail-content') as HTMLElement, detail, equivMap);
+      const defaultRegion = activeRegions.length > 0
+        ? activeRegions[0]
+        : PROVIDER_PRIMARY[provider] ?? 'us-east-1';
+      renderDetail(detailRow.querySelector('.detail-content') as HTMLElement, detail, equivMap, rowOS, defaultRegion, activeRegions);
     } catch (err) {
       const dc = detailRow.querySelector('.detail-content') as HTMLElement;
       if (dc) dc.textContent = `Failed to load detail: ${err}`;
@@ -1028,12 +1463,17 @@
     detailDiv.innerHTML = '<div class="detail-content text-sm text-gray-500 italic">Loading detail...</div>';
     card.insertAdjacentElement('afterend', detailDiv);
 
+    const cardBtnOS      = btn.dataset.os ?? 'Linux';
+    const cardBtnTenancy = btn.dataset.tenancy ?? 'shared';
     try {
       const [detail, equivMap] = await Promise.all([
-        loadInstance(provider, instanceId) as Promise<V3InstanceFile>,
+        loadInstance(provider, instanceId, cardBtnOS, cardBtnTenancy) as Promise<V3InstanceFile>,
         loadEquivalents(),
       ]);
-      renderDetail(detailDiv.querySelector('.detail-content') as HTMLElement, detail, equivMap);
+      const defaultRegion = activeRegions.length > 0
+        ? activeRegions[0]
+        : PROVIDER_PRIMARY[provider] ?? 'us-east-1';
+      renderDetail(detailDiv.querySelector('.detail-content') as HTMLElement, detail, equivMap, cardBtnOS, defaultRegion, activeRegions);
     } catch (err) {
       const dc = detailDiv.querySelector('.detail-content') as HTMLElement;
       if (dc) dc.textContent = `Failed to load detail: ${err}`;
@@ -1060,16 +1500,21 @@
 
   function handleSelectChange(checkbox: HTMLInputElement) {
     const key = checkbox.dataset.key!;
-    const colonIdx = key.indexOf(':');
-    const provider     = key.slice(0, colonIdx);
-    const instanceType = key.slice(colonIdx + 1);
+    const parts = key.split(':');
+    const provider     = parts[0];
+    const instanceType = parts[1];
+    const keyOS        = parts[2] ?? 'Linux';
 
     if (checkbox.checked) {
       if (selectedInstances.size >= MAX_COMPARE) {
         checkbox.checked = false;
         return;
       }
-      const inst = allInstances.find((i) => i.provider === provider && i.instanceType === instanceType);
+      const inst = allInstances.find((i) =>
+        i.provider === provider &&
+        i.instanceType === instanceType &&
+        (i.operatingSystem ?? 'Linux') === keyOS
+      );
       if (inst) selectedInstances.set(key, inst);
     } else {
       selectedInstances.delete(key);
@@ -1108,7 +1553,6 @@
 
   function updateCompareBar() {
     const bar     = document.getElementById('compare-bar');
-    const countEl = document.getElementById('compare-bar-count');
     const chipsEl = document.getElementById('compare-bar-chips');
     const linkEl  = document.getElementById('compare-bar-link') as HTMLAnchorElement | null;
 
@@ -1118,16 +1562,17 @@
     if (exportDropdownBtn) exportDropdownBtn.disabled = filteredInstances.length === 0 && selectedInstances.size === 0;
 
     if (selectedInstances.size === 0) {
-      bar.classList.add('hidden');
+      bar.classList.add('translate-y-full');
+      bar.classList.remove('translate-y-0');
+      bar.setAttribute('aria-hidden', 'true');
+      tableWrapper.style.paddingBottom = '';
       return;
     }
 
-    bar.classList.remove('hidden');
-
-    if (countEl) {
-      const n = selectedInstances.size;
-      countEl.textContent = `${n} instance${n !== 1 ? 's' : ''} selected`;
-    }
+    bar.classList.remove('translate-y-full');
+    bar.classList.add('translate-y-0');
+    bar.setAttribute('aria-hidden', 'false');
+    tableWrapper.style.paddingBottom = `${bar.offsetHeight}px`;
 
     if (chipsEl) {
       chipsEl.innerHTML = '';
@@ -1165,11 +1610,14 @@
     window.dispatchEvent(new CustomEvent('compareCountChanged', { detail: { count: selectedInstances.size } }));
 
     if (linkEl) {
-      const items = [...selectedInstances.entries()].map(([key]) => {
-        const colonIdx = key.indexOf(':');
-        const prov  = key.slice(0, colonIdx);
-        const itype = key.slice(colonIdx + 1);
-        return `${prov}:${encodeURIComponent(itype)}`;
+      const safeSlug = (s: string) => s.toLowerCase().replace(/[^a-z0-9._-]/g, '-').replace(/^-+|-+$/g, '');
+      const items = [...selectedInstances.values()].map((inst) => {
+        const parts = [safeSlug(inst.instanceType)];
+        const os = inst.operatingSystem ?? 'Linux';
+        const tenancy = inst.tenancy ?? 'shared';
+        if (os !== 'Linux') parts.push(safeSlug(os));
+        if (tenancy !== 'shared') parts.push(safeSlug(tenancy));
+        return `${inst.provider}:${encodeURIComponent(parts.join('-'))}`;
       }).join(',');
       linkEl.href = `/compare?items=${items}`;
     }
@@ -1189,7 +1637,7 @@
   // ---------------------------------------------------------------------------
   // Render detail (shared by table row and mobile card)
   // ---------------------------------------------------------------------------
-  function renderDetail(container: HTMLElement, detail: V3InstanceFile, equivMap: Record<string, EquivRecord>) {
+  function renderDetail(container: HTMLElement, detail: V3InstanceFile, equivMap: Record<string, EquivRecord>, currentOS = 'Linux', comparisonRegion = 'us-east-1', availableRegions: string[] = []) {
     const fmt    = (n: number | undefined | null, d = 4) => (n != null && !isNaN(n) ? `$${n.toFixed(d)}` : '—');
     const fmtPct = (n: number | undefined | null, d = 1) => (n != null && !isNaN(n) ? `${n.toFixed(d)}%` : '—');
 
@@ -1235,6 +1683,108 @@
     const hasMoreRegions      = hiddenRegionRows.length > 0;
     const totalRegionCount    = allRegionEntries.length;
 
+    // OS pricing comparison — two-phase rendering
+    // Phase 1: osPricing from aggregate.py (primary-region cross-OS summary), no extra fetch.
+    // Phase 2: on region-selector change, fetch sibling instance files and re-render.
+    const osPricingData = detail.osPricing;
+    const osSiblings = allInstances
+      .filter(i => i.provider === detail.provider && i.instanceType === detail.instanceType)
+      .sort((a, b) => {
+        const order: Record<string, number> = { Linux: 0, Windows: 1, RHEL: 2, macOS: 3 };
+        return (order[a.operatingSystem ?? 'Linux'] ?? 4) - (order[b.operatingSystem ?? 'Linux'] ?? 4);
+      });
+
+    const hasMultiOS = (osPricingData && Object.keys(osPricingData).length > 1) || osSiblings.length > 1;
+    const hasRegionalPricing = !!(detail.regionPricing && Object.keys(detail.regionPricing).length > 0);
+
+    // Shared row builder — accessible in the region-change closure wired up after innerHTML.
+    const OS_DISPLAY_ORDER = ['Linux', 'Windows', 'RHEL', 'macOS'];
+    const buildOsRows = (priceMap: Record<string, { hourly: number; monthly: number }>, activeOS: string): string => {
+      const allOS = [
+        ...OS_DISPLAY_ORDER.filter(os => os in priceMap),
+        ...Object.keys(priceMap).filter(os => !OS_DISPLAY_ORDER.includes(os)),
+      ];
+      const linuxPrice = priceMap['Linux']?.hourly ?? 0;
+      return allOS.map(os => {
+        const isActive = os === activeOS;
+        const { hourly: price, monthly } = priceMap[os] ?? { hourly: 0, monthly: 0 };
+        const premium = (linuxPrice > 0 && os !== 'Linux') ? ((price - linuxPrice) / linuxPrice * 100) : null;
+        const osBadge = `<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold ${
+          os === 'Windows' ? 'bg-blue-50 text-blue-700' :
+          os === 'RHEL'    ? 'bg-red-50 text-red-700' :
+          os === 'macOS'   ? 'bg-stone-100 text-stone-700' :
+                             'bg-gray-100 text-gray-700'
+        }">${os}</span>`;
+        const premiumText = premium == null ? '—'
+          : premium > 1  ? `+${premium.toFixed(0)}%`
+          : premium < -1 ? `${premium.toFixed(0)}%`
+          :                '≈ Linux';
+        const premiumClass = premium == null ? 'text-gray-400'
+          : premium > 1  ? 'text-amber-600 font-medium'
+          : premium < -1 ? 'text-green-700 font-medium'
+          :                'text-gray-400';
+        return `<tr class="border-b border-gray-100${isActive ? ' bg-primary-50' : ''}">
+            <td class="pr-4 py-1.5">${osBadge}${isActive ? ' <span class="text-[10px] text-primary-600 font-medium">current</span>' : ''}</td>
+            <td class="pr-4 py-1.5 font-mono text-gray-900${isActive ? ' font-semibold' : ''}">${price > 0 ? fmt(price) + '/hr' : '—'}</td>
+            <td class="pr-4 py-1.5 font-mono text-gray-600">${monthly > 0 ? fmt(monthly, 2) + '/mo' : '—'}</td>
+            <td class="py-1.5 text-xs ${premiumClass}">${premiumText}</td>
+          </tr>`;
+      }).join('');
+    };
+
+    let osPricingHtml = '';
+    if (hasMultiOS) {
+      // Region selector: filtered regions ∩ instance regions, default region first.
+      const instRegions: string[] = detail.regions ?? [];
+      const rawAvail = availableRegions.length > 0
+        ? availableRegions.filter(r => instRegions.includes(r))
+        : [];
+      const selectorRegions = rawAvail.length > 0 ? rawAvail : instRegions;
+      const regionOptionsList = [
+        comparisonRegion,
+        ...selectorRegions.filter(r => r !== comparisonRegion),
+      ];
+
+      const regionSelectHtml = hasRegionalPricing && regionOptionsList.length > 1
+        ? `<select id="os-region-select" class="text-xs border border-gray-200 rounded px-1.5 py-0.5 text-gray-600 bg-white focus:ring-1 focus:ring-primary-500">
+            ${regionOptionsList.map(r => `<option value="${r}"${r === comparisonRegion ? ' selected' : ''}>${r}</option>`).join('')}
+          </select>`
+        : '';
+
+      // Phase 1: initial price map from osPricing or sibling fallback.
+      const initialPriceMap: Record<string, { hourly: number; monthly: number }> = {};
+      if (osPricingData && Object.keys(osPricingData).length > 1) {
+        for (const [os, hourly] of Object.entries(osPricingData)) {
+          initialPriceMap[os] = { hourly, monthly: hourly * 730.44 };
+        }
+      } else {
+        for (const sib of osSiblings) {
+          const os = sib.operatingSystem ?? 'Linux';
+          initialPriceMap[os] = { hourly: sib.priceUSD_hourly ?? 0, monthly: sib.priceUSD_monthly ?? 0 };
+        }
+      }
+
+      osPricingHtml = `
+        <div class="mt-4 pt-4 border-t border-gray-200">
+          <div class="flex items-center justify-between mb-2">
+            <h4 class="font-semibold text-gray-800 text-sm">OS Pricing Comparison</h4>
+            ${regionSelectHtml}
+          </div>
+          <table class="text-xs w-full">
+            <thead>
+              <tr class="text-gray-500 border-b border-gray-200">
+                <th class="pr-4 pb-1 text-left font-medium">OS</th>
+                <th class="pr-4 pb-1 text-left font-medium">On-Demand/hr</th>
+                <th class="pr-4 pb-1 text-left font-medium">Monthly est.</th>
+                <th class="pb-1 text-left font-medium">vs Linux</th>
+              </tr>
+            </thead>
+            <tbody id="os-pricing-tbody">${buildOsRows(initialPriceMap, currentOS)}</tbody>
+          </table>
+          <p class="text-[11px] text-gray-400 mt-1.5 os-region-note">Prices shown for <span class="font-medium">${comparisonRegion}</span>.</p>
+        </div>`;
+    }
+
     const equivKey   = `${detail.provider}/${detail.family}`;
     const equivEntry = equivMap[equivKey];
     let equivHtml = '';
@@ -1277,6 +1827,113 @@
       `;
     }
 
+    // Tenancy comparison (AWS only — shared vs dedicated-instance vs dedicated-host)
+    // Two-phase rendering mirrors the OS pricing section:
+    // Phase 1: initial prices from allInstances (primary-region), no extra fetch.
+    // Phase 2: on region-selector change, fetch sibling tenancy files and re-render.
+    const TENANCY_LABELS: Record<string, string> = {
+      shared: 'Shared (Multi-Tenant)',
+      dedicated: 'Dedicated Instance',
+      host: 'Dedicated Host',
+    };
+    const TENANCY_ORDER = ['shared', 'dedicated', 'host'];
+    const buildTenancyRows = (priceMap: Record<string, { hourly: number; monthly: number }>, activeTenancy: string): string => {
+      const tenancies = [
+        ...TENANCY_ORDER.filter(t => t in priceMap),
+        ...Object.keys(priceMap).filter(t => !TENANCY_ORDER.includes(t)),
+      ];
+      const sharedPrice = priceMap['shared']?.hourly ?? 0;
+      return tenancies.map(tenancy => {
+        const isCurrent = tenancy === activeTenancy;
+        const { hourly: price, monthly } = priceMap[tenancy] ?? { hourly: 0, monthly: 0 };
+        const premium = sharedPrice > 0 && tenancy !== 'shared'
+          ? ((price - sharedPrice) / sharedPrice * 100)
+          : null;
+        const premiumText = premium == null ? '—'
+          : premium > 1  ? `+${premium.toFixed(0)}%`
+          : premium < -1 ? `${premium.toFixed(0)}%`
+          :                '≈ Shared';
+        const premiumClass = premium == null ? 'text-gray-400'
+          : premium > 1  ? 'text-amber-600 font-medium'
+          : premium < -1 ? 'text-green-700 font-medium'
+          :                'text-gray-400';
+        return `<tr class="border-b border-gray-100${isCurrent ? ' bg-primary-50' : ''}">
+          <td class="pr-4 py-1.5 font-medium text-gray-700">
+            ${TENANCY_LABELS[tenancy] ?? tenancy}
+            ${isCurrent ? '<span class="ml-1 text-[10px] text-primary-600 font-medium">current</span>' : ''}
+          </td>
+          <td class="pr-4 py-1.5 font-mono text-gray-900${isCurrent ? ' font-semibold' : ''}">${price > 0 ? fmt(price) + '/hr' : '—'}</td>
+          <td class="pr-4 py-1.5 font-mono text-gray-600">${monthly > 0 ? fmt(monthly, 2) + '/mo' : '—'}</td>
+          <td class="py-1.5 text-xs ${premiumClass}">${premiumText}</td>
+        </tr>`;
+      }).join('');
+    };
+
+    let tenancyHtml = '';
+    let tenancyVariants: string[] = [];
+    if (detail.provider === 'aws') {
+      const currentTenancy = detail.tenancy ?? 'shared';
+      const currentOS = detail.operatingSystem ?? 'Linux';
+      const tenancySiblings = allInstances.filter((i) =>
+        i.provider === detail.provider &&
+        i.instanceType === detail.instanceType &&
+        (i.operatingSystem ?? 'Linux') === currentOS &&
+        (i.tenancy ?? 'shared') !== currentTenancy
+      );
+
+      if (tenancySiblings.length > 0) {
+        const tenancyOrder: Record<string, number> = { shared: 0, dedicated: 1, host: 2 };
+        const allTenancyInstances = ([detail as V3Instance, ...tenancySiblings]).sort(
+          (a, b) => (tenancyOrder[a.tenancy ?? 'shared'] ?? 3) - (tenancyOrder[b.tenancy ?? 'shared'] ?? 3)
+        );
+
+        tenancyVariants = allTenancyInstances.map(i => i.tenancy ?? 'shared');
+
+        const initialTenancyPriceMap: Record<string, { hourly: number; monthly: number }> = {};
+        for (const inst of allTenancyInstances) {
+          const t = inst.tenancy ?? 'shared';
+          initialTenancyPriceMap[t] = { hourly: inst.priceUSD_hourly ?? 0, monthly: inst.priceUSD_monthly ?? 0 };
+        }
+
+        const instRegions: string[] = detail.regions ?? [];
+        const rawAvail = availableRegions.length > 0
+          ? availableRegions.filter(r => instRegions.includes(r))
+          : [];
+        const selectorRegions = rawAvail.length > 0 ? rawAvail : instRegions;
+        const tenancyRegionList = [
+          comparisonRegion,
+          ...selectorRegions.filter(r => r !== comparisonRegion),
+        ];
+        const tenancyHasRegionalPricing = hasRegionalPricing;
+        const tenancyRegionSelectHtml = tenancyHasRegionalPricing && tenancyRegionList.length > 1
+          ? `<select id="tenancy-region-select" class="text-xs border border-gray-200 rounded px-1.5 py-0.5 text-gray-600 bg-white focus:ring-1 focus:ring-primary-500">
+              ${tenancyRegionList.map(r => `<option value="${r}"${r === comparisonRegion ? ' selected' : ''}>${r}</option>`).join('')}
+            </select>`
+          : '';
+
+        tenancyHtml = `
+          <div class="mt-4 pt-4 border-t border-gray-200">
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="font-semibold text-gray-800 text-sm">Tenancy Comparison</h4>
+              ${tenancyRegionSelectHtml}
+            </div>
+            <table class="text-xs w-full">
+              <thead>
+                <tr class="text-gray-500 border-b border-gray-200">
+                  <th class="pr-4 pb-1 text-left font-medium">Tenancy</th>
+                  <th class="pr-4 pb-1 text-left font-medium">On-Demand/hr</th>
+                  <th class="pr-4 pb-1 text-left font-medium">Monthly est.</th>
+                  <th class="pb-1 text-left font-medium">vs Shared</th>
+                </tr>
+              </thead>
+              <tbody id="tenancy-pricing-tbody">${buildTenancyRows(initialTenancyPriceMap, currentTenancy)}</tbody>
+            </table>
+            <p class="text-[11px] text-gray-400 mt-1.5 tenancy-region-note">Prices shown for <span class="font-medium">${comparisonRegion}</span>.</p>
+            <p class="text-[11px] text-gray-400 mt-1">Dedicated instances run on hardware dedicated to your account. Dedicated hosts provide visibility and control over the physical host.</p>
+          </div>`;
+      }
+    }
+
     container.innerHTML = `
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
@@ -1293,6 +1950,7 @@
               ${detail.networkPerformance ? `<tr><td class="pr-4 py-0.5 text-gray-500">Network</td><td class="text-gray-800">${detail.networkPerformance}</td></tr>` : ''}
               ${detail.gpu ? `<tr><td class="pr-4 py-0.5 text-gray-500">GPU</td><td class="text-gray-800">${detail.gpu.count}× ${detail.gpu.type} (${detail.gpu.memoryGiB} GiB)</td></tr>` : ''}
               <tr><td class="pr-4 py-0.5 text-gray-500">On-Demand</td><td class="text-gray-800 font-medium">${fmt(detail.priceUSD_hourly)}/hr</td></tr>
+              ${detail.minimumBillingHours ? `<tr><td class="pr-4 py-0.5 text-gray-500">Min. Billing</td><td class="text-gray-800">${detail.minimumBillingHours}h <span class="text-gray-400 text-[11px]">(dedicated host)</span></td></tr>` : ''}
               <tr><td class="pr-4 py-0.5 text-gray-500">$/vCPU/hr</td><td class="text-gray-800">${fmt(detail.priceUSD_hourly != null ? detail.priceUSD_hourly / (detail.vCPU || 1) : null, 5)}</td></tr>
               <tr><td class="pr-4 py-0.5 text-gray-500">$/GiB/hr</td><td class="text-gray-800">${fmt(detail.priceUSD_hourly != null ? detail.priceUSD_hourly / (detail.memoryGiB || 1) : null, 5)}</td></tr>
               <tr><td class="pr-4 py-0.5 text-gray-500">Regions</td><td class="text-gray-800">${(detail.regions ?? []).length} available</td></tr>
@@ -1339,6 +1997,8 @@
       </div>
       ` : ''}
 
+      ${osPricingHtml}
+      ${tenancyHtml}
       ${equivHtml}
     `;
 
@@ -1350,6 +2010,79 @@
       this.classList.remove('text-primary-600', 'hover:underline');
       this.classList.add('text-gray-400', 'cursor-default');
     });
+
+    // Wire OS region selector — Phase 2: fetch sibling instance files on region change.
+    if (hasMultiOS) {
+      const osRegionSelect = container.querySelector<HTMLSelectElement>('#os-region-select');
+      if (osRegionSelect) {
+        osRegionSelect.addEventListener('change', async () => {
+          const selectedRegion = osRegionSelect.value;
+          const tbody = container.querySelector<HTMLElement>('#os-pricing-tbody');
+          const note  = container.querySelector<HTMLElement>('.os-region-note');
+          if (!tbody) return;
+
+          tbody.innerHTML = '<tr><td colspan="4" class="py-2 text-gray-400 italic text-xs">Loading…</td></tr>';
+
+          const osVariants = osPricingData
+            ? Object.keys(osPricingData)
+            : osSiblings.map(s => s.operatingSystem ?? 'Linux');
+
+          const files = await Promise.all(
+            osVariants.map(os => loadInstanceForOS(detail.provider, detail.instanceType, os).catch(() => null))
+          );
+
+          const priceMap: Record<string, { hourly: number; monthly: number }> = {};
+          osVariants.forEach((os, i) => {
+            const rp = files[i]?.regionPricing?.[selectedRegion];
+            if (rp) priceMap[os] = { hourly: rp.priceUSD_hourly, monthly: rp.priceUSD_monthly };
+          });
+
+          if (Object.keys(priceMap).length > 0) {
+            tbody.innerHTML = buildOsRows(priceMap, currentOS);
+            if (note) note.innerHTML = `Prices shown for <span class="font-medium">${selectedRegion}</span>.`;
+          } else {
+            tbody.innerHTML = `<tr><td colspan="4" class="py-2 text-gray-400 italic text-xs">No pricing data for ${selectedRegion}.</td></tr>`;
+          }
+        });
+      }
+    }
+
+    // Wire tenancy region selector — Phase 2: fetch sibling tenancy files on region change.
+    if (detail.provider === 'aws' && tenancyVariants.length > 0) {
+      const tenancyRegionSelect = container.querySelector<HTMLSelectElement>('#tenancy-region-select');
+      if (tenancyRegionSelect) {
+        tenancyRegionSelect.addEventListener('change', async () => {
+          const selectedRegion = tenancyRegionSelect.value;
+          const tbody = container.querySelector<HTMLElement>('#tenancy-pricing-tbody');
+          const note  = container.querySelector<HTMLElement>('.tenancy-region-note');
+          if (!tbody) return;
+
+          tbody.innerHTML = '<tr><td colspan="4" class="py-2 text-gray-400 italic text-xs">Loading…</td></tr>';
+
+          const currentOS = detail.operatingSystem ?? 'Linux';
+          const currentTenancy = detail.tenancy ?? 'shared';
+
+          const files = await Promise.all(
+            tenancyVariants.map(t =>
+              loadInstance(detail.provider, detail.instanceType, currentOS, t === 'shared' ? undefined : t).catch(() => null)
+            )
+          );
+
+          const priceMap: Record<string, { hourly: number; monthly: number }> = {};
+          tenancyVariants.forEach((t, i) => {
+            const rp = files[i]?.regionPricing?.[selectedRegion];
+            if (rp) priceMap[t] = { hourly: rp.priceUSD_hourly, monthly: rp.priceUSD_monthly };
+          });
+
+          if (Object.keys(priceMap).length > 0) {
+            tbody.innerHTML = buildTenancyRows(priceMap, currentTenancy);
+            if (note) note.innerHTML = `Prices shown for <span class="font-medium">${selectedRegion}</span>.`;
+          } else {
+            tbody.innerHTML = `<tr><td colspan="4" class="py-2 text-gray-400 italic text-xs">No pricing data for ${selectedRegion}.</td></tr>`;
+          }
+        });
+      }
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -1389,6 +2122,13 @@
     });
   });
 
+  window.addEventListener('requestResetSort', () => {
+    currentSortField = 'priceUSD_hourly';
+    currentSortDir   = 'asc';
+    updateSortAriaLabels();
+    // sortAndRender() will be triggered by the filtersChanged event that follows
+  });
+
   // ---------------------------------------------------------------------------
   // Search
   // ---------------------------------------------------------------------------
@@ -1400,13 +2140,18 @@
     clearSearchBtn?.classList.toggle('hidden', !searchTerm);
     currentPage = 1;
 
+    if (activeServiceCategory !== 'compute') {
+      applyAndRenderProducts();
+      return;
+    }
+
     baseFilteredInstances = searchTerm
-      ? allInstances.filter((inst) => {
+      ? panelFilteredInstances.filter((inst) => {
           const haystack =
-            `${inst.instanceType} ${inst.provider} ${inst.family} ${inst.architecture} ${(inst.regions ?? []).join(' ')}`.toLowerCase();
+            `${inst.instanceType} ${inst.provider} ${inst.family} ${inst.architecture} ${inst.operatingSystem ?? ''} ${(inst.regions ?? []).join(' ')}`.toLowerCase();
           return haystack.includes(searchTerm);
         })
-      : [...allInstances];
+      : [...panelFilteredInstances];
 
     sortAndRender();
   });
@@ -1415,7 +2160,13 @@
     searchInput.value  = '';
     searchTerm         = '';
     clearSearchBtn.classList.add('hidden');
-    baseFilteredInstances = [...allInstances];
+
+    if (activeServiceCategory !== 'compute') {
+      applyAndRenderProducts();
+      return;
+    }
+
+    baseFilteredInstances = [...panelFilteredInstances];
     currentPage           = 1;
     sortAndRender();
   });
@@ -1552,6 +2303,17 @@
     window.dispatchEvent(new CustomEvent('requestClearFilters'));
   });
 
+  // Back to Compute button inside coming-soon state
+  document.getElementById('cs-back-btn')?.addEventListener('click', () => {
+    activeServiceCategory = 'compute';
+    const params = new URLSearchParams(window.location.search);
+    params.delete('cat');
+    const url = new URL(window.location.href);
+    url.search = params.toString();
+    window.history.replaceState({}, '', url.toString());
+    window.dispatchEvent(new CustomEvent('serviceCategoryChanged', { detail: { category: 'compute' } }));
+  });
+
   // ---------------------------------------------------------------------------
   // Pagination controls
   // ---------------------------------------------------------------------------
@@ -1578,5 +2340,412 @@
     const val = parseInt(pageInput.value, 10);
     currentPage = isNaN(val) ? 1 : Math.max(1, Math.min(val, totalPages));
     renderPage();
+  });
+
+  // ===========================================================================
+  // Products table (block-storage, databases, ai-ml)
+  // ===========================================================================
+
+  let blockStorageGiB = 100;
+
+  const CATEGORY_PRODUCT_KEY: Record<string, string> = {
+    'block-storage': 'storage',
+    'databases': 'database',
+    'ai-ml': 'ai',
+    'object-storage': 'object-storage',
+  };
+
+  interface ProductColumn {
+    key: string;
+    label: string;
+    fmt?: (val: unknown) => string;
+    extraClass?: string;
+  }
+
+  interface ProductFileRef { file: string }
+  interface ProductsIndex {
+    providers: Record<string, Record<string, ProductFileRef>>;
+  }
+  interface ProductItem {
+    provider?: string;
+    instanceType?: string;
+    storageMedia?: string;
+    maxIops?: number;
+    maxThroughputMBps?: number | string;
+    regions?: string[];
+    priceUSD_monthly?: number;
+    priceUSD_hourly?: number;
+    engine?: string;
+    deploymentOption?: string;
+    vCPU?: number;
+    memoryGiB?: number;
+    pricePerMInputTokens?: number;
+    pricePerMOutputTokens?: number;
+    modality?: string;
+    modelName?: string;
+    contextWindowK?: number;
+    storageClass?: string;
+    redundancy?: string;
+    minPricePerGiBMonth?: number;
+    maxPricePerGiBMonth?: number;
+    [key: string]: unknown;
+  }
+
+  const PRODUCT_COLUMNS: Record<string, ProductColumn[]> = {
+    'block-storage': [
+      { key: 'provider', label: 'Provider', fmt: (v) => String(v ?? '').toUpperCase() },
+      { key: 'instanceType', label: 'Volume Type' },
+      { key: 'storageMedia', label: 'Media' },
+      { key: 'priceUSD_monthly', label: '$/GiB/mo', extraClass: 'font-mono tabular-nums', fmt: (v) => v != null ? `$${Number(v).toFixed(4)}` : '—' },
+      { key: 'priceUSD_monthly', label: 'Est. Monthly', extraClass: 'font-mono tabular-nums font-semibold', fmt: (v) => v != null ? `$${(Number(v) * blockStorageGiB).toFixed(2)}` : '—' },
+      { key: 'maxIops', label: 'Max IOPS', extraClass: 'font-mono tabular-nums', fmt: (v) => v != null ? Number(v).toLocaleString() : '—' },
+      { key: 'maxThroughputMBps', label: 'Throughput', extraClass: 'font-mono tabular-nums', fmt: (v) => v != null ? `${v} MB/s` : '—' },
+      { key: 'regions', label: 'Regions', extraClass: 'font-mono tabular-nums', fmt: (v) => Array.isArray(v) ? String(v.length) : '—' },
+    ],
+    'databases': [
+      { key: 'provider', label: 'Provider', fmt: (v) => String(v ?? '').toUpperCase() },
+      { key: 'instanceType', label: 'Instance' },
+      { key: 'engine', label: 'Engine', fmt: (v) => String(v ?? '—') },
+      { key: 'deploymentOption', label: 'Deployment', fmt: (v) => String(v ?? '—') },
+      { key: 'vCPU', label: 'vCPU', extraClass: 'font-mono tabular-nums', fmt: (v) => v != null ? String(v) : '—' },
+      { key: 'memoryGiB', label: 'Memory', extraClass: 'font-mono tabular-nums', fmt: (v) => v != null ? `${v} GiB` : '—' },
+      { key: 'priceUSD_hourly', label: '$/hr', extraClass: 'font-mono tabular-nums', fmt: (v) => v != null ? `$${Number(v).toFixed(4)}` : '—' },
+      { key: 'priceUSD_monthly', label: '$/mo', extraClass: 'font-mono tabular-nums font-semibold', fmt: (v) => v != null ? `$${Number(v).toFixed(2)}` : '—' },
+    ],
+    'ai-ml': [
+      { key: 'provider', label: 'Provider', fmt: (v) => String(v ?? '').toUpperCase() },
+      { key: 'instanceType', label: 'Model ID' },
+      { key: 'modelName', label: 'Name', extraClass: 'max-w-xs truncate', fmt: (v) => String(v ?? '—') },
+      { key: 'modality', label: 'Modality', fmt: (v) => String(v ?? '—') },
+      { key: 'pricePerMInputTokens', label: '$/M In', extraClass: 'font-mono tabular-nums', fmt: (v) => v != null ? `$${Number(v).toFixed(2)}` : '—' },
+      { key: 'pricePerMOutputTokens', label: '$/M Out', extraClass: 'font-mono tabular-nums', fmt: (v) => v != null ? `$${Number(v).toFixed(2)}` : '—' },
+      { key: 'contextWindowK', label: 'Context', extraClass: 'font-mono tabular-nums', fmt: (v) => v != null ? `${v}K` : '—' },
+    ],
+    'object-storage': [
+      { key: 'provider', label: 'Provider', fmt: (v) => String(v ?? '').toUpperCase() },
+      { key: 'storageClass', label: 'Storage Class', fmt: (v) => String(v ?? '—') },
+      { key: 'redundancy', label: 'Redundancy', fmt: (v) => v != null ? String(v) : '—' },
+      { key: 'minPricePerGiBMonth', label: 'Min $/GiB/mo', extraClass: 'font-mono tabular-nums', fmt: (v) => v != null ? `$${Number(v).toFixed(4)}` : '—' },
+      { key: 'maxPricePerGiBMonth', label: 'Max $/GiB/mo', extraClass: 'font-mono tabular-nums', fmt: (v) => v != null ? `$${Number(v).toFixed(4)}` : '—' },
+      { key: 'regions', label: 'Regions', extraClass: 'font-mono tabular-nums', fmt: (v) => Array.isArray(v) ? String(v.length) : '—' },
+    ],
+  };
+
+  let productsIndexData: ProductsIndex | null = null;
+  let allProductItems: ProductItem[] = [];
+  let filteredProductItems: ProductItem[] = [];
+  let productsPage = 1;
+  const PRODUCTS_PAGE_SIZE = 50;
+
+  async function showProductsTable(category: string) {
+    const section = document.getElementById('products-section')!;
+    const pLoading = document.getElementById('products-loading')!;
+    const pWrapper = document.getElementById('products-table-wrapper')!;
+    const pEmpty = document.getElementById('products-empty')!;
+    const pPagination = document.getElementById('products-pagination')!;
+
+    tableLoading.classList.add('hidden');
+    tableWrapper.classList.add('hidden');
+    tableEmpty.classList.add('hidden');
+    paginationControls.classList.add('hidden');
+    document.getElementById('badge-legend')?.classList.add('hidden');
+    document.getElementById('service-coming-soon')?.classList.add('hidden');
+
+    section.classList.remove('hidden');
+    pLoading.classList.remove('hidden');
+    pWrapper.classList.add('hidden');
+    pEmpty.classList.add('hidden');
+    pPagination.classList.add('hidden');
+    if (resultCount) resultCount.textContent = '';
+
+    const calcEl = document.getElementById('block-storage-calculator');
+    if (calcEl) calcEl.classList.toggle('hidden', category !== 'block-storage');
+
+    const productKey = CATEGORY_PRODUCT_KEY[category];
+    if (!productKey) {
+      section.classList.add('hidden');
+      showComingSoon(category);
+      return;
+    }
+
+    if (!productsIndexData) {
+      const resp = await fetch('/data/products/index.json');
+      productsIndexData = (await resp.json()) as ProductsIndex;
+    }
+
+    const items: ProductItem[] = [];
+    const providers = productsIndexData.providers;
+    await Promise.all(
+      Object.values(providers)
+        .filter((pd) => pd[productKey])
+        .map(async (pd) => {
+          const resp = await fetch(`/data/${pd[productKey].file}`);
+          const data: ProductItem[] = await resp.json();
+          items.push(...data);
+        })
+    );
+
+    allProductItems = items;
+    productsPage = 1;
+    pLoading.classList.add('hidden');
+    applyAndRenderProducts();
+
+    const providerCounts: Record<string, number> = {};
+    for (const item of allProductItems) {
+      if (item.provider) providerCounts[item.provider] = (providerCounts[item.provider] ?? 0) + 1;
+    }
+    window.dispatchEvent(new CustomEvent('productProvidersLoaded', { detail: { providerCounts } }));
+  }
+
+  function applyAndRenderProducts(selectedProviders?: string[], selectedRegions?: string[]) {
+    filteredProductItems = allProductItems.filter((item) => {
+      if (selectedProviders?.length && !selectedProviders.includes(item.provider ?? '')) return false;
+      if (selectedRegions?.length && Array.isArray(item.regions)) {
+        const regions = item.regions as string[];
+        if (!selectedRegions.some((r: string) => regions.includes(r))) return false;
+      }
+      if (searchTerm) {
+        const haystack = [
+          item.provider, item.instanceType, item.storageClass, item.modelName,
+          item.engine, item.modality, item.storageMedia, item.deploymentOption,
+        ].filter(Boolean).join(' ').toLowerCase();
+        if (!haystack.includes(searchTerm)) return false;
+      }
+      return true;
+    });
+    productsPage = 1;
+    renderProductsPage();
+  }
+
+  // Primary price key for heatmap per product category
+  const PRODUCT_PRICE_KEY: Record<string, string> = {
+    'block-storage':  'priceUSD_monthly',
+    'databases':      'priceUSD_hourly',
+    'ai-ml':          'pricePerMInputTokens',
+    'object-storage': 'minPricePerGiBMonth',
+  };
+
+  function renderProductsPage() {
+    const category = activeServiceCategory;
+    const columns = PRODUCT_COLUMNS[category];
+    if (!columns) return;
+
+    const thead = document.getElementById('products-thead')!;
+    const tbody = document.getElementById('products-tbody')!;
+    const productsMobileCards = document.getElementById('products-mobile-cards')!;
+    const pWrapper = document.getElementById('products-table-wrapper')!;
+    const pEmpty = document.getElementById('products-empty')!;
+    const pPagination = document.getElementById('products-pagination')!;
+
+    if (filteredProductItems.length === 0) {
+      pWrapper.classList.add('hidden');
+      if (productsMobileCards) productsMobileCards.innerHTML = '';
+      pEmpty.classList.remove('hidden');
+      pPagination.classList.add('hidden');
+      if (resultCount) resultCount.textContent = '0 items';
+      return;
+    }
+
+    pEmpty.classList.add('hidden');
+    pWrapper.classList.remove('hidden');
+
+    const total = filteredProductItems.length;
+    const totalPages = Math.ceil(total / PRODUCTS_PAGE_SIZE);
+    if (productsPage > totalPages) productsPage = totalPages;
+    const start = (productsPage - 1) * PRODUCTS_PAGE_SIZE;
+    const end = Math.min(start + PRODUCTS_PAGE_SIZE, total);
+    const pageItems = filteredProductItems.slice(start, end);
+
+    // Compute heatmap min/max across full filtered set (not just current page)
+    const heatKey = PRODUCT_PRICE_KEY[category];
+    const heatVals = filteredProductItems
+      .map(item => { const v = item[heatKey] as number | null | undefined; return v != null ? Number(v) : NaN; })
+      .filter(n => !isNaN(n) && n > 0);
+    const heatMin = heatVals.length ? Math.min(...heatVals) : 0;
+    const heatMax = heatVals.length ? Math.max(...heatVals) : 0;
+
+    // Compute table header — compute style
+    thead.innerHTML = `<tr class="bg-slate-100 border-b-2 border-slate-200">${columns.map((c) =>
+      `<th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider sticky top-0 bg-slate-100 z-10 whitespace-nowrap">${c.label}</th>`
+    ).join('')}</tr>`;
+
+    // Render rows with provider badges, zebra stripes, and price heatmap
+    tbody.innerHTML = pageItems.map((item, i) => {
+      const cells = columns.map((col) => {
+        const val = item[col.key];
+        let display: string;
+        if (col.key === 'provider') {
+          const prov = String(val ?? '').toLowerCase();
+          display = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold leading-snug ${providerColor(prov)}">${String(val ?? '').toUpperCase()}</span>`;
+        } else {
+          display = col.fmt ? col.fmt(val) : (val != null ? String(val) : '—');
+        }
+        let heatStyle = '';
+        if (col.key === heatKey && heatMax > heatMin && val != null) {
+          const n = Number(val);
+          if (!isNaN(n) && n > 0) {
+            const t = (n - heatMin) / (heatMax - heatMin);
+            const hue = Math.round(130 - t * 102);
+            heatStyle = ` style="background-color:hsl(${hue},62%,72%);color:#1f2937;"`;
+          }
+        }
+        const cls = `px-3 py-2.5 whitespace-nowrap${col.extraClass ? ' ' + col.extraClass : ''}`;
+        return `<td class="${cls}"${heatStyle}>${display}</td>`;
+      }).join('');
+      const rowCls = i % 2 === 0 ? 'bg-white hover:bg-blue-50/40' : 'bg-slate-50 hover:bg-blue-50/40';
+      return `<tr class="transition-colors ${rowCls}">${cells}</tr>`;
+    }).join('');
+
+    // Mobile cards
+    if (productsMobileCards) {
+      productsMobileCards.innerHTML = pageItems.map((item, i) =>
+        buildProductCard(item, category, i % 2 === 0, heatMin, heatMax)
+      ).join('');
+    }
+
+    if (resultCount) resultCount.textContent = `${total.toLocaleString()} items`;
+
+    const infoEl = document.getElementById('products-pagination-info');
+    if (infoEl) infoEl.textContent = `Showing ${start + 1}–${end} of ${total.toLocaleString()}`;
+
+    const pageInfoEl = document.getElementById('products-page-info');
+    if (pageInfoEl) pageInfoEl.textContent = `Page ${productsPage} of ${totalPages}`;
+
+    const prevBtn = document.getElementById('products-prev-btn') as HTMLButtonElement | null;
+    const nextBtn = document.getElementById('products-next-btn') as HTMLButtonElement | null;
+    if (prevBtn) prevBtn.disabled = productsPage <= 1;
+    if (nextBtn) nextBtn.disabled = productsPage >= totalPages;
+
+    pPagination.classList.toggle('hidden', total <= PRODUCTS_PAGE_SIZE);
+  }
+
+  function buildProductCard(item: ProductItem, category: string, isEven: boolean, heatMin: number, heatMax: number): string {
+    const provider = String(item.provider ?? '').toLowerCase();
+    const provBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ${providerColor(provider)}">${provider.toUpperCase()}</span>`;
+
+    function heatInline(val: number | null | undefined): string {
+      if (val == null || isNaN(val) || val <= 0 || heatMax <= heatMin) return '';
+      const t = (val - heatMin) / (heatMax - heatMin);
+      const hue = Math.round(130 - t * 102);
+      return ` style="background-color:hsl(${hue},62%,72%);color:#1f2937;padding:2px 6px;border-radius:4px;"`;
+    }
+
+    if (category === 'block-storage') {
+      const price = item.priceUSD_monthly != null ? Number(item.priceUSD_monthly) : null;
+      const priceStr = price != null ? `$${price.toFixed(4)}/GiB/mo` : '—';
+      const estMonthly = price != null ? price * blockStorageGiB : null;
+      const estStr = estMonthly != null ? `≈$${estMonthly.toFixed(2)}/mo for ${blockStorageGiB} GiB` : '';
+      return `<div class="px-4 py-3 ${isEven ? 'bg-gray-50' : 'bg-white'}">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center flex-wrap gap-1.5 mb-1.5">${provBadge}</div>
+            <div class="font-medium text-sm text-gray-900 truncate">${item.instanceType ?? '—'}</div>
+            <div class="flex flex-wrap items-center gap-3 mt-1.5 text-sm">
+              ${item.storageMedia ? `<span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-700">${item.storageMedia}</span>` : ''}
+              ${item.maxIops != null ? `<span class="text-gray-600"><span class="text-[11px] text-gray-400 mr-0.5">IOPS</span>${Number(item.maxIops).toLocaleString()}</span>` : ''}
+              ${item.maxThroughputMBps != null ? `<span class="text-gray-600"><span class="text-[11px] text-gray-400 mr-0.5">Throughput</span>${item.maxThroughputMBps} MB/s</span>` : ''}
+            </div>
+          </div>
+          <div class="text-right shrink-0">
+            <div class="text-base font-bold tabular-nums leading-tight"${heatInline(price)}>${priceStr}</div>
+            ${estStr ? `<div class="text-xs font-semibold text-blue-700 mt-0.5">${estStr}</div>` : ''}
+            ${Array.isArray(item.regions) ? `<div class="text-xs text-gray-400 mt-1">${item.regions.length} regions</div>` : ''}
+          </div>
+        </div>
+      </div>`;
+    }
+
+    if (category === 'databases') {
+      const price = item.priceUSD_hourly != null ? Number(item.priceUSD_hourly) : null;
+      const priceStr = price != null ? `$${price.toFixed(4)}/hr` : '—';
+      const monthly = item.priceUSD_monthly != null ? Number(item.priceUSD_monthly) : null;
+      const monthlyStr = monthly != null ? `$${monthly.toFixed(2)}/mo` : '';
+      return `<div class="px-4 py-3 ${isEven ? 'bg-gray-50' : 'bg-white'}">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center flex-wrap gap-1.5 mb-1.5">${provBadge}${item.engine ? `<span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-700">${item.engine}</span>` : ''}</div>
+            <div class="font-medium text-sm text-gray-900 font-mono truncate">${item.instanceType ?? '—'}</div>
+            ${item.deploymentOption ? `<div class="text-xs text-gray-500 mt-0.5">${item.deploymentOption}</div>` : ''}
+            <div class="flex flex-wrap items-center gap-3 mt-1.5 text-sm">
+              ${item.vCPU != null ? `<span class="text-gray-600"><span class="text-[11px] text-gray-400 mr-0.5">vCPU</span>${item.vCPU}</span>` : ''}
+              ${item.memoryGiB != null ? `<span class="text-gray-600"><span class="text-[11px] text-gray-400 mr-0.5">RAM</span>${item.memoryGiB} GiB</span>` : ''}
+            </div>
+          </div>
+          <div class="text-right shrink-0">
+            <div class="text-base font-bold tabular-nums leading-tight"${heatInline(price)}>${priceStr}</div>
+            ${monthlyStr ? `<div class="text-xs font-semibold text-gray-600 mt-0.5">${monthlyStr}</div>` : ''}
+          </div>
+        </div>
+      </div>`;
+    }
+
+    if (category === 'ai-ml') {
+      const priceIn = item.pricePerMInputTokens != null ? Number(item.pricePerMInputTokens) : null;
+      const priceOut = item.pricePerMOutputTokens != null ? Number(item.pricePerMOutputTokens) : null;
+      const priceInStr = priceIn != null ? `$${priceIn.toFixed(2)}/M in` : '—';
+      const priceOutStr = priceOut != null ? `$${priceOut.toFixed(2)}/M out` : '';
+      return `<div class="px-4 py-3 ${isEven ? 'bg-gray-50' : 'bg-white'}">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center flex-wrap gap-1.5 mb-1.5">${provBadge}${item.modality ? `<span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-700">${item.modality}</span>` : ''}</div>
+            <div class="font-medium text-sm text-gray-900 font-mono truncate">${item.instanceType ?? '—'}</div>
+            ${item.modelName ? `<div class="text-xs text-gray-500 mt-0.5 truncate">${item.modelName}</div>` : ''}
+            ${item.contextWindowK != null ? `<div class="text-xs text-gray-500 mt-1"><span class="text-gray-400 mr-0.5">Context</span>${item.contextWindowK}K tokens</div>` : ''}
+          </div>
+          <div class="text-right shrink-0">
+            <div class="text-sm font-semibold tabular-nums leading-tight"${heatInline(priceIn)}>${priceInStr}</div>
+            ${priceOutStr ? `<div class="text-xs text-gray-500 mt-0.5">${priceOutStr}</div>` : ''}
+          </div>
+        </div>
+      </div>`;
+    }
+
+    if (category === 'object-storage') {
+      const price = item.minPricePerGiBMonth != null ? Number(item.minPricePerGiBMonth) : null;
+      const priceStr = price != null ? `$${price.toFixed(4)}/GiB/mo` : '—';
+      const maxPriceStr = item.maxPricePerGiBMonth != null && item.maxPricePerGiBMonth !== item.minPricePerGiBMonth
+        ? `up to $${Number(item.maxPricePerGiBMonth).toFixed(4)}`
+        : '';
+      return `<div class="px-4 py-3 ${isEven ? 'bg-gray-50' : 'bg-white'}">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center flex-wrap gap-1.5 mb-1.5">${provBadge}</div>
+            <div class="font-medium text-sm text-gray-900 truncate">${item.storageClass ?? '—'}</div>
+            ${item.redundancy ? `<div class="text-xs text-gray-500 mt-0.5">${item.redundancy}</div>` : ''}
+          </div>
+          <div class="text-right shrink-0">
+            <div class="text-base font-bold tabular-nums leading-tight"${heatInline(price)}>${priceStr}</div>
+            ${maxPriceStr ? `<div class="text-xs text-gray-400 mt-0.5">${maxPriceStr}</div>` : ''}
+            ${Array.isArray(item.regions) ? `<div class="text-xs text-gray-400 mt-1">${item.regions.length} regions</div>` : ''}
+          </div>
+        </div>
+      </div>`;
+    }
+
+    return '';
+  }
+
+  function hideProductsSection() {
+    document.getElementById('products-section')?.classList.add('hidden');
+    document.getElementById('block-storage-calculator')?.classList.add('hidden');
+    const mobileCards = document.getElementById('products-mobile-cards');
+    if (mobileCards) mobileCards.innerHTML = '';
+    allProductItems = [];
+    filteredProductItems = [];
+    window.dispatchEvent(new CustomEvent('productProvidersLoaded', { detail: { providerCounts: null } }));
+  }
+
+  document.getElementById('products-prev-btn')?.addEventListener('click', () => {
+    if (productsPage > 1) { productsPage--; renderProductsPage(); }
+  });
+  document.getElementById('products-next-btn')?.addEventListener('click', () => {
+    const totalPages = Math.ceil(filteredProductItems.length / PRODUCTS_PAGE_SIZE);
+    if (productsPage < totalPages) { productsPage++; renderProductsPage(); }
+  });
+
+  document.getElementById('storage-gib-input')?.addEventListener('input', (e) => {
+    const val = parseInt((e.target as HTMLInputElement).value, 10);
+    blockStorageGiB = isNaN(val) || val < 1 ? 1 : Math.min(val, 65536);
+    renderProductsPage();
   });
 </script>
