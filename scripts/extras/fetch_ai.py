@@ -80,46 +80,106 @@ def _is_excluded_model(name: str) -> bool:
 # Keyed by lowercase fragment matched against the model slug
 # ---------------------------------------------------------------------------
 _MODEL_META: Dict[str, Tuple[Optional[int], str]] = {
-    "claude-3-7-sonnet":  (200,  "multimodal"),
-    "claude-3-5-sonnet":  (200,  "multimodal"),
-    "claude-3-5-haiku":   (200,  "multimodal"),
-    "claude-3-opus":      (200,  "multimodal"),
-    "claude-3-sonnet":    (200,  "multimodal"),
-    "claude-3-haiku":     (200,  "multimodal"),
-    "llama-3-3":          (128,  "text"),
-    "llama-3-2":          (128,  "multimodal"),
-    "llama-3-1":          (128,  "text"),
-    "llama-3":            (8,    "text"),
-    "mistral-large":      (128,  "text"),
-    "mistral-small":      (32,   "text"),
-    "mistral-7b":         (32,   "text"),
-    "mixtral":            (32,   "text"),
-    "command-r-plus":     (128,  "multimodal"),
-    "command-r":          (128,  "text"),
-    "titan-text-premier": (32,   "text"),
-    "titan-text-express": (8,    "text"),
-    "titan-text-lite":    (4,    "text"),
-    "nova-pro":           (300,  "multimodal"),
-    "nova-lite":          (300,  "multimodal"),
-    "nova-micro":         (128,  "text"),
-    "jamba":              (256,  "text"),
-    "gemini-2-0-flash":   (1000, "multimodal"),
-    "gemini-2-0":         (1000, "multimodal"),
-    "gemini-1-5-pro":     (2000, "multimodal"),
-    "gemini-1-5-flash":   (1000, "multimodal"),
-    "gemini-1-0-pro":     (32,   "text"),
-    "gemini-1-pro":       (32,   "text"),
-    "gpt-4o-mini":        (128,  "multimodal"),
-    "gpt-4o":             (128,  "multimodal"),
-    "gpt-4-turbo":        (128,  "multimodal"),
-    "gpt-4-32k":          (32,   "text"),
-    "gpt-4":              (8,    "text"),
-    "gpt-35-turbo-16k":   (16,   "text"),
-    "gpt-35-turbo":       (16,   "text"),
-    "o3-mini":            (200,  "text"),
-    "o3":                 (200,  "text"),
-    "o1-mini":            (128,  "text"),
-    "o1":                 (200,  "text"),
+    # Claude 4.x
+    "claude-opus-4":          (200,   "multimodal"),
+    "claude-sonnet-4":        (200,   "multimodal"),
+    "claude-haiku-4":         (200,   "multimodal"),
+    # Claude 3.x
+    "claude-3-7-sonnet":      (200,   "multimodal"),
+    "claude-3-5-sonnet":      (200,   "multimodal"),
+    "claude-3-5-haiku":       (200,   "multimodal"),
+    "claude-3-opus":          (200,   "multimodal"),
+    "claude-3-sonnet":        (200,   "multimodal"),
+    "claude-3-haiku":         (200,   "multimodal"),
+    # Meta Llama 4
+    "llama-4-maverick":       (1000,  "multimodal"),
+    "llama-4-scout":          (10000, "multimodal"),
+    "llama-4":                (1000,  "multimodal"),
+    # Meta Llama 3.x
+    "llama-3-3":              (128,   "text"),
+    "llama-3-2":              (128,   "multimodal"),
+    "llama-3-1":              (128,   "text"),
+    "llama-3":                (8,     "text"),
+    # Mistral / Codestral / Pixtral
+    "pixtral":                (128,   "multimodal"),
+    "codestral":              (256,   "text"),
+    "mistral-large":          (128,   "text"),
+    "mistral-medium":         (128,   "text"),
+    "mistral-small":          (32,    "text"),
+    "mistral-7b":             (32,    "text"),
+    "mixtral":                (32,    "text"),
+    # Cohere Command
+    "command-a":              (256,   "multimodal"),
+    "command-r-plus":         (128,   "multimodal"),
+    "command-r":              (128,   "text"),
+    # Amazon
+    "nova-premier":           (300,   "multimodal"),
+    "nova-pro":               (300,   "multimodal"),
+    "nova-lite":              (300,   "multimodal"),
+    "nova-micro":             (128,   "text"),
+    "titan-text-premier":     (32,    "text"),
+    "titan-text-express":     (8,     "text"),
+    "titan-text-lite":        (4,     "text"),
+    # AI21 Jamba
+    "jamba":                  (256,   "text"),
+    # DeepSeek
+    "deepseek-r1":            (128,   "text"),
+    "deepseek-v3":            (128,   "text"),
+    "deepseek":               (128,   "text"),
+    # xAI Grok
+    "grok-4":                 (2000,  "multimodal"),
+    "grok-3":                 (131,   "multimodal"),
+    "grok-2":                 (131,   "multimodal"),
+    "grok":                   (131,   "multimodal"),
+    # Microsoft Phi
+    "phi-4-mini":             (16,    "multimodal"),
+    "phi-4":                  (16,    "multimodal"),
+    "phi-3-5":                (128,   "multimodal"),
+    "phi-3":                  (128,   "multimodal"),
+    # Google Gemma
+    "gemma-3":                (128,   "multimodal"),
+    "gemma-2":                (8,     "multimodal"),
+    "gemma":                  (8,     "multimodal"),
+    # Gemini 3.x
+    "gemini-3-1-pro":         (1000,  "multimodal"),
+    "gemini-3":               (1000,  "multimodal"),
+    # Gemini 2.5
+    "gemini-2-5-flash-lite":  (1000,  "multimodal"),
+    "gemini-2-5-pro":         (1000,  "multimodal"),
+    "gemini-2-5-flash":       (1000,  "multimodal"),
+    # Gemini 2.0
+    "gemini-2-0-flash":       (1000,  "multimodal"),
+    "gemini-2-0":             (1000,  "multimodal"),
+    # Gemini 1.x
+    "gemini-1-5-pro":         (2000,  "multimodal"),
+    "gemini-1-5-flash":       (1000,  "multimodal"),
+    "gemini-1-0-pro":         (32,    "text"),
+    "gemini-1-pro":           (32,    "text"),
+    # GPT-5 (includes GPT-5.4, GPT-5.5 as substrings)
+    "gpt-5-nano":             (128,   "multimodal"),
+    "gpt-5-mini":             (128,   "multimodal"),
+    "gpt-5":                  (128,   "multimodal"),
+    # OpenAI open-weight models (GPT OSS 20B / 120B on Bedrock)
+    "gpt-oss":                (128,   "text"),
+    # GPT-4.1
+    "gpt-4-1":                (1000,  "multimodal"),
+    # GPT-4o
+    "gpt-4o-mini":            (128,   "multimodal"),
+    "gpt-4o":                 (128,   "multimodal"),
+    # GPT-4
+    "gpt-4-turbo":            (128,   "multimodal"),
+    "gpt-4-32k":              (32,    "text"),
+    "gpt-4":                  (8,     "text"),
+    # GPT-3.5
+    "gpt-35-turbo-16k":       (16,    "text"),
+    "gpt-35-turbo":           (16,    "text"),
+    # OpenAI o-series
+    "o4-mini":                (200,   "multimodal"),
+    "o4":                     (200,   "multimodal"),
+    "o3-mini":                (200,   "text"),
+    "o3":                     (200,   "text"),
+    "o1-mini":                (128,   "text"),
+    "o1":                     (200,   "text"),
 }
 
 
@@ -147,6 +207,7 @@ _VARIANT_SUFFIXES = frozenset([
     "sonnet", "haiku", "opus", "flash", "pro", "turbo", "mini", "lite",
     "micro", "nano", "large", "small", "medium", "instruct", "vision",
     "chat", "it", "preview", "express", "premier", "plus", "inference",
+    "fast", "reasoning", "thinking",
 ])
 
 _SIZE_RE = re.compile(r"^\d+[bBkKmMgGtT]+$")
@@ -187,6 +248,17 @@ def _dedup_records(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
 AWS_BEDROCK_MODEL_SLUGS: Dict[str, str] = {
     # Exact lower-case match → canonical instanceType slug
+    # Claude 4.x — multiple display-name formats observed on Bedrock pricing page
+    "claude opus 4.7":            "claude-opus-4-7",
+    "claude opus 4":              "claude-opus-4-7",
+    "claude 4 opus":              "claude-opus-4-7",
+    "claude sonnet 4.6":          "claude-sonnet-4-6",
+    "claude sonnet 4":            "claude-sonnet-4-6",
+    "claude 4 sonnet":            "claude-sonnet-4-6",
+    "claude haiku 4.5":           "claude-haiku-4-5-20251001",
+    "claude haiku 4":             "claude-haiku-4-5-20251001",
+    "claude 4 haiku":             "claude-haiku-4-5-20251001",
+    # Claude 3.x
     "claude 3.7 sonnet":          "claude-3-7-sonnet-20250219",
     "claude 3.5 sonnet v2":       "claude-3-5-sonnet-20241022",
     "claude 3.5 sonnet":          "claude-3-5-sonnet-20240620",
@@ -194,9 +266,16 @@ AWS_BEDROCK_MODEL_SLUGS: Dict[str, str] = {
     "claude 3 opus":              "claude-3-opus-20240229",
     "claude 3 sonnet":            "claude-3-sonnet-20240229",
     "claude 3 haiku":             "claude-3-haiku-20240307",
+    "amazon nova premier":        "nova-premier",
     "amazon nova pro":            "nova-pro",
     "amazon nova lite":           "nova-lite",
     "amazon nova micro":          "nova-micro",
+    # Meta Llama 4
+    "llama 4 maverick":           "llama-4-maverick-17b-instruct",
+    "meta llama 4 maverick":      "llama-4-maverick-17b-instruct",
+    "llama 4 scout":              "llama-4-scout-17b-instruct",
+    "meta llama 4 scout":         "llama-4-scout-17b-instruct",
+    # Meta Llama 3.x
     "llama 3.3 70b instruct":     "llama-3-3-70b-instruct",
     "llama 3.2 90b vision":       "llama-3-2-90b-vision-instruct",
     "llama 3.2 11b vision":       "llama-3-2-11b-vision-instruct",
@@ -218,6 +297,28 @@ AWS_BEDROCK_MODEL_SLUGS: Dict[str, str] = {
     "titan text lite":            "titan-text-lite-v1",
     "jamba 1.5 large":            "jamba-1-5-large",
     "jamba 1.5 mini":             "jamba-1-5-mini",
+    # OpenAI on Bedrock (limited preview April 2026)
+    "gpt-5.4":                    "gpt-5-4",
+    "gpt 5.4":                    "gpt-5-4",
+    "openai gpt-5.4":             "gpt-5-4",
+    "gpt-5.5":                    "gpt-5-5",
+    "gpt 5.5":                    "gpt-5-5",
+    "openai gpt-5.5":             "gpt-5-5",
+    "gpt oss 20b":                "gpt-oss-20b",
+    "gpt oss 120b":               "gpt-oss-120b",
+    # DeepSeek
+    "deepseek r1":                "deepseek-r1",
+    "deepseek-r1":                "deepseek-r1",
+    "deepseek r1 0528":           "deepseek-r1-0528",
+    "deepseek v3":                "deepseek-v3",
+    # Google Gemma (available via Bedrock Marketplace)
+    "gemma 3 27b":                "gemma-3-27b",
+    "gemma 3 12b":                "gemma-3-12b",
+    "gemma 3 4b":                 "gemma-3-4b",
+    "gemma 3 1b":                 "gemma-3-1b",
+    # Writer Palmyra
+    "palmyra x5":                 "palmyra-x5",
+    "palmyra x4":                 "palmyra-x4",
 }
 
 
@@ -757,7 +858,7 @@ _AZURE_PRODUCT_PREFIX: Dict[str, str] = {
 _AZURE_KNOWN_PREFIXES = (
     "gpt", "o1", "o2", "o3", "o4", "llama", "mistral", "deepseek",
     "command", "phi", "grok", "kimi", "qwen", "codestral", "cohere",
-    "azure", "oss", "jamba", "mai",
+    "azure", "oss", "jamba", "mai", "gemma", "palmyra", "pixtral",
 )
 
 

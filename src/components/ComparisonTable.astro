@@ -323,6 +323,22 @@
 
   <!-- Products table (block-storage, databases, ai-ml tabs) -->
   <div id="products-section" class="hidden">
+    <!-- Block Storage Cost Estimator card (shown only for block-storage category) -->
+    <div id="block-storage-calculator" class="hidden mx-4 mt-4 mb-3 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="flex-1 min-w-0">
+          <p class="text-xs font-semibold text-blue-700 uppercase tracking-wide mb-0.5">Cost Estimator</p>
+          <p class="text-xs text-gray-500">Enter a volume size to calculate the estimated monthly cost for each volume type.</p>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <label class="text-sm text-gray-600 whitespace-nowrap font-medium" for="storage-gib-input">Volume size</label>
+          <input type="number" id="storage-gib-input" min="1" max="65536" value="100"
+            class="w-24 border border-blue-300 rounded-lg px-2 py-1.5 text-sm text-right font-mono focus:ring-2 focus:ring-blue-400 focus:border-blue-400 bg-white" />
+          <span class="text-sm text-gray-600 font-medium">GiB</span>
+        </div>
+      </div>
+    </div>
+
     <div id="products-loading" class="py-10 text-center text-sm text-gray-500">
       <svg class="mx-auto mb-2 h-5 w-5 animate-spin text-primary-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -514,6 +530,8 @@
     };
     if (titleEl) titleEl.textContent = INIT_TITLES[activeServiceCategory] ?? 'Comparison';
     if (commitmentToggle) commitmentToggle.style.display = 'none';
+    const colToggleContainer = document.getElementById('col-toggle-container');
+    if (colToggleContainer) colToggleContainer.style.display = 'none';
   })();
 
   const COMING_SOON: Record<string, { icon: string; title: string; description: string; features: string[] }> = {
@@ -807,6 +825,8 @@
 
     const commitmentToggle = document.getElementById('commitment-toggle');
     if (commitmentToggle) commitmentToggle.style.display = category === 'compute' ? '' : 'none';
+    const colToggleContainer = document.getElementById('col-toggle-container');
+    if (colToggleContainer) colToggleContainer.style.display = category === 'compute' ? '' : 'none';
 
     // Reset and update search bar for the new category
     if (searchInput) {
@@ -897,7 +917,7 @@
       if (filters.architecture !== 'any' && inst.architecture !== filters.architecture) return false;
       if (filters.gpuOnly && !inst.gpu) return false;
       if (filters.tenancy && filters.tenancy !== 'any') {
-        const instTenancy = (inst as any).tenancy ?? 'shared';
+        const instTenancy = inst.tenancy ?? 'shared';
         if (instTenancy !== filters.tenancy) return false;
       }
       if (filters.regions?.length && !filters.regions.some((r) => inst.regions?.includes(r))) return false;
@@ -1208,6 +1228,10 @@
     const osBadgeHtml = instOS !== 'Linux'
       ? `<span class="inline-flex items-center px-1.5 py-px rounded text-[10px] font-semibold ${instOS === 'Windows' ? 'bg-blue-50 text-blue-700 dark:bg-blue-400/20 dark:text-blue-300' : 'bg-red-50 text-red-700 dark:bg-red-400/20 dark:text-red-300'}">${instOS}</span>`
       : '';
+    const instTenancy = inst.tenancy ?? 'shared';
+    const tenancyBadgeHtml = instTenancy !== 'shared'
+      ? `<span class="inline-flex items-center px-1.5 py-px rounded text-[10px] font-semibold ${instTenancy === 'host' ? 'bg-purple-50 text-purple-700 dark:bg-purple-400/20 dark:text-purple-300' : 'bg-indigo-50 text-indigo-700 dark:bg-indigo-400/20 dark:text-indigo-300'}">${instTenancy === 'host' ? 'Host' : 'Dedicated'}</span>`
+      : '';
 
     tr.innerHTML = `
       <td class="w-10 px-2 py-2.5 text-center">
@@ -1232,6 +1256,7 @@
         <div class="flex items-center gap-1.5">
           <div class="max-w-48 truncate text-sm font-medium text-gray-900 font-mono" title="${inst.instanceType}">${inst.instanceType}</div>
           ${osBadgeHtml}
+          ${tenancyBadgeHtml}
         </div>
         <div class="text-xs text-gray-600 mt-0.5">${inst.family}</div>
         ${badgeHtml ? `<div class="flex flex-wrap gap-1 mt-0.5">${badgeHtml}</div>` : ''}
@@ -1291,6 +1316,10 @@
     const cardOsBadge    = cardOS !== 'Linux'
       ? `<span class="inline-flex items-center px-1.5 py-px rounded text-[10px] font-semibold ${cardOS === 'Windows' ? 'bg-blue-50 text-blue-700 dark:bg-blue-400/20 dark:text-blue-300' : 'bg-red-50 text-red-700 dark:bg-red-400/20 dark:text-red-300'}">${cardOS}</span>`
       : '';
+    const cardTenancy = inst.tenancy ?? 'shared';
+    const cardTenancyBadge = cardTenancy !== 'shared'
+      ? `<span class="inline-flex items-center px-1.5 py-px rounded text-[10px] font-semibold ${cardTenancy === 'host' ? 'bg-purple-50 text-purple-700 dark:bg-purple-400/20 dark:text-purple-300' : 'bg-indigo-50 text-indigo-700 dark:bg-indigo-400/20 dark:text-indigo-300'}">${cardTenancy === 'host' ? 'Host' : 'Dedicated'}</span>`
+      : '';
 
     div.innerHTML = `
       <div class="flex items-start justify-between gap-3">
@@ -1298,6 +1327,7 @@
           <div class="flex items-center flex-wrap gap-1.5 mb-1.5">
             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ${providerColor(inst.provider)}">${inst.provider.toUpperCase()}</span>
             ${cardOsBadge}
+            ${cardTenancyBadge}
             ${savings !== '-' ? `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-100 text-green-800">Save ${savings}</span>` : ''}
           </div>
           <div class="font-medium text-sm text-gray-900 font-mono truncate" title="${inst.instanceType}">${inst.instanceType}</div>
@@ -1798,18 +1828,56 @@
     }
 
     // Tenancy comparison (AWS only — shared vs dedicated-instance vs dedicated-host)
+    // Two-phase rendering mirrors the OS pricing section:
+    // Phase 1: initial prices from allInstances (primary-region), no extra fetch.
+    // Phase 2: on region-selector change, fetch sibling tenancy files and re-render.
+    const TENANCY_LABELS: Record<string, string> = {
+      shared: 'Shared (Multi-Tenant)',
+      dedicated: 'Dedicated Instance',
+      host: 'Dedicated Host',
+    };
+    const TENANCY_ORDER = ['shared', 'dedicated', 'host'];
+    const buildTenancyRows = (priceMap: Record<string, { hourly: number; monthly: number }>, activeTenancy: string): string => {
+      const tenancies = [
+        ...TENANCY_ORDER.filter(t => t in priceMap),
+        ...Object.keys(priceMap).filter(t => !TENANCY_ORDER.includes(t)),
+      ];
+      const sharedPrice = priceMap['shared']?.hourly ?? 0;
+      return tenancies.map(tenancy => {
+        const isCurrent = tenancy === activeTenancy;
+        const { hourly: price, monthly } = priceMap[tenancy] ?? { hourly: 0, monthly: 0 };
+        const premium = sharedPrice > 0 && tenancy !== 'shared'
+          ? ((price - sharedPrice) / sharedPrice * 100)
+          : null;
+        const premiumText = premium == null ? '—'
+          : premium > 1  ? `+${premium.toFixed(0)}%`
+          : premium < -1 ? `${premium.toFixed(0)}%`
+          :                '≈ Shared';
+        const premiumClass = premium == null ? 'text-gray-400'
+          : premium > 1  ? 'text-amber-600 font-medium'
+          : premium < -1 ? 'text-green-700 font-medium'
+          :                'text-gray-400';
+        return `<tr class="border-b border-gray-100${isCurrent ? ' bg-primary-50' : ''}">
+          <td class="pr-4 py-1.5 font-medium text-gray-700">
+            ${TENANCY_LABELS[tenancy] ?? tenancy}
+            ${isCurrent ? '<span class="ml-1 text-[10px] text-primary-600 font-medium">current</span>' : ''}
+          </td>
+          <td class="pr-4 py-1.5 font-mono text-gray-900${isCurrent ? ' font-semibold' : ''}">${price > 0 ? fmt(price) + '/hr' : '—'}</td>
+          <td class="pr-4 py-1.5 font-mono text-gray-600">${monthly > 0 ? fmt(monthly, 2) + '/mo' : '—'}</td>
+          <td class="py-1.5 text-xs ${premiumClass}">${premiumText}</td>
+        </tr>`;
+      }).join('');
+    };
+
     let tenancyHtml = '';
+    let tenancyVariants: string[] = [];
     if (detail.provider === 'aws') {
-      const TENANCY_LABELS: Record<string, string> = {
-        shared: 'Shared (Multi-Tenant)',
-        dedicated: 'Dedicated Instance',
-        host: 'Dedicated Host',
-      };
       const currentTenancy = detail.tenancy ?? 'shared';
+      const currentOS = detail.operatingSystem ?? 'Linux';
       const tenancySiblings = allInstances.filter((i) =>
         i.provider === detail.provider &&
         i.instanceType === detail.instanceType &&
-        (i.operatingSystem ?? 'Linux') === (detail.operatingSystem ?? 'Linux') &&
+        (i.operatingSystem ?? 'Linux') === currentOS &&
         (i.tenancy ?? 'shared') !== currentTenancy
       );
 
@@ -1818,34 +1886,37 @@
         const allTenancyInstances = ([detail as V3Instance, ...tenancySiblings]).sort(
           (a, b) => (tenancyOrder[a.tenancy ?? 'shared'] ?? 3) - (tenancyOrder[b.tenancy ?? 'shared'] ?? 3)
         );
-        const sharedInst = allTenancyInstances.find((i) => (i.tenancy ?? 'shared') === 'shared');
-        const sharedPrice = sharedInst?.priceUSD_hourly ?? 0;
 
-        const tenancyRows = allTenancyInstances.map((inst) => {
-          const tenancy = inst.tenancy ?? 'shared';
-          const price = inst.priceUSD_hourly ?? 0;
-          const isCurrent = tenancy === currentTenancy;
-          const premium = sharedPrice > 0 && tenancy !== 'shared'
-            ? ((price - sharedPrice) / sharedPrice * 100)
-            : null;
-          const premiumText = premium == null ? '—' : `+${premium.toFixed(0)}%`;
-          const premiumClass = premium == null ? 'text-gray-400'
-            : premium > 0 ? 'text-amber-600 font-medium'
-            : 'text-green-700 font-medium';
-          return `<tr class="border-b border-gray-100${isCurrent ? ' bg-primary-50' : ''}">
-            <td class="pr-4 py-1.5 font-medium text-gray-700">
-              ${TENANCY_LABELS[tenancy] ?? tenancy}
-              ${isCurrent ? '<span class="ml-1 text-[10px] text-primary-600 font-medium">current</span>' : ''}
-            </td>
-            <td class="pr-4 py-1.5 font-mono text-gray-900${isCurrent ? ' font-semibold' : ''}">${price > 0 ? fmt(price) + '/hr' : '—'}</td>
-            <td class="pr-4 py-1.5 font-mono text-gray-600">${price > 0 ? fmt(price * 730, 2) + '/mo' : '—'}</td>
-            <td class="py-1.5 text-xs ${premiumClass}">${premiumText}</td>
-          </tr>`;
-        }).join('');
+        tenancyVariants = allTenancyInstances.map(i => i.tenancy ?? 'shared');
+
+        const initialTenancyPriceMap: Record<string, { hourly: number; monthly: number }> = {};
+        for (const inst of allTenancyInstances) {
+          const t = inst.tenancy ?? 'shared';
+          initialTenancyPriceMap[t] = { hourly: inst.priceUSD_hourly ?? 0, monthly: inst.priceUSD_monthly ?? 0 };
+        }
+
+        const instRegions: string[] = detail.regions ?? [];
+        const rawAvail = availableRegions.length > 0
+          ? availableRegions.filter(r => instRegions.includes(r))
+          : [];
+        const selectorRegions = rawAvail.length > 0 ? rawAvail : instRegions;
+        const tenancyRegionList = [
+          comparisonRegion,
+          ...selectorRegions.filter(r => r !== comparisonRegion),
+        ];
+        const tenancyHasRegionalPricing = hasRegionalPricing;
+        const tenancyRegionSelectHtml = tenancyHasRegionalPricing && tenancyRegionList.length > 1
+          ? `<select id="tenancy-region-select" class="text-xs border border-gray-200 rounded px-1.5 py-0.5 text-gray-600 bg-white focus:ring-1 focus:ring-primary-500">
+              ${tenancyRegionList.map(r => `<option value="${r}"${r === comparisonRegion ? ' selected' : ''}>${r}</option>`).join('')}
+            </select>`
+          : '';
 
         tenancyHtml = `
           <div class="mt-4 pt-4 border-t border-gray-200">
-            <h4 class="font-semibold text-gray-800 mb-2 text-sm">Tenancy Comparison</h4>
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="font-semibold text-gray-800 text-sm">Tenancy Comparison</h4>
+              ${tenancyRegionSelectHtml}
+            </div>
             <table class="text-xs w-full">
               <thead>
                 <tr class="text-gray-500 border-b border-gray-200">
@@ -1855,9 +1926,10 @@
                   <th class="pb-1 text-left font-medium">vs Shared</th>
                 </tr>
               </thead>
-              <tbody>${tenancyRows}</tbody>
+              <tbody id="tenancy-pricing-tbody">${buildTenancyRows(initialTenancyPriceMap, currentTenancy)}</tbody>
             </table>
-            <p class="text-[11px] text-gray-400 mt-1.5">Dedicated instances run on hardware dedicated to your account. Dedicated hosts provide visibility and control over the physical host.</p>
+            <p class="text-[11px] text-gray-400 mt-1.5 tenancy-region-note">Prices shown for <span class="font-medium">${comparisonRegion}</span>.</p>
+            <p class="text-[11px] text-gray-400 mt-1">Dedicated instances run on hardware dedicated to your account. Dedicated hosts provide visibility and control over the physical host.</p>
           </div>`;
       }
     }
@@ -1967,6 +2039,43 @@
 
           if (Object.keys(priceMap).length > 0) {
             tbody.innerHTML = buildOsRows(priceMap, currentOS);
+            if (note) note.innerHTML = `Prices shown for <span class="font-medium">${selectedRegion}</span>.`;
+          } else {
+            tbody.innerHTML = `<tr><td colspan="4" class="py-2 text-gray-400 italic text-xs">No pricing data for ${selectedRegion}.</td></tr>`;
+          }
+        });
+      }
+    }
+
+    // Wire tenancy region selector — Phase 2: fetch sibling tenancy files on region change.
+    if (detail.provider === 'aws' && tenancyVariants.length > 0) {
+      const tenancyRegionSelect = container.querySelector<HTMLSelectElement>('#tenancy-region-select');
+      if (tenancyRegionSelect) {
+        tenancyRegionSelect.addEventListener('change', async () => {
+          const selectedRegion = tenancyRegionSelect.value;
+          const tbody = container.querySelector<HTMLElement>('#tenancy-pricing-tbody');
+          const note  = container.querySelector<HTMLElement>('.tenancy-region-note');
+          if (!tbody) return;
+
+          tbody.innerHTML = '<tr><td colspan="4" class="py-2 text-gray-400 italic text-xs">Loading…</td></tr>';
+
+          const currentOS = detail.operatingSystem ?? 'Linux';
+          const currentTenancy = detail.tenancy ?? 'shared';
+
+          const files = await Promise.all(
+            tenancyVariants.map(t =>
+              loadInstance(detail.provider, detail.instanceType, currentOS, t === 'shared' ? undefined : t).catch(() => null)
+            )
+          );
+
+          const priceMap: Record<string, { hourly: number; monthly: number }> = {};
+          tenancyVariants.forEach((t, i) => {
+            const rp = files[i]?.regionPricing?.[selectedRegion];
+            if (rp) priceMap[t] = { hourly: rp.priceUSD_hourly, monthly: rp.priceUSD_monthly };
+          });
+
+          if (Object.keys(priceMap).length > 0) {
+            tbody.innerHTML = buildTenancyRows(priceMap, currentTenancy);
             if (note) note.innerHTML = `Prices shown for <span class="font-medium">${selectedRegion}</span>.`;
           } else {
             tbody.innerHTML = `<tr><td colspan="4" class="py-2 text-gray-400 italic text-xs">No pricing data for ${selectedRegion}.</td></tr>`;
@@ -2237,6 +2346,8 @@
   // Products table (block-storage, databases, ai-ml)
   // ===========================================================================
 
+  let blockStorageGiB = 100;
+
   const CATEGORY_PRODUCT_KEY: Record<string, string> = {
     'block-storage': 'storage',
     'databases': 'database',
@@ -2251,12 +2362,42 @@
     extraClass?: string;
   }
 
+  interface ProductFileRef { file: string }
+  interface ProductsIndex {
+    providers: Record<string, Record<string, ProductFileRef>>;
+  }
+  interface ProductItem {
+    provider?: string;
+    instanceType?: string;
+    storageMedia?: string;
+    maxIops?: number;
+    maxThroughputMBps?: number | string;
+    regions?: string[];
+    priceUSD_monthly?: number;
+    priceUSD_hourly?: number;
+    engine?: string;
+    deploymentOption?: string;
+    vCPU?: number;
+    memoryGiB?: number;
+    pricePerMInputTokens?: number;
+    pricePerMOutputTokens?: number;
+    modality?: string;
+    modelName?: string;
+    contextWindowK?: number;
+    storageClass?: string;
+    redundancy?: string;
+    minPricePerGiBMonth?: number;
+    maxPricePerGiBMonth?: number;
+    [key: string]: unknown;
+  }
+
   const PRODUCT_COLUMNS: Record<string, ProductColumn[]> = {
     'block-storage': [
       { key: 'provider', label: 'Provider', fmt: (v) => String(v ?? '').toUpperCase() },
       { key: 'instanceType', label: 'Volume Type' },
       { key: 'storageMedia', label: 'Media' },
       { key: 'priceUSD_monthly', label: '$/GiB/mo', extraClass: 'font-mono tabular-nums', fmt: (v) => v != null ? `$${Number(v).toFixed(4)}` : '—' },
+      { key: 'priceUSD_monthly', label: 'Est. Monthly', extraClass: 'font-mono tabular-nums font-semibold', fmt: (v) => v != null ? `$${(Number(v) * blockStorageGiB).toFixed(2)}` : '—' },
       { key: 'maxIops', label: 'Max IOPS', extraClass: 'font-mono tabular-nums', fmt: (v) => v != null ? Number(v).toLocaleString() : '—' },
       { key: 'maxThroughputMBps', label: 'Throughput', extraClass: 'font-mono tabular-nums', fmt: (v) => v != null ? `${v} MB/s` : '—' },
       { key: 'regions', label: 'Regions', extraClass: 'font-mono tabular-nums', fmt: (v) => Array.isArray(v) ? String(v.length) : '—' },
@@ -2269,6 +2410,7 @@
       { key: 'vCPU', label: 'vCPU', extraClass: 'font-mono tabular-nums', fmt: (v) => v != null ? String(v) : '—' },
       { key: 'memoryGiB', label: 'Memory', extraClass: 'font-mono tabular-nums', fmt: (v) => v != null ? `${v} GiB` : '—' },
       { key: 'priceUSD_hourly', label: '$/hr', extraClass: 'font-mono tabular-nums', fmt: (v) => v != null ? `$${Number(v).toFixed(4)}` : '—' },
+      { key: 'priceUSD_monthly', label: '$/mo', extraClass: 'font-mono tabular-nums font-semibold', fmt: (v) => v != null ? `$${Number(v).toFixed(2)}` : '—' },
     ],
     'ai-ml': [
       { key: 'provider', label: 'Provider', fmt: (v) => String(v ?? '').toUpperCase() },
@@ -2289,9 +2431,9 @@
     ],
   };
 
-  let productsIndexData: Record<string, any> | null = null;
-  let allProductItems: any[] = [];
-  let filteredProductItems: any[] = [];
+  let productsIndexData: ProductsIndex | null = null;
+  let allProductItems: ProductItem[] = [];
+  let filteredProductItems: ProductItem[] = [];
   let productsPage = 1;
   const PRODUCTS_PAGE_SIZE = 50;
 
@@ -2316,6 +2458,9 @@
     pPagination.classList.add('hidden');
     if (resultCount) resultCount.textContent = '';
 
+    const calcEl = document.getElementById('block-storage-calculator');
+    if (calcEl) calcEl.classList.toggle('hidden', category !== 'block-storage');
+
     const productKey = CATEGORY_PRODUCT_KEY[category];
     if (!productKey) {
       section.classList.add('hidden');
@@ -2325,17 +2470,17 @@
 
     if (!productsIndexData) {
       const resp = await fetch('/data/products/index.json');
-      productsIndexData = (await resp.json()) as Record<string, any>;
+      productsIndexData = (await resp.json()) as ProductsIndex;
     }
 
-    const items: any[] = [];
-    const providers = productsIndexData.providers as Record<string, any>;
+    const items: ProductItem[] = [];
+    const providers = productsIndexData.providers;
     await Promise.all(
       Object.values(providers)
         .filter((pd) => pd[productKey])
         .map(async (pd) => {
           const resp = await fetch(`/data/${pd[productKey].file}`);
-          const data: any[] = await resp.json();
+          const data: ProductItem[] = await resp.json();
           items.push(...data);
         })
     );
@@ -2354,9 +2499,10 @@
 
   function applyAndRenderProducts(selectedProviders?: string[], selectedRegions?: string[]) {
     filteredProductItems = allProductItems.filter((item) => {
-      if (selectedProviders?.length && !selectedProviders.includes(item.provider)) return false;
+      if (selectedProviders?.length && !selectedProviders.includes(item.provider ?? '')) return false;
       if (selectedRegions?.length && Array.isArray(item.regions)) {
-        if (!selectedRegions.some((r: string) => item.regions.includes(r))) return false;
+        const regions = item.regions as string[];
+        if (!selectedRegions.some((r: string) => regions.includes(r))) return false;
       }
       if (searchTerm) {
         const haystack = [
@@ -2413,7 +2559,7 @@
     // Compute heatmap min/max across full filtered set (not just current page)
     const heatKey = PRODUCT_PRICE_KEY[category];
     const heatVals = filteredProductItems
-      .map(item => { const v = (item as any)[heatKey]; return v != null ? Number(v) : NaN; })
+      .map(item => { const v = item[heatKey] as number | null | undefined; return v != null ? Number(v) : NaN; })
       .filter(n => !isNaN(n) && n > 0);
     const heatMin = heatVals.length ? Math.min(...heatVals) : 0;
     const heatMax = heatVals.length ? Math.max(...heatVals) : 0;
@@ -2426,7 +2572,7 @@
     // Render rows with provider badges, zebra stripes, and price heatmap
     tbody.innerHTML = pageItems.map((item, i) => {
       const cells = columns.map((col) => {
-        const val = (item as any)[col.key];
+        const val = item[col.key];
         let display: string;
         if (col.key === 'provider') {
           const prov = String(val ?? '').toLowerCase();
@@ -2473,7 +2619,7 @@
     pPagination.classList.toggle('hidden', total <= PRODUCTS_PAGE_SIZE);
   }
 
-  function buildProductCard(item: any, category: string, isEven: boolean, heatMin: number, heatMax: number): string {
+  function buildProductCard(item: ProductItem, category: string, isEven: boolean, heatMin: number, heatMax: number): string {
     const provider = String(item.provider ?? '').toLowerCase();
     const provBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ${providerColor(provider)}">${provider.toUpperCase()}</span>`;
 
@@ -2487,6 +2633,8 @@
     if (category === 'block-storage') {
       const price = item.priceUSD_monthly != null ? Number(item.priceUSD_monthly) : null;
       const priceStr = price != null ? `$${price.toFixed(4)}/GiB/mo` : '—';
+      const estMonthly = price != null ? price * blockStorageGiB : null;
+      const estStr = estMonthly != null ? `≈$${estMonthly.toFixed(2)}/mo for ${blockStorageGiB} GiB` : '';
       return `<div class="px-4 py-3 ${isEven ? 'bg-gray-50' : 'bg-white'}">
         <div class="flex items-start justify-between gap-3">
           <div class="flex-1 min-w-0">
@@ -2500,6 +2648,7 @@
           </div>
           <div class="text-right shrink-0">
             <div class="text-base font-bold tabular-nums leading-tight"${heatInline(price)}>${priceStr}</div>
+            ${estStr ? `<div class="text-xs font-semibold text-blue-700 mt-0.5">${estStr}</div>` : ''}
             ${Array.isArray(item.regions) ? `<div class="text-xs text-gray-400 mt-1">${item.regions.length} regions</div>` : ''}
           </div>
         </div>
@@ -2509,6 +2658,8 @@
     if (category === 'databases') {
       const price = item.priceUSD_hourly != null ? Number(item.priceUSD_hourly) : null;
       const priceStr = price != null ? `$${price.toFixed(4)}/hr` : '—';
+      const monthly = item.priceUSD_monthly != null ? Number(item.priceUSD_monthly) : null;
+      const monthlyStr = monthly != null ? `$${monthly.toFixed(2)}/mo` : '';
       return `<div class="px-4 py-3 ${isEven ? 'bg-gray-50' : 'bg-white'}">
         <div class="flex items-start justify-between gap-3">
           <div class="flex-1 min-w-0">
@@ -2522,6 +2673,7 @@
           </div>
           <div class="text-right shrink-0">
             <div class="text-base font-bold tabular-nums leading-tight"${heatInline(price)}>${priceStr}</div>
+            ${monthlyStr ? `<div class="text-xs font-semibold text-gray-600 mt-0.5">${monthlyStr}</div>` : ''}
           </div>
         </div>
       </div>`;
@@ -2575,6 +2727,7 @@
 
   function hideProductsSection() {
     document.getElementById('products-section')?.classList.add('hidden');
+    document.getElementById('block-storage-calculator')?.classList.add('hidden');
     const mobileCards = document.getElementById('products-mobile-cards');
     if (mobileCards) mobileCards.innerHTML = '';
     allProductItems = [];
@@ -2588,5 +2741,11 @@
   document.getElementById('products-next-btn')?.addEventListener('click', () => {
     const totalPages = Math.ceil(filteredProductItems.length / PRODUCTS_PAGE_SIZE);
     if (productsPage < totalPages) { productsPage++; renderProductsPage(); }
+  });
+
+  document.getElementById('storage-gib-input')?.addEventListener('input', (e) => {
+    const val = parseInt((e.target as HTMLInputElement).value, 10);
+    blockStorageGiB = isNaN(val) || val < 1 ? 1 : Math.min(val, 65536);
+    renderProductsPage();
   });
 </script>
