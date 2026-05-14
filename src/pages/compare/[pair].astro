@@ -1,0 +1,131 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { loadProviderInstances, fmtPrice } from '../../lib/seo-instances';
+import type { V3Instance } from '../../types/index';
+
+export function getStaticPaths() {
+  return [
+    { params: { pair: 'aws-vs-azure' }, props: { providerA: 'aws', providerB: 'azure', labelA: 'AWS', labelB: 'Azure', fullA: 'AWS', fullB: 'Azure' } },
+    { params: { pair: 'aws-vs-gcp' }, props: { providerA: 'aws', providerB: 'gcp', labelA: 'AWS', labelB: 'GCP', fullA: 'AWS', fullB: 'Google Cloud' } },
+  ];
+}
+
+interface Props {
+  providerA: string;
+  providerB: string;
+  labelA: string;
+  labelB: string;
+  fullA: string;
+  fullB: string;
+}
+
+const { providerA, providerB, labelA, labelB, fullA, fullB } = Astro.props;
+
+// Cheapest instance per vCPU count for each provider
+function cheapestByVCPU(instances: V3Instance[]): Map<number, V3Instance> {
+  const map = new Map<number, V3Instance>();
+  for (const inst of instances) {
+    if (!inst.vCPU || inst.vCPU <= 0) continue;
+    const cur = map.get(inst.vCPU);
+    if (!cur || inst.priceUSD_hourly < cur.priceUSD_hourly) map.set(inst.vCPU, inst);
+  }
+  return map;
+}
+
+const mapA = cheapestByVCPU(loadProviderInstances(providerA));
+const mapB = cheapestByVCPU(loadProviderInstances(providerB));
+
+const tiers = [...mapA.keys()]
+  .filter(v => mapB.has(v))
+  .sort((a, b) => a - b)
+  .slice(0, 20);
+
+const rows = tiers.map(vcpu => {
+  const a = mapA.get(vcpu)!;
+  const b = mapB.get(vcpu)!;
+  const cheaperLabel = a.priceUSD_hourly <= b.priceUSD_hourly ? labelA : labelB;
+  const cheaperProvider = a.priceUSD_hourly <= b.priceUSD_hourly ? providerA : providerB;
+  const savingsPct = Math.round(
+    (Math.abs(a.priceUSD_hourly - b.priceUSD_hourly) / Math.max(a.priceUSD_hourly, b.priceUSD_hourly)) * 100,
+  );
+  return { vcpu, a, b, cheaperLabel, cheaperProvider, savingsPct };
+});
+
+const title = `${fullA} vs ${fullB} Instance Pricing — CloudPriceFinder`;
+const description = `Compare ${fullA} vs ${fullB} compute instance prices side by side. Cheapest option per vCPU tier. Updated weekly.`;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: `${fullA} vs ${fullB} Cloud Instance Price Comparison`,
+  description,
+  numberOfItems: rows.length,
+  itemListElement: rows.map(({ vcpu, a, b }, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: `${vcpu} vCPU: ${labelA} ${a.instanceType} ${fmtPrice(a.priceUSD_hourly)} vs ${labelB} ${b.instanceType} ${fmtPrice(b.priceUSD_hourly)}`,
+  })),
+};
+
+const BADGE_CLASSES: Record<string, string> = {
+  aws: 'bg-orange-50 text-orange-700',
+  azure: 'bg-blue-50 text-blue-700',
+  gcp: 'bg-green-50 text-green-700',
+  oci: 'bg-red-50 text-red-700',
+};
+---
+
+<BaseLayout {title} {description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} slot="head" />
+
+  <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-8">
+    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
+      {fullA} vs {fullB} — Cloud Instance Price Comparison
+    </h1>
+    <p class="text-gray-600 mb-6 max-w-2xl">
+      Side-by-side comparison of the cheapest {fullA} and {fullB} compute instances for each vCPU
+      tier. Find which provider offers better value for your workload size.
+    </p>
+
+    <div class="overflow-x-auto rounded-lg border border-gray-200 shadow-sm mb-6">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-gray-50 border-b-2 border-gray-200">
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-10">#</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">vCPU</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{labelA} Instance</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{labelA} $/hr</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{labelB} Instance</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{labelB} $/hr</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Cheaper</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {rows.map(({ vcpu, a, b, cheaperLabel, cheaperProvider, savingsPct }, i) => (
+            <tr class="hover:bg-gray-50 transition-colors">
+              <td class="px-4 py-3 text-gray-400 text-xs">{i + 1}</td>
+              <td class="px-4 py-3 font-semibold text-gray-900">{vcpu}</td>
+              <td class="px-4 py-3 font-mono text-gray-700">{a.instanceType}</td>
+              <td class="px-4 py-3 font-semibold text-emerald-700">{fmtPrice(a.priceUSD_hourly)}</td>
+              <td class="px-4 py-3 font-mono text-gray-700">{b.instanceType}</td>
+              <td class="px-4 py-3 font-semibold text-emerald-700">{fmtPrice(b.priceUSD_hourly)}</td>
+              <td class="px-4 py-3">
+                <span class={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${BADGE_CLASSES[cheaperProvider] ?? ''}`}>
+                  {cheaperLabel}
+                </span>
+                <span class="text-gray-400 text-xs ml-1">{savingsPct}% cheaper</span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <a
+      href={`/?providers=${providerA},${providerB}`}
+      class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition-colors"
+    >
+      View full {fullA} vs {fullB} comparison →
+    </a>
+  </div>
+</BaseLayout>

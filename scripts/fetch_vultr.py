@@ -22,7 +22,6 @@ import argparse
 import json
 import logging
 import sys
-import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -37,6 +36,7 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from scripts.utils.data_validator import validate_instance_data
+from scripts.utils.http_client import HOURS_PER_MONTH, get_json, make_session
 
 logging.basicConfig(
     level=logging.INFO,
@@ -55,8 +55,6 @@ REQUEST_TIMEOUT = 60
 MAX_RETRIES = 3
 RETRY_BACKOFF = 5
 
-HOURS_PER_MONTH = 730.44
-
 FAMILY_MAP: Dict[str, str] = {
     "vc2": "cloud-compute",
     "vhf": "high-frequency",
@@ -71,33 +69,6 @@ FAMILY_MAP: Dict[str, str] = {
 # ---------------------------------------------------------------------------
 # HTTP helpers
 # ---------------------------------------------------------------------------
-
-def _make_session() -> requests.Session:
-    session = requests.Session()
-    session.headers.update({
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "application/json, text/plain, */*",
-    })
-    return session
-
-
-def _get_json(
-    session: requests.Session,
-    url: str,
-    params: Optional[Dict[str, str]] = None,
-) -> Any:
-    """Fetch URL with retry logic."""
-    for attempt in range(1, MAX_RETRIES + 1):
-        try:
-            resp = session.get(url, params=params, timeout=REQUEST_TIMEOUT)
-            resp.raise_for_status()
-            return resp.json()
-        except requests.RequestException as exc:
-            if attempt == MAX_RETRIES:
-                raise
-            logger.warning(f"Attempt {attempt} failed for {url}: {exc}. Retrying in {RETRY_BACKOFF}s...")
-            time.sleep(RETRY_BACKOFF)
-    raise RuntimeError(f"Failed to fetch {url} after {MAX_RETRIES} attempts")
 
 
 def _fetch_all_pages(
@@ -114,7 +85,7 @@ def _fetch_all_pages(
         params: Dict[str, str] = {"per_page": "500"}
         if cursor:
             params["cursor"] = cursor
-        data = _get_json(session, url, params)
+        data = get_json(session, url, params)
         items: List[Dict[str, Any]] = data.get(result_key, [])
         results.extend(items)
         cursor = (data.get("meta", {}).get("links", {}).get("next") or "").strip() or None
@@ -177,7 +148,7 @@ def _build_instance(
     plan: Dict[str, Any],
     region_lookup: Dict[str, Dict[str, Any]],
 ) -> Dict[str, Any]:
-    plan_type = plan.get("type", "vc2")
+    plan_type = plan.get("type") or ("vbm" if "metal" in plan.get("id", "").lower() else "vc2")
     family = FAMILY_MAP.get(plan_type, plan_type)
 
     monthly_cost = float(plan.get("monthly_cost", 0))
@@ -196,6 +167,7 @@ def _build_instance(
         "provider": "vultr",
         "type": "cloud-server",
         "instanceType": plan["id"],
+        "architecture": "x86_64",
         "vCPU": plan["vcpu_count"],
         "memoryGiB": memory_gib,
         "diskSizeGB": plan.get("disk", 0),
@@ -221,7 +193,8 @@ def _build_instance(
                 m = _re.search(r"(\d+)vram", plan["id"])
                 if m:
                     vram_gib = int(m.group(1))
-            instance["gpu"] = {"count": 1, "type": gpu_type, "memoryGiB": vram_gib}
+            gpu_count = int(plan.get("gpu_count") or 1)
+            instance["gpu"] = {"count": gpu_count, "type": gpu_type, "memoryGiB": vram_gib}
 
     return instance
 
@@ -232,7 +205,7 @@ def _build_instance(
 
 class VultrFetcher:
     def __init__(self) -> None:
-        self.session = _make_session()
+        self.session = make_session()
 
     def _fetch_regions(self) -> Dict[str, Dict[str, Any]]:
         """Fetch all regions and return a lookup dict keyed by region code."""

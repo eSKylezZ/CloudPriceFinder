@@ -72,6 +72,7 @@ const navLinks: Array<{ href: string; label: string; tooltip?: string }> = [
     <meta name="twitter:image" content={new URL(ogImage, Astro.site)} />
 
     <title>{title}</title>
+    <slot name="head" />
     <style>
       /* Critical CSS for faster rendering */
       .table-loading { min-height: 200px; }

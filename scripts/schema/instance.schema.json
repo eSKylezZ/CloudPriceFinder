@@ -95,6 +95,20 @@
       "minimum": 0,
       "description": "On-demand price in USD per month (730 hrs)"
     },
+    "operatingSystem": {
+      "type": "string",
+      "description": "Operating system (e.g. Linux, Windows, macOS, RHEL)"
+    },
+    "tenancy": {
+      "type": "string",
+      "enum": ["shared", "dedicated", "host"],
+      "description": "Hardware tenancy: shared (default multi-tenant), dedicated (single-tenant isolated), host (dedicated physical host — required for macOS)"
+    },
+    "minimumBillingHours": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Minimum billing duration in hours (e.g. 24 for AWS Mac Dedicated Host instances)"
+    },
     "originalPrice": {
       "type": "object",
       "required": ["hourly", "monthly", "currency"],
@@ -146,7 +160,7 @@
       "properties": {
         "term": {
           "type": "string",
-          "enum": ["on-demand", "1yr", "3yr"],
+          "enum": ["on-demand", "1yr", "2yr", "3yr"],
           "description": "Commitment duration"
         },
         "payment": {

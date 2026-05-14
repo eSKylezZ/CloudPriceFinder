@@ -1,0 +1,92 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { loadProviderInstances, fmtPrice } from '../../lib/seo-instances';
+
+export function getStaticPaths() {
+  const PROVIDERS = {
+    aws: { displayName: 'AWS', dataId: 'aws' },
+    azure: { displayName: 'Azure', dataId: 'azure' },
+    gcp: { displayName: 'Google Cloud', dataId: 'gcp' },
+    'oracle-cloud': { displayName: 'Oracle Cloud', dataId: 'oci' },
+  } as const;
+  return Object.entries(PROVIDERS).map(([slug, config]) => ({
+    params: { provider: slug },
+    props: { config },
+  }));
+}
+
+type Props = { config: { displayName: string; dataId: string } };
+
+const { config } = Astro.props;
+
+const top20 = loadProviderInstances(config.dataId)
+  .sort((a, b) => a.priceUSD_hourly - b.priceUSD_hourly)
+  .slice(0, 20);
+
+const title = `${config.displayName} Instance Pricing — CloudPriceFinder`;
+const description = `Compare ${config.displayName} compute instance prices. Top 20 cheapest ${config.displayName} instances by on-demand hourly rate. Updated weekly from the official pricing API.`;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: `${config.displayName} Cloud Instance Pricing`,
+  description,
+  numberOfItems: top20.length,
+  itemListElement: top20.map((inst, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: `${inst.instanceType} — ${fmtPrice(inst.priceUSD_hourly)}`,
+    description: `${inst.vCPU} vCPU, ${inst.memoryGiB} GiB RAM, ${inst.architecture}`,
+  })),
+};
+---
+
+<BaseLayout {title} {description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} slot="head" />
+
+  <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-8">
+    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
+      {config.displayName} Cloud Instance Pricing
+    </h1>
+    <p class="text-gray-600 mb-6 max-w-2xl">
+      Top 20 cheapest {config.displayName} compute instances sorted by on-demand hourly price.
+      Data refreshed weekly from the {config.displayName} pricing API.
+    </p>
+
+    <div class="overflow-x-auto rounded-lg border border-gray-200 shadow-sm mb-6">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-gray-50 border-b-2 border-gray-200">
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-10">#</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Instance</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">vCPU</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">RAM (GiB)</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Arch</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">On-Demand/hr</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Est. Monthly</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {top20.map((inst, i) => (
+            <tr class="hover:bg-gray-50 transition-colors">
+              <td class="px-4 py-3 text-gray-400 text-xs">{i + 1}</td>
+              <td class="px-4 py-3 font-mono font-medium text-gray-900">{inst.instanceType}</td>
+              <td class="px-4 py-3 text-gray-700">{inst.vCPU ?? '—'}</td>
+              <td class="px-4 py-3 text-gray-700">{inst.memoryGiB ?? '—'}</td>
+              <td class="px-4 py-3 text-gray-500 text-xs">{inst.architecture ?? '—'}</td>
+              <td class="px-4 py-3 font-semibold text-emerald-700">{fmtPrice(inst.priceUSD_hourly)}</td>
+              <td class="px-4 py-3 text-gray-600">${inst.priceUSD_monthly.toFixed(2)}/mo</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <a
+      href={`/?providers=${config.dataId}`}
+      class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition-colors"
+    >
+      View all {config.displayName} instances →
+    </a>
+  </div>
+</BaseLayout>

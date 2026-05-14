@@ -57,10 +57,20 @@ export async function loadFamily(provider: string, family: string): Promise<V3Fa
 
 /**
  * Load full detail for a single instance (includes per-region pricing breakdown).
- * Mirrors aggregate.py's safe_id(): lowercase, keep [a-z0-9._-], replace rest with '-'.
+ * Mirrors aggregate.py's slug logic: base slug + optional OS suffix + optional tenancy suffix.
+ * e.g. mac2.metal + macOS + host → mac2.metal-macos-host.json
  */
-export async function loadInstance(provider: string, id: string): Promise<V3InstanceFile> {
-  const slug = id.toLowerCase().replace(/[^a-z0-9._-]/g, '-').replace(/^-+|-+$/g, '');
+export async function loadInstance(
+  provider: string,
+  instanceType: string,
+  os?: string,
+  tenancy?: string,
+): Promise<V3InstanceFile> {
+  const safe = (s: string) => s.toLowerCase().replace(/[^a-z0-9._-]/g, '-').replace(/^-+|-+$/g, '');
+  const parts = [safe(instanceType)];
+  if (os && os !== 'Linux') parts.push(safe(os));
+  if (tenancy && tenancy !== 'shared') parts.push(safe(tenancy));
+  const slug = parts.join('-');
   return _fetchJSON<V3InstanceFile>(`/data/instances/${provider}/${slug}.json`);
 }
 
@@ -74,6 +84,31 @@ export async function loadFamilies(
 ): Promise<V3FamilyFile> {
   const results = await Promise.all(families.map((f) => loadFamily(provider, f)));
   return results.flat() as V3FamilyFile;
+}
+
+/**
+ * Load a single instance file for a specific OS variant using deterministic slugs
+ * produced by aggregate.py (e.g. t3.xlarge-windows.json, t3.xlarge-rhel.json).
+ * Returns null if the file doesn't exist (non-Linux OS not available in this provider).
+ */
+const OS_SLUG_SUFFIX: Record<string, string> = {
+  Linux:   '',
+  Windows: '-windows',
+  RHEL:    '-rhel',
+};
+
+export async function loadInstanceForOS(
+  provider: string,
+  instanceType: string,
+  os: string,
+): Promise<V3InstanceFile | null> {
+  const base = instanceType.toLowerCase().replace(/[^a-z0-9._-]/g, '-').replace(/^-+|-+$/g, '');
+  const suffix = OS_SLUG_SUFFIX[os] ?? `-${os.toLowerCase().replace(/[^a-z0-9._-]/g, '-').replace(/^-+|-+$/g, '')}`;
+  try {
+    return await _fetchJSON<V3InstanceFile>(`/data/instances/${provider}/${base}${suffix}.json`);
+  } catch {
+    return null;
+  }
 }
 
 /**

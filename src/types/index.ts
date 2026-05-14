@@ -100,6 +100,10 @@ export interface V3Instance {
   diskType?: string;
   diskSizeGB?: number;
   networkPerformance?: string;
+  operatingSystem?: 'Linux' | 'Windows' | 'RHEL' | 'macOS' | string;
+  tenancy?: 'shared' | 'dedicated' | 'host';
+  osPricing?: Record<string, number>;
+  minimumBillingHours?: number;
 }
 
 /** Shape of /data/families/{provider}/{family}.json — an array of instances */

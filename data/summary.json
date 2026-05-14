@@ -1,0 +1,101 @@
+{
+  "totalInstances": 5114,
+  "providersCount": 7,
+  "lastUpdated": "2026-05-14T19:04:38.173788",
+  "priceRange": {
+    "min": 0.000176,
+    "max": 696.98695
+  },
+  "byProvider": {
+    "oci": 115,
+    "vultr": 150,
+    "vast": 342,
+    "scaleway": 240,
+    "ovh": 448,
+    "gcp": 225,
+    "aws": 3594
+  },
+  "byType": {
+    "cloud-server": 4712,
+    "dedicated-server": 402
+  },
+  "errors": {},
+  "providerFiles": {
+    "oci": {
+      "file": "providers/oci.json",
+      "count": 115,
+      "lastUpdated": "2026-05-14T19:04:38.190138"
+    },
+    "vultr": {
+      "file": "providers/vultr.json",
+      "count": 150,
+      "lastUpdated": "2026-05-14T19:04:38.205353"
+    },
+    "vast": {
+      "file": "providers/vast.json",
+      "count": 342,
+      "lastUpdated": "2026-05-14T19:04:38.214481"
+    },
+    "scaleway": {
+      "file": "providers/scaleway.json",
+      "count": 240,
+      "lastUpdated": "2026-05-14T19:04:38.223017"
+    },
+    "ovh": {
+      "file": "providers/ovh.json",
+      "count": 448,
+      "lastUpdated": "2026-05-14T19:04:38.251531"
+    },
+    "gcp": {
+      "file": "providers/gcp.json",
+      "count": 225,
+      "lastUpdated": "2026-05-14T19:04:38.259312"
+    },
+    "aws": {
+      "file": "providers/aws.json",
+      "count": 3594,
+      "lastUpdated": "2026-05-14T19:04:38.539663"
+    }
+  },
+  "dataStructure": {
+    "combined": "data/all_instances.json",
+    "providers": {
+      "oci": {
+        "file": "providers/oci.json",
+        "count": 115,
+        "lastUpdated": "2026-05-14T19:04:38.190138"
+      },
+      "vultr": {
+        "file": "providers/vultr.json",
+        "count": 150,
+        "lastUpdated": "2026-05-14T19:04:38.205353"
+      },
+      "vast": {
+        "file": "providers/vast.json",
+        "count": 342,
+        "lastUpdated": "2026-05-14T19:04:38.214481"
+      },
+      "scaleway": {
+        "file": "providers/scaleway.json",
+        "count": 240,
+        "lastUpdated": "2026-05-14T19:04:38.223017"
+      },
+      "ovh": {
+        "file": "providers/ovh.json",
+        "count": 448,
+        "lastUpdated": "2026-05-14T19:04:38.251531"
+      },
+      "gcp": {
+        "file": "providers/gcp.json",
+        "count": 225,
+        "lastUpdated": "2026-05-14T19:04:38.259312"
+      },
+      "aws": {
+        "file": "providers/aws.json",
+        "count": 3594,
+        "lastUpdated": "2026-05-14T19:04:38.539663"
+      }
+    },
+    "description": "Data available in both combined format and individual provider files"
+  }
+}

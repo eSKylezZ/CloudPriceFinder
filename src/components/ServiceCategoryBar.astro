@@ -1,0 +1,88 @@
+---
+// ServiceCategoryBar — top-level service category selector (tab control)
+---
+
+<style>
+  #cat-scroll::-webkit-scrollbar { display: none; }
+  #cat-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+
+<div id="service-category-bar" class="mb-5">
+  <div
+    id="cat-scroll"
+    class="flex items-center gap-2 overflow-x-auto pb-1"
+    role="tablist"
+    aria-label="Service category"
+  ></div>
+</div>
+
+<script>
+  type CatId = 'compute' | 'block-storage' | 'databases' | 'ai-ml' | 'object-storage';
+
+  const CATS: { id: CatId; label: string; icon: string; available: boolean }[] = [
+    { id: 'compute',        label: 'Compute',        icon: '🖥️',  available: true },
+    { id: 'block-storage',  label: 'Block Storage',  icon: '💾',  available: true },
+    { id: 'databases',      label: 'Databases',      icon: '🗄️',  available: true },
+    { id: 'ai-ml',          label: 'AI / ML',        icon: '🤖',  available: true },
+    { id: 'object-storage', label: 'Object Storage', icon: '📦',  available: true },
+  ];
+
+  let active: CatId = (() => {
+    const p = new URLSearchParams(window.location.search).get('cat') as CatId | null;
+    return p && CATS.some((c) => c.id === p) ? p : 'compute';
+  })();
+
+  const scroll = document.getElementById('cat-scroll')!;
+
+  function render() {
+    scroll.innerHTML = '';
+    CATS.forEach((cat) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.setAttribute('role', 'tab');
+      btn.setAttribute('aria-selected', String(cat.id === active));
+      btn.dataset.catId = cat.id;
+
+      const isActive = cat.id === active;
+      if (isActive) {
+        btn.className =
+          'flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold border transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 bg-primary-600 border-primary-600 text-white shadow-sm';
+      } else if (cat.available) {
+        btn.className =
+          'flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium border transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400';
+      } else {
+        btn.className =
+          'flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium border transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 bg-gray-50/80 border-gray-200 text-gray-400 hover:bg-gray-100 hover:text-gray-500';
+      }
+
+      btn.innerHTML = `
+        <span aria-hidden="true" class="text-base leading-none">${cat.icon}</span>
+        <span>${cat.label}</span>
+        ${!cat.available ? '<span class="ml-0.5 inline-flex items-center px-1.5 py-0.5 text-[9px] font-bold bg-gray-200 text-gray-500 rounded-full tracking-wide">SOON</span>' : ''}
+      `;
+      scroll.appendChild(btn);
+    });
+  }
+
+  render();
+
+  scroll.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-cat-id]');
+    if (!btn) return;
+    const id = btn.dataset.catId as CatId;
+    if (!id || id === active) return;
+
+    active = id;
+    render();
+
+    // Update URL
+    const params = new URLSearchParams(window.location.search);
+    if (id === 'compute') params.delete('cat');
+    else params.set('cat', id);
+    const url = new URL(window.location.href);
+    url.search = params.toString();
+    window.history.replaceState({}, '', url.toString());
+
+    window.dispatchEvent(new CustomEvent('serviceCategoryChanged', { detail: { category: id } }));
+  });
+</script>

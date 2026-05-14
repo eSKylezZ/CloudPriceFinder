@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 # Commitment validation (Stage 1 — v3 schema extension)
 # ---------------------------------------------------------------------------
 
-VALID_TERMS = {'on-demand', '1yr', '3yr'}
+VALID_TERMS = {'on-demand', '1yr', '2yr', '3yr'}
 VALID_PAYMENTS = {'no-upfront', 'partial-upfront', 'all-upfront', 'flexible'}
 VALID_PRODUCTS = {'reserved', 'savings-plan', 'cud', 'flex'}
 
@@ -103,7 +103,7 @@ REQUIRED_FIELDS = [
     'lastUpdated'
 ]
 
-VALID_PROVIDERS = ['aws', 'azure', 'gcp', 'hetzner', 'oci', 'ovh', 'scaleway', 'vast', 'vultr']
+VALID_PROVIDERS = ['aws', 'azure', 'gcp', 'oci', 'ovh', 'scaleway', 'vast', 'vultr']
 VALID_TYPES = [
     'cloud-server',
     'cloud-loadbalancer', 
@@ -155,7 +155,12 @@ def validate_instance_data(instance: Dict[str, Any]) -> bool:
             if not isinstance(instance['memoryGiB'], (int, float)) or instance['memoryGiB'] <= 0:
                 logger.error(f"Invalid memoryGiB: {instance['memoryGiB']}")
                 return False
-        
+
+        VALID_ARCHITECTURES = {'x86_64', 'arm64'}
+        if 'architecture' in instance and instance['architecture'] not in VALID_ARCHITECTURES:
+            logger.error(f"Invalid architecture: {instance['architecture']}")
+            return False
+
         # Check for meaningful pricing data (either USD or EUR pricing)
         has_usd_pricing = (isinstance(instance.get('priceUSD_hourly'), (int, float)) and 
                           instance['priceUSD_hourly'] > 0)
@@ -179,6 +184,8 @@ def validate_instance_data(instance: Dict[str, Any]) -> bool:
             if not instance.get('memoryGiB') or instance.get('memoryGiB', 0) <= 0:
                 logger.error(f"Compute instance missing valid memory: {instance.get('instanceType')}")
                 return False
+            if not instance.get('family', '').strip():
+                logger.warning(f"Compute instance missing family: {instance.get('instanceType')}")
         
         return True
         
